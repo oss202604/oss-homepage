@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>구매대행 신청 | OSS(オッス)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="utility-bar">
+    <div class="container utility-inner">
+      <span class="utility-left">🇯🇵 일본 현지인이 직접 운영하는 구매대행 · 배대지</span>
+      <nav class="utility-right">
+        <a href="login.html">로그인</a><span class="divider">|</span>
+        <a href="signup.html">회원가입</a><span class="divider">|</span>
+        <a href="index.html#contact">고객센터</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-tag">Simply Trusted!</span>
+        <span class="logo-name">OSS<span class="logo-dot">.</span></span>
+        <span class="logo-jp">オッス</span>
+      </a>
+      <form class="search-box" onsubmit="return false;">
+        <select class="search-cat"><option>전체 검색</option><option>메루카리</option><option>라쿠텐</option><option>야후옥션</option><option>아마존JP</option></select>
+        <input type="text" placeholder="상품명 또는 상품 링크를 입력하세요." />
+        <button type="submit" aria-label="검색">🔍</button>
+      </form>
+      <div class="header-icons">
+        <a href="login.html" class="header-icon" title="찜">♡</a>
+        <a href="login.html" class="header-icon" title="내 정보">👤</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="main-nav">
+    <div class="container main-nav-inner">
+      <button class="cat-btn">☰ 전체 서비스</button>
+      <ul class="main-menu" id="mainMenu">
+        <li><a href="order.html" class="active">구매대행 신청</a></li>
+        <li><a href="delivery.html">배송대행 신청</a></li>
+        <li><a href="index.html#how">이용가이드</a></li>
+        <li><a href="index.html#fee">예상비용</a></li>
+        <li><a href="index.html#about">회사소개</a></li>
+        <li><a href="index.html#contact">고객센터</a></li>
+      </ul>
+      <button class="menu-toggle" id="menuToggle" aria-label="메뉴">☰</button>
+    </div>
+  </nav>
+
+  <!-- 페이지 배너 -->
+  <section class="page-hero">
+    <div class="container">
+      <h1>🛍️ 구매대행 신청</h1>
+      <p>원하는 일본 상품의 링크와 옵션, 배송지를 입력해 주세요. 빠르게 견적을 안내드립니다.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <p class="section-lead"><span class="req-note">* 표시는 필수 항목입니다.</span></p>
+
+      <form class="order-form" id="orderForm" novalidate>
+        <fieldset class="form-block">
+          <legend>1. 신청자 정보</legend>
+          <div class="form-row">
+            <label>이름 <span class="req">*</span><input type="text" name="name" required placeholder="홍길동" /></label>
+            <label>연락처(휴대폰) <span class="req">*</span><input type="tel" name="phone" required placeholder="010-1234-5678" /></label>
+          </div>
+          <div class="form-row">
+            <label>이메일<input type="email" name="email" placeholder="example@email.com" /></label>
+            <label>카카오톡 ID<input type="text" name="kakao" placeholder="kakao_id" /></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-block">
+          <legend>2. 상품 정보</legend>
+          <div id="productList">
+            <div class="product-item">
+              <div class="form-row">
+                <label>상품명 <span class="req">*</span><input type="text" name="productName[]" required placeholder="예: 나이키 운동화" /></label>
+                <label>상품 링크(URL)<input type="url" name="productUrl[]" placeholder="https://..." /></label>
+              </div>
+              <div class="form-row">
+                <label>옵션(색상/사이즈 등)<input type="text" name="productOption[]" placeholder="예: 블랙 / 270mm" /></label>
+                <label>수량 <span class="req">*</span><input type="number" name="productQty[]" min="1" value="1" required /></label>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-small" id="addProduct">+ 상품 추가</button>
+        </fieldset>
+
+        <fieldset class="form-block">
+          <legend>3. 배송지 정보</legend>
+          <div class="form-row">
+            <label>받는 분 <span class="req">*</span><input type="text" name="receiver" required placeholder="받는 분 성함" /></label>
+            <label>받는 분 연락처<input type="tel" name="receiverPhone" placeholder="010-0000-0000" /></label>
+          </div>
+          <div class="form-row">
+            <label>우편번호<input type="text" name="zipcode" placeholder="00000" /></label>
+            <label>배송 방법
+              <select name="shipMethod">
+                <option value="">선택</option>
+                <option>EMS (빠름)</option>
+                <option>항공</option>
+                <option>선박 (저렴)</option>
+                <option>상담 후 결정</option>
+              </select>
+            </label>
+          </div>
+          <label class="full">한국 주소 <span class="req">*</span><input type="text" name="address" required placeholder="도로명 주소 + 상세주소" /></label>
+        </fieldset>
+
+        <fieldset class="form-block">
+          <legend>4. 요청사항 · 예산</legend>
+          <div class="form-row">
+            <label>예산 한도<input type="text" name="budget" placeholder="예: 30만원 이내" /></label>
+            <label>희망 수령 시기<input type="text" name="dueDate" placeholder="예: 6월 중" /></label>
+          </div>
+          <label class="full">기타 요청사항<textarea name="memo" rows="4" placeholder="검수 요청, 포장 요청, 기타 문의 내용을 자유롭게 적어주세요."></textarea></label>
+          <label class="checkbox full"><input type="checkbox" name="agree" required /><span>개인정보 수집·이용(주문 처리 목적)에 동의합니다. <span class="req">*</span></span></label>
+        </fieldset>
+
+        <button type="submit" class="btn btn-primary btn-block">구매대행 신청하기</button>
+        <p class="form-note">* 현재는 미리보기 화면입니다. 제출 시 입력 내용이 화면에 표시되며, 실제 접수 연동은 추후 설정합니다.</p>
+      </form>
+    </div>
+  </section>
+
+  <footer class="site-footer" id="contact">
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-logo">OSS <small>オッス</small></p>
+        <p class="footer-desc">일본 현지인 구매대행 배대지</p>
+      </div>
+      <div class="footer-contact">
+        <p>✉️ 이메일: oss202604@gmail.com</p>
+        <p>💬 카카오톡: @OSS (등록 예정)</p>
+        <p>🕒 상담시간: 평일 10:00 ~ 18:00 (일본시간)</p>
+      </div>
+    </div>
+    <div class="footer-bottom"><div class="container">© 2026 OSS. All rights reserved.</div></div>
+  </footer>
+
+  <aside class="quick-menu">
+    <a href="index.html#contact" class="qm-item"><span class="qm-ico">🎧</span>고객센터</a>
+    <a href="order.html" class="qm-item"><span class="qm-ico">🛍️</span>구매대행</a>
+    <a href="delivery.html" class="qm-item"><span class="qm-ico">📦</span>배송대행</a>
+    <a href="index.html#fee" class="qm-item"><span class="qm-ico">🧮</span>예상비용</a>
+    <a href="index.html#how" class="qm-item"><span class="qm-ico">📖</span>이용가이드</a>
+    <button class="qm-top" id="scrollTop" title="맨 위로">▲<br /><small>TOP</small></button>
+  </aside>
+
+  <div class="modal" id="resultModal" hidden>
+    <div class="modal-box">
+      <h3>신청서 미리보기 ✅</h3>
+      <p class="modal-sub">아래 내용으로 접수됩니다. (현재는 미리보기 단계)</p>
+      <pre id="resultContent"></pre>
+      <button class="btn btn-primary" id="closeModal">확인</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
