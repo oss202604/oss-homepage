@@ -50,6 +50,43 @@ async function updateApplication(id, fields) {
   if (error) throw error;
 }
 
+// ---- 공지사항 ----
+async function fetchNotices() {
+  const { data, error } = await sb.from("notices").select("*").order("pinned", { ascending: false }).order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+async function createNotice(title, body, pinned) {
+  const { error } = await sb.from("notices").insert([{ title, body, pinned: !!pinned }]);
+  if (error) throw error;
+}
+async function deleteNotice(id) {
+  const { error } = await sb.from("notices").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// ---- 설정(키-값): 센터주소·사이트정보·요율표 등 ----
+async function getSetting(key) {
+  const { data, error } = await sb.from("settings").select("value").eq("key", key).maybeSingle();
+  if (error) throw error;
+  return data ? data.value : null;
+}
+async function saveSetting(key, value) {
+  const { error } = await sb.from("settings").upsert({ key, value, updated_at: new Date().toISOString() });
+  if (error) throw error;
+}
+
+// ---- 이용안내 페이지 ----
+async function getPage(slug) {
+  const { data, error } = await sb.from("pages").select("*").eq("slug", slug).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+async function savePage(slug, title, body) {
+  const { error } = await sb.from("pages").upsert({ slug, title, body, updated_at: new Date().toISOString() });
+  if (error) throw error;
+}
+
 // ---- 관리자 인증 ----
 async function adminSignIn(email, password) {
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
@@ -71,6 +108,13 @@ window.OSS = {
   fetchApplications,
   updateApplicationStatus,
   updateApplication,
+  fetchNotices,
+  createNotice,
+  deleteNotice,
+  getSetting,
+  saveSetting,
+  getPage,
+  savePage,
   adminSignIn,
   adminGetSession,
   adminSignOut,

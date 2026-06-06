@@ -74,6 +74,7 @@ async function init() {
   }
   renderKanban();
   renderDashboard();
+  loadNotices();
 }
 
 document.getElementById("adminLogout").addEventListener("click", async (e) => {
@@ -262,9 +263,43 @@ function badgeClass(s) {
   return "status-progress";
 }
 
-// ----- 공지 등록 (2단계 게시판 연동 전 안내) -----
-document.getElementById("addNotice").addEventListener("click", () => {
-  alert("공지 게시판은 2단계에서 연동됩니다. (현재는 주문관리까지 동작)");
+// ----- 공지사항 (작성/목록/삭제) -----
+async function loadNotices() {
+  const tbody = document.getElementById("noticeRows");
+  try {
+    const list = await window.OSS.fetchNotices();
+    tbody.innerHTML = list.length
+      ? list.map((n) => `<tr>
+          <td>${n.title}</td>
+          <td>${n.pinned ? "📌" : "-"}</td>
+          <td>${(n.created_at || "").slice(0, 10)}</td>
+          <td><button class="btn btn-small remove-product" data-del="${n.id}">삭제</button></td>
+        </tr>`).join("")
+      : `<tr><td colspan="4" class="empty">등록된 공지가 없습니다.</td></tr>`;
+    tbody.querySelectorAll("[data-del]").forEach((b) => {
+      b.addEventListener("click", async () => {
+        if (!confirm("이 공지를 삭제할까요?")) return;
+        try { await window.OSS.deleteNotice(b.dataset.del); loadNotices(); }
+        catch (e) { alert("삭제 실패: " + (e.message || e)); }
+      });
+    });
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="4" class="empty">불러오기 실패: ${e.message || e}</td></tr>`;
+  }
+}
+document.getElementById("addNotice").addEventListener("click", async () => {
+  const title = document.getElementById("noticeTitle").value.trim();
+  const body = document.getElementById("noticeBody").value.trim();
+  const pinned = document.getElementById("noticePinned").checked;
+  if (!title) { alert("공지 제목을 입력해 주세요."); return; }
+  try {
+    await window.OSS.createNotice(title, body, pinned);
+    document.getElementById("noticeTitle").value = "";
+    document.getElementById("noticeBody").value = "";
+    document.getElementById("noticePinned").checked = false;
+    loadNotices();
+    alert("공지가 등록되었습니다.");
+  } catch (e) { alert("등록 실패: " + (e.message || e)); }
 });
 
 // 시작

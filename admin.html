@@ -93,8 +93,17 @@
           <h3 style="margin-bottom:14px;color:var(--navy);">새 공지 작성</h3>
           <input type="text" id="noticeTitle" placeholder="공지 제목" />
           <textarea id="noticeBody" rows="4" placeholder="공지 내용"></textarea>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:12px;"><input type="checkbox" id="noticePinned" style="width:auto;" /> 상단 고정(중요 공지)</label>
           <button class="btn btn-primary" id="addNotice">공지 등록</button>
-          <p class="form-note" style="text-align:left;">* Supabase 연동 후 실제 게시판에 저장됩니다.</p>
+        </div>
+        <div class="dash-panel" style="margin-bottom:24px;">
+          <h3>등록된 공지</h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>제목</th><th>고정</th><th>등록일</th><th>관리</th></tr></thead>
+              <tbody id="noticeRows"></tbody>
+            </table>
+          </div>
         </div>
         <div class="dash-panel">
           <h3>1:1 문의 목록</h3>

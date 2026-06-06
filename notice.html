@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>주문 조회 | OSS(オッス)</title>
+  <title>공지사항 | OSS(オッス)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <div class="utility-bar">
@@ -47,8 +47,8 @@
       <ul class="main-menu" id="mainMenu">
         <li><a href="order.html">구매대행 신청</a></li>
         <li><a href="delivery.html">배송대행 신청</a></li>
-        <li><a href="order-lookup.html" class="active">주문조회</a></li>
-        <li><a href="notice.html">고객센터</a></li>
+        <li><a href="order-lookup.html">주문조회</a></li>
+        <li><a href="notice.html" class="active">고객센터</a></li>
       </ul>
       <button class="menu-toggle" id="menuToggle" aria-label="메뉴"><i data-lucide="menu"></i></button>
     </div>
@@ -56,30 +56,15 @@
 
   <section class="page-hero">
     <div class="container">
-      <h1>주문 조회</h1>
-      <p>접수 시 발급된 주문번호와 신청 시 입력한 전화번호로 진행 상황을 확인하세요.</p>
+      <h1>공지사항</h1>
+      <p>OSS의 새로운 소식과 이용 안내를 확인하세요.</p>
     </div>
   </section>
 
-  <section class="auth-section">
-    <div class="auth-card auth-card-wide">
-      <h1>비회원 주문 조회</h1>
-      <p class="auth-sub">회원가입 없이 주문번호로 바로 조회할 수 있습니다.</p>
-      <form id="lookupForm">
-        <label class="auth-label">주문번호<input type="text" id="lkOrderNo" required placeholder="예: OSS-260608-A3F9" autocomplete="off" /></label>
-        <label class="auth-label">전화번호<input type="tel" id="lkPhone" required placeholder="신청 시 입력한 휴대폰번호" autocomplete="off" /></label>
-        <button type="submit" class="btn btn-primary btn-block" id="lkBtn">조회하기</button>
-        <p class="login-error" id="lkError" style="color:var(--red);text-align:center;margin-top:12px;min-height:18px;"></p>
-      </form>
-
-      <div id="lkResult" hidden style="margin-top:24px;">
-        <h3 style="font-size:17px;color:var(--navy);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--yellow);">조회 결과</h3>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead><tr><th>주문번호</th><th>유형</th><th>상태</th><th>금액</th><th>접수일</th></tr></thead>
-            <tbody id="lkRows"></tbody>
-          </table>
-        </div>
+  <section class="section">
+    <div class="container">
+      <div class="notice-list" id="noticeList">
+        <p class="section-lead">공지사항을 불러오는 중...</p>
       </div>
     </div>
   </section>
@@ -105,41 +90,31 @@
   <script src="supabase.js"></script>
   <script src="script.js"></script>
   <script>
-    function badgeClass(s) {
-      if (s === "신규접수") return "status-new";
-      if (s === "배송완료") return "status-done";
-      if (["보류","취소","반품/교환","사고/폐기","일부입고"].includes(s)) return "status-hold";
-      return "status-progress";
-    }
-    document.getElementById("lookupForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const orderNo = document.getElementById("lkOrderNo").value.trim();
-      const phone = document.getElementById("lkPhone").value.trim();
-      const err = document.getElementById("lkError");
-      const btn = document.getElementById("lkBtn");
-      const resultBox = document.getElementById("lkResult");
-      err.textContent = ""; resultBox.hidden = true;
-      btn.disabled = true; btn.textContent = "조회 중...";
+    function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    (async function () {
+      const wrap = document.getElementById("noticeList");
       try {
-        const rows = await window.OSS.lookupOrder(orderNo, phone);
-        if (!rows.length) {
-          err.textContent = "조회 결과가 없습니다. 주문번호와 전화번호를 확인해 주세요.";
-        } else {
-          document.getElementById("lkRows").innerHTML = rows.map(r =>
-            `<tr>
-              <td>${r.order_no || "-"}</td>
-              <td>${r.type === "purchase" ? "구매대행" : "배송대행"}</td>
-              <td><span class="status-badge ${badgeClass(r.status)}">${r.status}</span></td>
-              <td>¥${(r.subtotal || 0).toLocaleString()}</td>
-              <td>${(r.created_at || "").slice(0,10)}</td>
-            </tr>`).join("");
-          resultBox.hidden = false;
-        }
-      } catch (e2) {
-        err.textContent = "조회 중 오류가 발생했어요: " + (e2.message || e2);
+        const list = await window.OSS.fetchNotices();
+        if (!list.length) { wrap.innerHTML = '<p class="section-lead">등록된 공지사항이 없습니다.</p>'; return; }
+        wrap.innerHTML = list.map((n) => `
+          <div class="notice-item">
+            <button class="notice-head" type="button">
+              <span class="notice-title">${n.pinned ? '<span class="notice-pin">중요</span> ' : ''}${esc(n.title)}</span>
+              <span class="notice-date">${(n.created_at||"").slice(0,10)}</span>
+            </button>
+            <div class="notice-body" hidden>${esc(n.body).replace(/\n/g,"<br>")}</div>
+          </div>`).join("");
+        wrap.querySelectorAll(".notice-head").forEach((h) => {
+          h.addEventListener("click", () => {
+            const body = h.nextElementSibling;
+            body.hidden = !body.hidden;
+            h.classList.toggle("open", !body.hidden);
+          });
+        });
+      } catch (e) {
+        wrap.innerHTML = '<p class="section-lead">공지사항을 불러오지 못했어요: ' + (e.message || e) + '</p>';
       }
-      btn.disabled = false; btn.textContent = "조회하기";
-    });
+    })();
   </script>
 </body>
 </html>
