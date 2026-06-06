@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OSS 관리자</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="admin.css?v=2" />
+</head>
+<body class="admin-body">
+  <!-- 상단 바 -->
+  <div class="admin-topbar">
+    <span class="admin-logo">OSS <small>관리자 모드</small></span>
+    <div class="admin-top-right">
+      <a href="index.html" target="_blank">사이트 보기 ↗</a>
+      <a href="#" id="adminLogout">로그아웃</a>
+    </div>
+  </div>
+
+  <div class="admin-layout">
+    <!-- 좌측 메뉴 -->
+    <aside class="admin-sidebar">
+      <ul class="admin-nav">
+        <li><button class="active" data-page="dashboard"><span class="ico"><i data-lucide="layout-dashboard"></i></span> 대시보드</button></li>
+        <li><button data-page="orders"><span class="ico"><i data-lucide="package"></i></span> 주문관리</button></li>
+        <li><button data-page="members"><span class="ico"><i data-lucide="users"></i></span> 회원관리</button></li>
+        <li><button data-page="board"><span class="ico"><i data-lucide="megaphone"></i></span> 공지·문의</button></li>
+      </ul>
+    </aside>
+
+    <main class="admin-main">
+      <!-- ===== 대시보드 ===== -->
+      <section class="admin-page active" id="page-dashboard">
+        <h2 class="admin-page-title">대시보드</h2>
+        <div class="stat-grid">
+          <div class="stat-card accent-new"><div class="stat-label">오늘 신규 신청</div><div class="stat-num" id="statNew">0<small>건</small></div></div>
+          <div class="stat-card accent-wait"><div class="stat-label">처리 대기</div><div class="stat-num" id="statWait">0<small>건</small></div></div>
+          <div class="stat-card accent-alert"><div class="stat-label">예외 (보류·사고 등)</div><div class="stat-num" id="statAlert">0<small>건</small></div></div>
+          <div class="stat-card accent-done"><div class="stat-label">오늘 완료</div><div class="stat-num" id="statDone">0<small>건</small></div></div>
+        </div>
+        <div class="dash-cols">
+          <div class="dash-panel">
+            <h3>최근 신청</h3>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>주문번호</th><th>유형</th><th>고객</th><th>상태</th></tr></thead>
+                <tbody id="recentOrders"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="dash-panel">
+            <h3>최근 문의</h3>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>제목</th><th>작성자</th><th>상태</th></tr></thead>
+                <tbody id="recentInquiries"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 주문관리 (칸반) ===== -->
+      <section class="admin-page" id="page-orders">
+        <h2 class="admin-page-title">주문관리</h2>
+        <p class="kanban-section-label">정상 흐름 — 카드를 끌어다 다음 단계로 옮기세요</p>
+        <div class="kanban" id="kanbanNormal"></div>
+        <p class="kanban-section-label" style="margin-top:20px;">예외 처리 — 취소·반품·사고 등은 이쪽으로</p>
+        <div class="kanban" id="kanbanException"></div>
+      </section>
+
+      <!-- ===== 회원관리 ===== -->
+      <section class="admin-page" id="page-members">
+        <h2 class="admin-page-title">회원관리</h2>
+        <div class="dash-panel">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>이름</th><th>연락처</th><th>이메일</th><th>가입일</th><th>누적 신청</th></tr></thead>
+              <tbody id="memberRows">
+                <tr><td colspan="5" class="empty">회원 기능은 2단계(회원가입/로그인)에서 연동됩니다.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 공지·문의 ===== -->
+      <section class="admin-page" id="page-board">
+        <h2 class="admin-page-title">공지·문의</h2>
+        <div class="notice-form">
+          <h3 style="margin-bottom:14px;color:var(--navy);">새 공지 작성</h3>
+          <input type="text" id="noticeTitle" placeholder="공지 제목" />
+          <textarea id="noticeBody" rows="4" placeholder="공지 내용"></textarea>
+          <button class="btn btn-primary" id="addNotice">공지 등록</button>
+          <p class="form-note" style="text-align:left;">* Supabase 연동 후 실제 게시판에 저장됩니다.</p>
+        </div>
+        <div class="dash-panel">
+          <h3>1:1 문의 목록</h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>제목</th><th>작성자</th><th>등록일</th><th>상태</th></tr></thead>
+              <tbody id="inquiryRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 주문 상세 모달 -->
+  <div class="admin-modal" id="orderModal" hidden>
+    <div class="admin-modal-box">
+      <h3 id="modalName">주문 상세</h3>
+      <p class="modal-id" id="modalId"></p>
+      <div id="modalDetail"></div>
+      <div class="modal-status-select">
+        <span style="font-size:14px;font-weight:700;">상태 변경:</span>
+        <select id="modalStatus"></select>
+        <button class="btn btn-primary btn-small" id="modalSave">저장</button>
+        <button class="btn btn-dark btn-small" id="modalClose">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="admin.js"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

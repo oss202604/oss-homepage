@@ -7,12 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2" />
 </head>
 <body>
   <div class="utility-bar">
     <div class="container utility-inner">
-      <span class="utility-left">🇯🇵 일본 현지인이 직접 운영하는 구매대행 · 배대지</span>
+      <span class="utility-left">일본 현지인이 직접 운영하는 구매대행 · 배송대행지</span>
       <nav class="utility-right">
         <a href="login.html">로그인</a><span class="divider">|</span>
         <a href="signup.html">회원가입</a><span class="divider">|</span>
@@ -31,39 +31,142 @@
       <form class="search-box" onsubmit="return false;">
         <select class="search-cat"><option>전체 검색</option><option>메루카리</option><option>라쿠텐</option><option>야후옥션</option><option>아마존JP</option></select>
         <input type="text" placeholder="상품명 또는 상품 링크를 입력하세요." />
-        <button type="submit" aria-label="검색">🔍</button>
+        <button type="submit" aria-label="검색"><i data-lucide="search"></i></button>
       </form>
       <div class="header-icons">
-        <a href="login.html" class="header-icon" title="찜">♡</a>
-        <a href="login.html" class="header-icon" title="내 정보">👤</a>
+        <a href="login.html" class="header-icon" title="찜"><i data-lucide="heart"></i></a>
+        <a href="login.html" class="header-icon" title="내 정보"><i data-lucide="user"></i></a>
       </div>
     </div>
   </header>
 
   <nav class="main-nav">
     <div class="container main-nav-inner">
-      <button class="cat-btn">☰ 전체 서비스</button>
+      <button class="cat-btn"><i data-lucide="menu" class="ico-inline"></i> 전체 서비스</button>
       <ul class="main-menu" id="mainMenu">
         <li><a href="order.html" class="active">구매대행 신청</a></li>
         <li><a href="delivery.html">배송대행 신청</a></li>
         <li><a href="index.html#how">이용가이드</a></li>
-        <li><a href="index.html#fee">예상비용</a></li>
-        <li><a href="index.html#about">회사소개</a></li>
         <li><a href="index.html#contact">고객센터</a></li>
       </ul>
-      <button class="menu-toggle" id="menuToggle" aria-label="메뉴">☰</button>
+      <button class="menu-toggle" id="menuToggle" aria-label="메뉴"><i data-lucide="menu"></i></button>
     </div>
   </nav>
 
   <!-- 페이지 배너 -->
   <section class="page-hero">
     <div class="container">
-      <h1>🛍️ 구매대행 신청</h1>
+      <h1>구매대행 신청</h1>
       <p>원하는 일본 상품의 링크와 옵션, 배송지를 입력해 주세요. 빠르게 견적을 안내드립니다.</p>
     </div>
   </section>
 
-  <section class="section">
+  <!-- ===== STEP 진행 표시 ===== -->
+  <section class="step-bar-section">
+    <div class="container">
+      <ol class="step-bar" id="stepBar">
+        <li class="step-bar-item active" data-step="1"><span>1</span> 안내·동의</li>
+        <li class="step-bar-item" data-step="2"><span>2</span> 신청서 작성</li>
+        <li class="step-bar-item" data-step="3"><span>3</span> 접수 완료</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ===== STEP 1: 약관 + 배송센터 선택 ===== -->
+  <section class="section" id="stepPanel1">
+    <div class="container">
+      <h2 class="section-title">구매대행 신청서 작성 시 주의사항</h2>
+      <p class="section-lead">물품 검수·국제운송·통관·국내배송 관련 안내가 담겨 있습니다. 꼭 확인 후 동의해 주세요.</p>
+
+      <div class="terms-box">
+        <h3>OSS 일본 구매대행 이용 안내</h3>
+        <p class="terms-lead">OSS는 고객님이 입력해 주신 정보를 바탕으로 일본 현지 쇼핑몰·경매 사이트의 상품을 대신 구매해 드리는 서비스입니다. 이용 전 아래 내용을 꼭 확인해 주세요.</p>
+
+        <h4>1. 신청 안내</h4>
+        <ul>
+          <li>상품 URL·상품명·브랜드·옵션(사이즈/색상)·수량을 정확히 입력해 주세요.</li>
+          <li>공식 판매처 여부는 고객님이 직접 확인해 주세요. 비공식 사이트 이용으로 인한 문제(가품·미발송 등)는 책임지지 않습니다.</li>
+          <li>상품가 확정 이후 <b>상품가 + 수수료 + 국제배송비</b>가 추가 안내됩니다.</li>
+          <li>현지 구매가 진행된 후에는 취소·수정이 불가합니다 (관리자 확인 시 미주문 건 한해 예외).</li>
+          <li>판매처 재고에 따라 신청해도 품절될 수 있습니다.</li>
+        </ul>
+
+        <h4>2. 검수 안내</h4>
+        <ul>
+          <li>기본 검수: 사이즈 / 색상 / 수량 / 심한 파손 여부</li>
+          <li>봉제·오염 등 정밀 검수는 메모란에 별도 요청해 주세요.</li>
+          <li>전자제품 작동 테스트, 부피 큰 상품(가구·이불 등) 정밀 검수는 불가합니다.</li>
+        </ul>
+
+        <h4>3. 수수료 · 결제</h4>
+        <ul>
+          <li>구매대행 수수료: 100엔 ~ 1,000엔 (상품가 기준)</li>
+          <li>같은 쇼핑몰 복수 주문도 카테고리·발매일이 다르면 추가 배송비가 발생할 수 있습니다.</li>
+          <li>1차 결제 후 무단 취소는 불가합니다.</li>
+        </ul>
+
+        <h4>4. 발송 주의</h4>
+        <ul>
+          <li>자동차 부품 등 수령 조건이 제한된 상품은 사전에 판매 조건을 확인해 주세요.</li>
+          <li>경매 낙찰 후 고객 사정 취소 시 낙찰가의 30%가 패널티로 부과됩니다.</li>
+        </ul>
+
+        <h4>5. 예약 · 수주 생산 상품</h4>
+        <ul>
+          <li>예약/수주 생산 상품은 도착까지 시간이 소요됩니다. 발매일을 꼭 확인해 주세요.</li>
+          <li>판매처 사정으로 인한 발매일 지연·변경은 OSS가 책임지지 않습니다.</li>
+        </ul>
+
+        <h4>6. 취소 · 환불 · 반품</h4>
+        <ul>
+          <li>신청 후 24시간 내 결제가 없으면 자동 취소됩니다.</li>
+          <li>물류센터 입고 시 하자·파손이 확인되면 환불 또는 교환 안내해 드립니다.</li>
+          <li>국제배송 중 반품 요청 시 반품 수수료(1,000엔) + 반품 택배비가 청구되며, 구매대행 수수료는 환불되지 않습니다.</li>
+        </ul>
+
+        <h4>7. 통관 안내</h4>
+        <ul>
+          <li>통관 가능 여부는 관세청(125) 또는 세관에 사전에 확인해 주세요.</li>
+          <li>통관 불가로 인한 반송·폐기·벌금에 대한 책임은 OSS가 지지 않습니다.</li>
+        </ul>
+      </div>
+
+      <label class="agree-line">
+        <input type="checkbox" id="agreeCheck" />
+        <span>위 주의사항을 모두 확인하였으며, 내용에 동의합니다.</span>
+      </label>
+
+      <div class="center-select">
+        <h3>배송센터 선택</h3>
+        <p class="center-desc">상품을 받을 일본 물류센터를 선택해 주세요. 신청 완료 후에는 변경이 불가합니다.</p>
+        <div class="center-options">
+          <label class="center-card">
+            <input type="radio" name="centerType" value="air" checked />
+            <span class="center-card-inner">
+              <span class="center-flag">🇯🇵 ✈️</span>
+              <b>일본 (항공)</b>
+              <small>빠른 배송 · 표준 요금</small>
+            </span>
+          </label>
+          <label class="center-card">
+            <input type="radio" name="centerType" value="sea" />
+            <span class="center-card-inner">
+              <span class="center-flag">🇯🇵 🚢</span>
+              <b>일본 (해상)</b>
+              <small>느리지만 저렴 · 대량·무거운 상품</small>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button type="button" class="btn btn-primary btn-block" id="goStep2">다음 단계 →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STEP 2: 신청서 폼 ===== -->
+  <section class="section" id="stepPanel2" hidden>
     <div class="container">
       <p class="section-lead"><span class="req-note">* 표시는 필수 항목입니다.</span></p>
 
@@ -82,26 +185,72 @@
 
         <fieldset class="form-block">
           <legend>2. 상품 정보</legend>
+          <p class="section-lead" style="margin-bottom:18px;">주문하실 상품 정보를 정확히 입력해 주세요. 상품 링크를 넣어주시면 더 정확한 검수가 가능합니다.</p>
           <div id="productList">
             <div class="product-item">
-              <div class="form-row">
+              <div class="product-item-head">
+                <span class="product-item-no">1</span>
+              </div>
+              <div class="form-row-3">
                 <label>상품명 <span class="req">*</span><input type="text" name="productName[]" required placeholder="예: 나이키 운동화" /></label>
-                <label>상품 링크(URL)<input type="url" name="productUrl[]" placeholder="https://..." /></label>
+                <label>브랜드/셀러<input type="text" name="productBrand[]" placeholder="예: NIKE" /></label>
+                <label>관리코드<input type="text" name="productCode[]" placeholder="내부 메모용 (선택)" /></label>
               </div>
-              <div class="form-row">
-                <label>옵션(색상/사이즈 등)<input type="text" name="productOption[]" placeholder="예: 블랙 / 270mm" /></label>
+              <div class="form-row-3">
+                <label>단가 <span class="req">*</span><span class="input-suffix"><input type="number" name="productPrice[]" min="0" required placeholder="0" /><span class="suffix">JPY</span></span></label>
                 <label>수량 <span class="req">*</span><input type="number" name="productQty[]" min="1" value="1" required /></label>
+                <label>품목분류 <span class="req">*</span>
+                  <select name="productCategory[]" required>
+                    <option value="">선택하세요</option>
+                    <option>의류</option><option>신발</option><option>가방/잡화</option>
+                    <option>전자제품</option><option>피규어/취미</option><option>화장품</option>
+                    <option>식품</option><option>유아용품</option><option>기타</option>
+                  </select>
+                </label>
               </div>
+              <div class="form-row-3">
+                <label>색상<input type="text" name="productColor[]" placeholder="예: 블랙" /></label>
+                <label>사이즈<input type="text" name="productSize[]" placeholder="예: 270mm" /></label>
+                <label>제품 상세 URL <span class="req">*</span><input type="url" name="productUrl[]" required placeholder="https://..." /></label>
+              </div>
+              <label class="full">구매 요청메세지<input type="text" name="productMemo[]" placeholder="이 상품에 대한 요청사항 (선택)" /></label>
             </div>
           </div>
-          <button type="button" class="btn btn-small" id="addProduct">+ 상품 추가</button>
+          <div class="product-actions">
+            <button type="button" class="btn btn-small" id="addProduct">+ 상품 추가</button>
+          </div>
+          <div class="subtotal-line">총 상품금액 : <b id="subtotal">¥0</b></div>
         </fieldset>
 
         <fieldset class="form-block">
-          <legend>3. 배송지 정보</legend>
+          <legend>3. 부가서비스 (선택)</legend>
+          <div class="addon-group">
+            <div class="addon-radios">
+              <label><input type="radio" name="inspect" value="없음" checked /> 검수 안함</label>
+              <label><input type="radio" name="inspect" value="실물검수" /> 실물검수</label>
+              <label><input type="radio" name="inspect" value="정밀검수" /> 정밀검수 <span class="addon-price">(수량별 ₩100)</span></label>
+            </div>
+            <div class="addon-checks">
+              <label><input type="checkbox" name="addon[]" value="신발박스 제거" /> 신발박스 제거(폴리백 포장)</label>
+              <label><input type="checkbox" name="addon[]" value="안전포장" /> 안전포장 <span class="addon-price">(주문서 당 ₩100)</span></label>
+              <label><input type="checkbox" name="addon[]" value="라벨 작업" /> 라벨지 작업 <span class="addon-price">(주문서 당 ₩300)</span></label>
+              <label><input type="checkbox" name="addon[]" value="사진촬영" /> 사진촬영</label>
+              <label><input type="checkbox" name="addon[]" value="바로출고" /> 바로출고</label>
+              <label><input type="checkbox" name="addon[]" value="편의점 결제대행" /> 편의점 결제대행 <span class="addon-price">(주문서 당 ₩300)</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-block">
+          <legend>4. 배송지 정보</legend>
+          <p class="section-lead" style="margin-bottom:18px;">상품을 받으실 수취인 정보를 입력해 주세요. 통관은 수입신고자 명의로 진행됩니다.</p>
           <div class="form-row">
-            <label>받는 분 <span class="req">*</span><input type="text" name="receiver" required placeholder="받는 분 성함" /></label>
-            <label>받는 분 연락처<input type="tel" name="receiverPhone" placeholder="010-0000-0000" /></label>
+            <label>수취인명 <span class="req">*</span><input type="text" name="receiver" required placeholder="받는 분 성함" /></label>
+            <label>휴대폰번호 <span class="req">*</span><input type="tel" name="receiverPhone" required placeholder="010-1234-5678" /></label>
+          </div>
+          <div class="form-row">
+            <label>추가 연락처<input type="tel" name="receiverPhone2" placeholder="(선택)" /></label>
+            <label>개인통관고유부호 <span class="req">*</span><input type="text" name="ccode" required placeholder="P로 시작하는 13자리" /></label>
           </div>
           <div class="form-row">
             <label>우편번호<input type="text" name="zipcode" placeholder="00000" /></label>
@@ -116,20 +265,21 @@
             </label>
           </div>
           <label class="full">한국 주소 <span class="req">*</span><input type="text" name="address" required placeholder="도로명 주소 + 상세주소" /></label>
+          <label class="full">택배사 전달메세지<input type="text" name="courierMemo" maxlength="20" placeholder="20자 이내 (선택)" /></label>
         </fieldset>
 
         <fieldset class="form-block">
-          <legend>4. 요청사항 · 예산</legend>
-          <div class="form-row">
-            <label>예산 한도<input type="text" name="budget" placeholder="예: 30만원 이내" /></label>
-            <label>희망 수령 시기<input type="text" name="dueDate" placeholder="예: 6월 중" /></label>
-          </div>
+          <legend>5. 요청사항</legend>
+          <label class="full">희망 수령 시기<input type="text" name="dueDate" placeholder="예: 6월 중 (선택)" /></label>
           <label class="full">기타 요청사항<textarea name="memo" rows="4" placeholder="검수 요청, 포장 요청, 기타 문의 내용을 자유롭게 적어주세요."></textarea></label>
           <label class="checkbox full"><input type="checkbox" name="agree" required /><span>개인정보 수집·이용(주문 처리 목적)에 동의합니다. <span class="req">*</span></span></label>
         </fieldset>
 
-        <button type="submit" class="btn btn-primary btn-block">구매대행 신청하기</button>
-        <p class="form-note">* 현재는 미리보기 화면입니다. 제출 시 입력 내용이 화면에 표시되며, 실제 접수 연동은 추후 설정합니다.</p>
+        <div class="step-actions step-actions-row">
+          <button type="button" class="btn btn-dark" id="backToStep1">← 이전 단계</button>
+          <button type="submit" class="btn btn-primary">구매대행 신청하기</button>
+        </div>
+        <p class="form-note">* 현재는 미리보기 화면입니다. 신청 시 입력 내용이 화면에 표시되며, 실제 접수 연동은 Supabase 연결 후 활성화됩니다.</p>
       </form>
     </div>
   </section>
@@ -141,21 +291,21 @@
         <p class="footer-desc">일본 현지인 구매대행 배대지</p>
       </div>
       <div class="footer-contact">
-        <p>✉️ 이메일: oss202604@gmail.com</p>
-        <p>💬 카카오톡: @OSS (등록 예정)</p>
-        <p>🕒 상담시간: 평일 10:00 ~ 18:00 (일본시간)</p>
+        <p><i data-lucide="mail" class="ico-inline"></i> 이메일: oss202604@gmail.com</p>
+        <p><i data-lucide="message-circle" class="ico-inline"></i> 카카오톡: @OSS (등록 예정)</p>
+        <p><i data-lucide="clock" class="ico-inline"></i> 상담시간: 평일 10:00 ~ 18:00 (일본시간)</p>
       </div>
     </div>
     <div class="footer-bottom"><div class="container">© 2026 OSS. All rights reserved.</div></div>
   </footer>
 
   <aside class="quick-menu">
-    <a href="index.html#contact" class="qm-item"><span class="qm-ico">🎧</span>고객센터</a>
-    <a href="order.html" class="qm-item"><span class="qm-ico">🛍️</span>구매대행</a>
-    <a href="delivery.html" class="qm-item"><span class="qm-ico">📦</span>배송대행</a>
-    <a href="index.html#fee" class="qm-item"><span class="qm-ico">🧮</span>예상비용</a>
-    <a href="index.html#how" class="qm-item"><span class="qm-ico">📖</span>이용가이드</a>
-    <button class="qm-top" id="scrollTop" title="맨 위로">▲<br /><small>TOP</small></button>
+    <a href="index.html#contact" class="qm-item"><span class="qm-ico"><i data-lucide="headphones"></i></span>고객센터</a>
+    <a href="order.html" class="qm-item"><span class="qm-ico"><i data-lucide="shopping-bag"></i></span>구매대행</a>
+    <a href="delivery.html" class="qm-item"><span class="qm-ico"><i data-lucide="package"></i></span>배송대행</a>
+    <a href="index.html#fee" class="qm-item"><span class="qm-ico"><i data-lucide="calculator"></i></span>예상비용</a>
+    <a href="index.html#how" class="qm-item"><span class="qm-ico"><i data-lucide="book-open"></i></span>이용가이드</a>
+    <button class="qm-top" id="scrollTop" title="맨 위로"><i data-lucide="chevron-up" class="ico-inline"></i><br /><small>TOP</small></button>
   </aside>
 
   <div class="modal" id="resultModal" hidden>
@@ -167,6 +317,10 @@
     </div>
   </div>
 
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
