@@ -35,6 +35,7 @@ function mapRow(row) {
     : (first.name || "(상품 정보 없음)");
   return {
     id: String(row.id),
+    no: row.order_no || ("#" + row.id),
     type: row.type,
     name: name,
     customer: row.applicant_name || "-",
@@ -82,7 +83,7 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
 function cardHtml(o) {
   return `<div class="kanban-card" draggable="true" data-id="${o.id}">
     <div class="kc-top">
-      <span class="kc-id">#${o.id}</span>
+      <span class="kc-id">${o.no}</span>
       <span class="kc-type ${o.type}">${o.type === "purchase" ? "구매" : "배송"}</span>
     </div>
     <div class="kc-name">${o.name}</div>
@@ -154,7 +155,7 @@ function openModal(id) {
     (p.orderNo ? ` / 오더:${p.orderNo}` : "") + (p.url ? `<br><a href="${p.url}" target="_blank" style="color:var(--blue);font-size:12px;">상품링크 ↗</a>` : "")
   ).join("<br>");
   document.getElementById("modalName").textContent = o.name;
-  document.getElementById("modalId").textContent = `#${o.id} · ${o.type === "purchase" ? "구매대행" : "배송대행"} · ${o.created}`;
+  document.getElementById("modalId").textContent = `${o.no} · ${o.type === "purchase" ? "구매대행" : "배송대행"} · ${o.created}`;
   document.getElementById("modalDetail").innerHTML = `
     <div class="detail-row"><span class="dk">신청자</span><span class="dv">${r.applicant_name || "-"} (${r.applicant_phone || "-"})</span></div>
     <div class="detail-row"><span class="dk">이메일/카톡</span><span class="dv">${r.applicant_email || "-"} / ${r.applicant_kakao || "-"}</span></div>
@@ -202,7 +203,7 @@ function renderDashboard() {
 
   const recent = ORDERS.slice(0, 8);
   document.getElementById("recentOrders").innerHTML = recent.length
-    ? recent.map((o) => `<tr><td>#${o.id}</td><td>${o.type === "purchase" ? "구매" : "배송"}</td><td>${o.customer}</td><td><span class="status-badge ${badgeClass(o.status)}">${labelOf(o.status)}</span></td></tr>`).join("")
+    ? recent.map((o) => `<tr><td>${o.no}</td><td>${o.type === "purchase" ? "구매" : "배송"}</td><td>${o.customer}</td><td><span class="status-badge ${badgeClass(o.status)}">${labelOf(o.status)}</span></td></tr>`).join("")
     : `<tr><td colspan="4" class="empty">아직 신청이 없습니다.</td></tr>`;
 
   // 문의는 2단계(게시판) 연동 전 안내

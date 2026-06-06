@@ -172,8 +172,18 @@ if (form && modal) {
   const resultContent = document.getElementById("resultContent");
   const g = (n) => new FormData(form).get(n) || "-";
 
+  // 주문번호 발급: OSS-YYMMDD-XXXXX (사람이 읽기 쉽고 고유)
+  function genOrderNo() {
+    const d = new Date();
+    const yy = String(d.getFullYear()).slice(2);
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const rnd = Math.random().toString(36).slice(2, 7).toUpperCase();
+    return `OSS-${yy}${mm}${dd}-${rnd}`;
+  }
+
   // 폼 → DB 저장용 payload 만들기
-  function buildPayload() {
+  function buildPayload(orderNo) {
     const data = new FormData(form);
     const isDelivery = !!document.querySelector('[name="productOrderNo[]"]');
     const names = data.getAll("productName[]");
@@ -194,6 +204,7 @@ if (form && modal) {
     const center = document.querySelector('input[name="centerType"]:checked');
     const subNum = Number((subtotalEl?.textContent || "0").replace(/[^0-9]/g, "")) || 0;
     return {
+      order_no: orderNo,
       type: isDelivery ? "delivery" : "purchase",
       center_type: center ? center.value : null,
       applicant_name: data.get("name") || "",
@@ -230,13 +241,15 @@ if (form && modal) {
       return;
     }
 
+    const orderNo = genOrderNo();
+
     // Supabase 연결돼 있으면 DB 저장
     if (window.OSS && window.OSS.submitApplication) {
       const submitBtn = form.querySelector('button[type="submit"]');
       const orig = submitBtn ? submitBtn.textContent : "";
       if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "접수 중..."; }
       try {
-        await window.OSS.submitApplication(buildPayload());
+        await window.OSS.submitApplication(buildPayload(orderNo));
       } catch (err) {
         console.error(err);
         alert("접수 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.\n(" + (err.message || err) + ")");
@@ -255,6 +268,9 @@ if (form && modal) {
     const urls = data.getAll("productUrl[]");
     const orderNos = data.getAll("productOrderNo[]"); // 배송대행만
 
+    lines.push(`■ 주문번호: ${orderNo}`);
+    lines.push("(주문조회 시 전화번호와 함께 사용하세요)");
+    lines.push("");
     lines.push("■ 신청자 정보");
     lines.push(`이름: ${data.get("name") || "-"}`);
     lines.push(`연락처: ${data.get("phone") || "-"}`);

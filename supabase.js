@@ -18,6 +18,16 @@ async function submitApplication(payload) {
   return true;
 }
 
+// ---- 비회원 주문 조회 (주문번호 + 전화번호) ----
+async function lookupOrder(orderNo, phone) {
+  const { data, error } = await sb.rpc("lookup_order", {
+    p_order_no: orderNo.trim(),
+    p_phone: phone.trim(),
+  });
+  if (error) throw error;
+  return data || [];
+}
+
 // ---- 관리자: 신청 목록 조회 ----
 async function fetchApplications() {
   const { data, error } = await sb
@@ -51,6 +61,7 @@ async function adminSignOut() {
 window.OSS = {
   sb,
   submitApplication,
+  lookupOrder,
   fetchApplications,
   updateApplicationStatus,
   adminSignIn,

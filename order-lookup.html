@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>주문 조회 | OSS(オッス)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=3" />
+</head>
+<body>
+  <div class="utility-bar">
+    <div class="container utility-inner">
+      <span class="utility-left">일본 현지인이 직접 운영하는 구매대행 · 배송대행지</span>
+      <nav class="utility-right">
+        <a href="login.html">로그인</a><span class="divider">|</span>
+        <a href="signup.html">회원가입</a><span class="divider">|</span>
+        <a href="order-lookup.html">주문조회</a><span class="divider">|</span>
+        <a href="index.html#contact">고객센터</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-tag">Simply Trusted!</span>
+        <span class="logo-name">OSS<span class="logo-dot">.</span></span>
+        <span class="logo-jp">オッス</span>
+      </a>
+      <form class="search-box" onsubmit="return false;">
+        <select class="search-cat"><option>전체 검색</option><option>메루카리</option><option>라쿠텐</option><option>야후옥션</option><option>아마존JP</option></select>
+        <input type="text" placeholder="상품명 또는 상품 링크를 입력하세요." />
+        <button type="submit" aria-label="검색"><i data-lucide="search"></i></button>
+      </form>
+      <div class="header-icons">
+        <a href="login.html" class="header-icon" title="찜"><i data-lucide="heart"></i></a>
+        <a href="login.html" class="header-icon" title="내 정보"><i data-lucide="user"></i></a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="main-nav">
+    <div class="container main-nav-inner">
+      <button class="cat-btn"><i data-lucide="menu" class="ico-inline"></i> 전체 서비스</button>
+      <ul class="main-menu" id="mainMenu">
+        <li><a href="order.html">구매대행 신청</a></li>
+        <li><a href="delivery.html">배송대행 신청</a></li>
+        <li><a href="order-lookup.html" class="active">주문조회</a></li>
+        <li><a href="index.html#contact">고객센터</a></li>
+      </ul>
+      <button class="menu-toggle" id="menuToggle" aria-label="메뉴"><i data-lucide="menu"></i></button>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>주문 조회</h1>
+      <p>접수 시 발급된 주문번호와 신청 시 입력한 전화번호로 진행 상황을 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="auth-section">
+    <div class="auth-card auth-card-wide">
+      <h1>비회원 주문 조회</h1>
+      <p class="auth-sub">회원가입 없이 주문번호로 바로 조회할 수 있습니다.</p>
+      <form id="lookupForm">
+        <label class="auth-label">주문번호<input type="text" id="lkOrderNo" required placeholder="예: OSS-260608-A3F9" autocomplete="off" /></label>
+        <label class="auth-label">전화번호<input type="tel" id="lkPhone" required placeholder="신청 시 입력한 휴대폰번호" autocomplete="off" /></label>
+        <button type="submit" class="btn btn-primary btn-block" id="lkBtn">조회하기</button>
+        <p class="login-error" id="lkError" style="color:var(--red);text-align:center;margin-top:12px;min-height:18px;"></p>
+      </form>
+
+      <div id="lkResult" hidden style="margin-top:24px;">
+        <h3 style="font-size:17px;color:var(--navy);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--yellow);">조회 결과</h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>주문번호</th><th>유형</th><th>상태</th><th>금액</th><th>접수일</th></tr></thead>
+            <tbody id="lkRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer" id="contact">
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-logo">OSS <small>オッス</small></p>
+        <p class="footer-desc">일본 현지인 구매대행 배대지</p>
+      </div>
+      <div class="footer-contact">
+        <p><i data-lucide="mail" class="ico-inline"></i> 이메일: oss202604@gmail.com</p>
+        <p><i data-lucide="message-circle" class="ico-inline"></i> 카카오톡: @OSS (등록 예정)</p>
+        <p><i data-lucide="clock" class="ico-inline"></i> 상담시간: 평일 10:00 ~ 18:00 (일본시간)</p>
+      </div>
+    </div>
+    <div class="footer-bottom"><div class="container">© 2026 OSS. All rights reserved.</div></div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="script.js"></script>
+  <script>
+    function badgeClass(s) {
+      if (s === "신규접수") return "status-new";
+      if (s === "배송완료") return "status-done";
+      if (["보류","취소","반품/교환","사고/폐기","일부입고"].includes(s)) return "status-hold";
+      return "status-progress";
+    }
+    document.getElementById("lookupForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const orderNo = document.getElementById("lkOrderNo").value.trim();
+      const phone = document.getElementById("lkPhone").value.trim();
+      const err = document.getElementById("lkError");
+      const btn = document.getElementById("lkBtn");
+      const resultBox = document.getElementById("lkResult");
+      err.textContent = ""; resultBox.hidden = true;
+      btn.disabled = true; btn.textContent = "조회 중...";
+      try {
+        const rows = await window.OSS.lookupOrder(orderNo, phone);
+        if (!rows.length) {
+          err.textContent = "조회 결과가 없습니다. 주문번호와 전화번호를 확인해 주세요.";
+        } else {
+          document.getElementById("lkRows").innerHTML = rows.map(r =>
+            `<tr>
+              <td>${r.order_no || "-"}</td>
+              <td>${r.type === "purchase" ? "구매대행" : "배송대행"}</td>
+              <td><span class="status-badge ${badgeClass(r.status)}">${r.status}</span></td>
+              <td>¥${(r.subtotal || 0).toLocaleString()}</td>
+              <td>${(r.created_at || "").slice(0,10)}</td>
+            </tr>`).join("");
+          resultBox.hidden = false;
+        }
+      } catch (e2) {
+        err.textContent = "조회 중 오류가 발생했어요: " + (e2.message || e2);
+      }
+      btn.disabled = false; btn.textContent = "조회하기";
+    });
+  </script>
+</body>
+</html>
