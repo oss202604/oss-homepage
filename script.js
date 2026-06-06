@@ -167,6 +167,7 @@ if (productList && addProduct) {
 // ===== 신청서 제출 (현재는 미리보기) =====
 const form = document.getElementById("orderForm");
 const modal = document.getElementById("resultModal");
+const formLoadAt = Date.now(); // 봇 초고속 제출 차단용
 if (form && modal) {
   const resultContent = document.getElementById("resultContent");
   const g = (n) => new FormData(form).get(n) || "-";
@@ -219,6 +220,15 @@ if (form && modal) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!form.checkValidity()) { form.reportValidity(); return; }
+
+    // 봇 방지 1: 함정 필드(사람 눈엔 안 보임)가 채워졌으면 봇 → 조용히 차단
+    const hp = form.querySelector('[name="_hp"]');
+    if (hp && hp.value.trim() !== "") { return; }
+    // 봇 방지 2: 페이지 열고 2.5초 안에 제출하면 사람이 아님 → 차단
+    if (Date.now() - formLoadAt < 2500) {
+      alert("잠시 후 다시 시도해 주세요.");
+      return;
+    }
 
     // Supabase 연결돼 있으면 DB 저장
     if (window.OSS && window.OSS.submitApplication) {
