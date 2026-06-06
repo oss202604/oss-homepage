@@ -44,6 +44,12 @@ async function updateApplicationStatus(id, status) {
   if (error) throw error;
 }
 
+// ---- 관리자: 여러 항목 부분 수정 (무게·배송비·상태 등) ----
+async function updateApplication(id, fields) {
+  const { error } = await sb.from("applications").update(fields).eq("id", id);
+  if (error) throw error;
+}
+
 // ---- 관리자 인증 ----
 async function adminSignIn(email, password) {
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
@@ -64,6 +70,7 @@ window.OSS = {
   lookupOrder,
   fetchApplications,
   updateApplicationStatus,
+  updateApplication,
   adminSignIn,
   adminGetSession,
   adminSignOut,

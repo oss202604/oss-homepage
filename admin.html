@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=3" />
-  <link rel="stylesheet" href="admin.css?v=3" />
+  <link rel="stylesheet" href="admin.css?v=4" />
 </head>
 <body class="admin-body">
   <!-- 상단 바 -->
@@ -115,6 +115,22 @@
       <h3 id="modalName">주문 상세</h3>
       <p class="modal-id" id="modalId"></p>
       <div id="modalDetail"></div>
+
+      <div class="modal-fee-box">
+        <h4>입고 · 무게 · 배송비</h4>
+        <div class="modal-fee-row">
+          <label>실무게(kg)<input type="number" id="modalWeight" step="0.1" min="0" placeholder="예: 1.5" /></label>
+          <label>배송센터
+            <select id="modalCenter">
+              <option value="air">일본(항공)</option>
+              <option value="sea">일본(해상)</option>
+            </select>
+          </label>
+          <button class="btn btn-small" id="modalCalcFee" type="button">배송비 계산</button>
+        </div>
+        <p class="modal-fee-out">예상 국제배송비: <b id="modalFee">-</b> <span class="modal-fee-note">(임시 요율 · 실제 요율로 교체 예정)</span></p>
+      </div>
+
       <div class="modal-status-select">
         <span style="font-size:14px;font-weight:700;">상태 변경:</span>
         <select id="modalStatus"></select>

@@ -24,6 +24,19 @@ const EXCEPTION = [
 const ALL_STATUS = [...NORMAL, ...EXCEPTION];
 const labelOf = (k) => (ALL_STATUS.find((s) => s.key === k) || {}).label || k;
 
+// 임시 국제배송비 요율표 (0.5kg 단위) — 실제 요율로 교체 예정
+const RATE = {
+  air: { base: 8000, step: 4000 },  // 항공: 0.5kg 8,000원, 이후 0.5kg마다 +4,000
+  sea: { base: 5000, step: 2500 },  // 해상: 0.5kg 5,000원, 이후 0.5kg마다 +2,500
+};
+function calcShippingFee(weightKg, center) {
+  const w = Number(weightKg);
+  if (!w || w <= 0) return 0;
+  const r = RATE[center] || RATE.air;
+  const units = Math.ceil(w / 0.5);
+  return r.base + (units - 1) * r.step;
+}
+
 let ORDERS = [];
 
 // ----- DB 행 → 카드 형태로 변환 -----
@@ -169,18 +182,48 @@ function openModal(id) {
     <div class="detail-row"><span class="dk">요청사항</span><span class="dv">${r.memo || "-"}</span></div>`;
   const sel = document.getElementById("modalStatus");
   sel.innerHTML = ALL_STATUS.map((s) => `<option value="${s.key}" ${s.key === o.status ? "selected" : ""}>${s.label}</option>`).join("");
+  // 입고·무게·배송비
+  document.getElementById("modalWeight").value = r.weight_kg != null ? r.weight_kg : "";
+  document.getElementById("modalCenter").value = r.center_type === "sea" ? "sea" : "air";
+  document.getElementById("modalFee").textContent = r.shipping_fee ? "₩" + Number(r.shipping_fee).toLocaleString() : "-";
   modal.hidden = false;
 }
 document.getElementById("modalClose").addEventListener("click", () => { modal.hidden = true; });
 modal.addEventListener("click", (e) => { if (e.target === modal) modal.hidden = true; });
+
+// 배송비 계산 버튼 (미리보기)
+document.getElementById("modalCalcFee").addEventListener("click", () => {
+  const w = document.getElementById("modalWeight").value;
+  const c = document.getElementById("modalCenter").value;
+  const fee = calcShippingFee(w, c);
+  document.getElementById("modalFee").textContent = fee ? "₩" + fee.toLocaleString() : "-";
+});
+
 document.getElementById("modalSave").addEventListener("click", async () => {
   const o = ORDERS.find((x) => x.id === modalOrderId);
   if (o) {
-    const prev = o.status;
-    o.status = document.getElementById("modalStatus").value;
+    const prev = { status: o.status, raw: { ...o.raw } };
+    const newStatus = document.getElementById("modalStatus").value;
+    const weight = document.getElementById("modalWeight").value;
+    const center = document.getElementById("modalCenter").value;
+    const fee = calcShippingFee(weight, center);
+    const fields = {
+      status: newStatus,
+      center_type: center,
+      weight_kg: weight ? Number(weight) : null,
+      shipping_fee: fee || null,
+    };
+    o.status = newStatus;
+    o.raw.weight_kg = fields.weight_kg;
+    o.raw.shipping_fee = fields.shipping_fee;
+    o.raw.center_type = center;
     renderKanban(); renderDashboard();
-    try { await window.OSS.updateApplicationStatus(o.id, o.status); }
-    catch (err) { alert("상태 저장 실패: " + (err.message || err)); o.status = prev; renderKanban(); renderDashboard(); }
+    try {
+      await window.OSS.updateApplication(o.id, fields);
+    } catch (err) {
+      alert("저장 실패: " + (err.message || err));
+      o.status = prev.status; o.raw = prev.raw; renderKanban(); renderDashboard();
+    }
   }
   modal.hidden = true;
 });

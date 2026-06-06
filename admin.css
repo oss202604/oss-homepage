@@ -71,6 +71,17 @@ body.admin-body { background: #eef1f6; }
 .modal-status-select { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
 .modal-status-select select { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 14px; }
 
+/* 입고·무게·배송비 박스 */
+.modal-fee-box { background: var(--bg); border-radius: 10px; padding: 16px; margin-top: 18px; }
+.modal-fee-box h4 { font-size: 14px; color: var(--navy); margin-bottom: 12px; }
+.modal-fee-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.modal-fee-row label { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+.modal-fee-row input, .modal-fee-row select { padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+.modal-fee-row input { width: 110px; }
+.modal-fee-out { margin-top: 12px; font-size: 15px; color: var(--navy); }
+.modal-fee-out b { color: var(--blue); font-size: 18px; }
+.modal-fee-note { font-size: 12px; color: var(--muted); font-weight: 400; }
+
 /* 공지·문의 */
 .notice-form { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 22px; box-shadow: var(--shadow); margin-bottom: 24px; }
 .notice-form input, .notice-form textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 14px; margin-bottom: 12px; background: #fbfcfe; }
