@@ -40,6 +40,19 @@ if (menuToggle && mainMenu) {
   );
 }
 
+// ===== 배대지 주소 (설정에서 로드, 배송대행 페이지) =====
+const centerAddrBox = document.getElementById("centerAddrBox");
+if (centerAddrBox && window.OSS && window.OSS.getSetting) {
+  window.OSS.getSetting("center_address").then((c) => {
+    if (c && (c.addr1 || c.zip)) {
+      centerAddrBox.innerHTML =
+        `받는사람: ${c.receiver || "OSS / 고객번호"}<br>` +
+        `${c.zip || ""} ${c.addr1 || ""} ${c.addr2 || ""}<br>` +
+        `Tel: ${c.tel || ""}`;
+    }
+  }).catch(() => {});
+}
+
 // ===== 맨 위로 =====
 const scrollTopBtn = document.getElementById("scrollTop");
 if (scrollTopBtn) {

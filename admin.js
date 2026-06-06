@@ -24,17 +24,26 @@ const EXCEPTION = [
 const ALL_STATUS = [...NORMAL, ...EXCEPTION];
 const labelOf = (k) => (ALL_STATUS.find((s) => s.key === k) || {}).label || k;
 
-// 임시 국제배송비 요율표 (0.5kg 단위) — 실제 요율로 교체 예정
-const RATE = {
-  air: { base: 8000, step: 4000 },  // 항공: 0.5kg 8,000원, 이후 0.5kg마다 +4,000
-  sea: { base: 5000, step: 2500 },  // 해상: 0.5kg 5,000원, 이후 0.5kg마다 +2,500
-};
+// 배송비 요율표 (관리자 설정에서 로드, 단위 엔). 행: {kg: 무게이하, air, sea}
+let RATES = [];
+// 사토리 기본요율(항공 실측값, 해상은 동일값으로 두고 관리자가 조정) — "기본요율 불러오기"용
+const DEFAULT_RATES = [
+  [0.5,1000,1000],[1,1150,1150],[1.5,1300,1300],[2,1450,1450],[2.5,1600,1600],
+  [3,1750,1750],[3.5,1900,1900],[4,2050,2050],[4.5,2200,2200],[5,2350,2350],
+  [6,2650,2650],[7,2950,2950],[8,3250,3250],[9,3550,3550],[10,3850,3850],
+  [12,4850,4850],[15,6350,6350],[17,7550,7550],[20,9350,9350],
+  [25,11850,11850],[30,14350,14350],[35,16850,16850],[40,19350,19350],
+].map(([kg, air, sea]) => ({ kg, air, sea }));
+
 function calcShippingFee(weightKg, center) {
   const w = Number(weightKg);
   if (!w || w <= 0) return 0;
-  const r = RATE[center] || RATE.air;
-  const units = Math.ceil(w / 0.5);
-  return r.base + (units - 1) * r.step;
+  if (RATES && RATES.length) {
+    const sorted = [...RATES].sort((a, b) => a.kg - b.kg);
+    const row = sorted.find((r) => w <= Number(r.kg)) || sorted[sorted.length - 1];
+    return Number(center === "sea" ? row.sea : row.air) || 0;
+  }
+  return 0; // 요율 미설정
 }
 
 let ORDERS = [];
@@ -302,5 +311,68 @@ document.getElementById("addNotice").addEventListener("click", async () => {
   } catch (e) { alert("등록 실패: " + (e.message || e)); }
 });
 
+// ----- 설정: 센터주소 -----
+async function loadCenter() {
+  try {
+    const c = (await window.OSS.getSetting("center_address")) || {};
+    const v = (id, val) => { const e = document.getElementById(id); if (e) e.value = val || ""; };
+    v("setZip", c.zip); v("setTel", c.tel); v("setReceiver", c.receiver);
+    v("setAddr1", c.addr1); v("setAddr2", c.addr2);
+  } catch (e) { console.error(e); }
+}
+document.getElementById("saveCenter").addEventListener("click", async () => {
+  const val = (id) => document.getElementById(id).value.trim();
+  const ok = document.getElementById("centerSaved");
+  try {
+    await window.OSS.saveSetting("center_address", {
+      zip: val("setZip"), tel: val("setTel"), receiver: val("setReceiver"),
+      addr1: val("setAddr1"), addr2: val("setAddr2"),
+    });
+    ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500);
+  } catch (e) { alert("저장 실패: " + (e.message || e)); }
+});
+
+// ----- 설정: 요율표 -----
+function renderRateRows() {
+  const tb = document.getElementById("rateRows");
+  tb.innerHTML = RATES.map((r, i) => `<tr>
+    <td><input type="number" step="0.1" value="${r.kg}" data-i="${i}" data-f="kg" /></td>
+    <td><input type="number" value="${r.air}" data-i="${i}" data-f="air" /></td>
+    <td><input type="number" value="${r.sea}" data-i="${i}" data-f="sea" /></td>
+    <td><button class="btn btn-small remove-product" data-del="${i}">삭제</button></td>
+  </tr>`).join("");
+  tb.querySelectorAll("input").forEach((inp) => inp.addEventListener("input", () => {
+    RATES[inp.dataset.i][inp.dataset.f] = Number(inp.value);
+  }));
+  tb.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", () => {
+    RATES.splice(Number(b.dataset.del), 1); renderRateRows();
+  }));
+}
+async function loadRates() {
+  try {
+    const r = await window.OSS.getSetting("shipping_rates");
+    RATES = Array.isArray(r) && r.length ? r : [];
+  } catch (e) { RATES = []; }
+  renderRateRows();
+}
+document.getElementById("addRate").addEventListener("click", () => { RATES.push({ kg: 0, air: 0, sea: 0 }); renderRateRows(); });
+document.getElementById("loadDefaultRate").addEventListener("click", () => {
+  if (!confirm("사토리 기본요율로 채울까요? 현재 입력값은 대체됩니다.")) return;
+  RATES = DEFAULT_RATES.map((r) => ({ ...r })); renderRateRows();
+});
+document.getElementById("saveRate").addEventListener("click", async () => {
+  const ok = document.getElementById("rateSaved");
+  try {
+    await window.OSS.saveSetting("shipping_rates", RATES);
+    ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500);
+  } catch (e) { alert("저장 실패: " + (e.message || e)); }
+});
+document.getElementById("rcCalc").addEventListener("click", () => {
+  const fee = calcShippingFee(document.getElementById("rcWeight").value, document.getElementById("rcCenter").value);
+  document.getElementById("rcOut").textContent = fee ? "¥" + fee.toLocaleString() : "요율 없음";
+});
+
 // 시작
 init();
+loadCenter();
+loadRates();

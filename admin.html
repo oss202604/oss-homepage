@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=3" />
-  <link rel="stylesheet" href="admin.css?v=4" />
+  <link rel="stylesheet" href="admin.css?v=5" />
 </head>
 <body class="admin-body">
   <!-- 상단 바 -->
@@ -27,6 +27,7 @@
         <li><button data-page="orders"><span class="ico"><i data-lucide="package"></i></span> 주문관리</button></li>
         <li><button data-page="members"><span class="ico"><i data-lucide="users"></i></span> 회원관리</button></li>
         <li><button data-page="board"><span class="ico"><i data-lucide="megaphone"></i></span> 공지·문의</button></li>
+        <li><button data-page="settings"><span class="ico"><i data-lucide="settings"></i></span> 설정</button></li>
       </ul>
     </aside>
 
@@ -115,6 +116,47 @@
           </div>
         </div>
       </section>
+      <!-- ===== 설정 ===== -->
+      <section class="admin-page" id="page-settings">
+        <h2 class="admin-page-title">설정</h2>
+
+        <div class="dash-panel" style="margin-bottom:24px;">
+          <h3>배송센터 주소 (일본 배대지)</h3>
+          <p class="form-note" style="text-align:left;margin:0 0 16px;">고객의 배송대행 신청 화면에 그대로 표시됩니다.</p>
+          <div class="set-grid">
+            <label>우편번호<input id="setZip" placeholder="〒556-0022" /></label>
+            <label>전화번호<input id="setTel" placeholder="06-6760-4541" /></label>
+            <label>수취인명<input id="setReceiver" placeholder="OSS / 고객번호" /></label>
+            <label class="full">주소 1 (시·군·구·번지)<input id="setAddr1" placeholder="大阪市浪速区..." /></label>
+            <label class="full">주소 2 (건물·호수)<input id="setAddr2" placeholder="CalmareNambaWest 206号" /></label>
+          </div>
+          <div class="set-actions"><button class="btn btn-primary" id="saveCenter">센터주소 저장</button><span class="save-ok" id="centerSaved"></span></div>
+        </div>
+
+        <div class="dash-panel">
+          <h3>배송비 요율표 (무게 이하 → 배송비)</h3>
+          <p class="form-note" style="text-align:left;margin:0 0 16px;">고객 예상비용·관리자 입고계산에 자동 반영됩니다. 행을 수정/추가하세요. 단위: 엔(¥)</p>
+          <div class="table-wrap">
+            <table class="data-table" id="rateTable">
+              <thead><tr><th>무게 이하(kg)</th><th>항공 (¥)</th><th>해상 (¥)</th><th>관리</th></tr></thead>
+              <tbody id="rateRows"></tbody>
+            </table>
+          </div>
+          <div class="set-actions">
+            <button class="btn btn-small" id="addRate">+ 행 추가</button>
+            <button class="btn btn-small" id="loadDefaultRate">사토리 기본요율 불러오기</button>
+            <button class="btn btn-primary" id="saveRate">요율표 저장</button>
+            <span class="save-ok" id="rateSaved"></span>
+          </div>
+          <div class="rate-preview">
+            <b>즉석 계산:</b>
+            <input type="number" id="rcWeight" step="0.1" placeholder="무게kg" />
+            <select id="rcCenter"><option value="air">항공</option><option value="sea">해상</option></select>
+            <button class="btn btn-small" id="rcCalc">계산</button>
+            <span id="rcOut">-</span>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -152,7 +194,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js"></script>
-  <script src="admin.js"></script>
+  <script src="admin.js?v=2"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

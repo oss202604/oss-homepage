@@ -86,6 +86,20 @@ body.admin-body { background: #eef1f6; }
 .notice-form { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 22px; box-shadow: var(--shadow); margin-bottom: 24px; }
 .notice-form input, .notice-form textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 14px; margin-bottom: 12px; background: #fbfcfe; }
 
+/* 설정 페이지 */
+.set-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+.set-grid label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
+.set-grid label.full { grid-column: 1 / -1; }
+.set-grid input { padding: 11px 13px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 14px; background: #fbfcfe; }
+.set-grid input:focus { outline: none; border-color: var(--blue); background: #fff; }
+.set-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.save-ok { color: #16a34a; font-size: 14px; font-weight: 700; }
+#rateRows input { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font-family: inherit; font-size: 14px; }
+.rate-preview { margin-top: 18px; padding: 14px 16px; background: var(--bg); border-radius: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; }
+.rate-preview input { width: 100px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font-family: inherit; }
+.rate-preview select { padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font-family: inherit; }
+.rate-preview #rcOut { font-weight: 900; color: var(--blue); font-size: 16px; }
+
 /* 로그인 */
 .admin-login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
 .admin-login-card { background: #fff; border-radius: 16px; padding: 40px; width: 100%; max-width: 380px; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
