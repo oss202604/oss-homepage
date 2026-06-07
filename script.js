@@ -40,6 +40,113 @@ if (menuToggle && mainMenu) {
   );
 }
 
+// ===== 공통 푸터 렌더 (전 페이지 통일) =====
+(function renderFooter() {
+  const f = document.querySelector(".site-footer");
+  if (!f) return;
+  // 기본값 (관리자 설정이 있으면 아래에서 덮어씀)
+  const biz = {
+    company: "OSS (オッス)",
+    desc: "일본 현지인이 직접 운영하는 구매대행 · 배송대행지",
+    email: "oss202604@gmail.com",
+    kakao: "@OSS (등록 예정)",
+    hours: "평일 10:00 ~ 18:00 (일본시간)",
+    bizline: "사업자 정보 등록 준비중",
+  };
+  function paint() {
+    f.innerHTML =
+      '<div class="container footer-cols">' +
+        '<div class="footer-col">' +
+          '<p class="footer-logo">OSS <small>オッス</small></p>' +
+          '<p class="footer-desc">' + biz.desc + '</p>' +
+          '<p class="footer-biz">' + biz.bizline + '</p>' +
+        '</div>' +
+        '<div class="footer-col">' +
+          '<p class="footer-col-tit">고객센터</p>' +
+          '<p><i data-lucide="mail" class="ico-inline"></i> ' + biz.email + '</p>' +
+          '<p><i data-lucide="message-circle" class="ico-inline"></i> 카카오톡 ' + biz.kakao + '</p>' +
+          '<p><i data-lucide="clock" class="ico-inline"></i> ' + biz.hours + '</p>' +
+        '</div>' +
+        '<div class="footer-col">' +
+          '<p class="footer-col-tit">바로가기</p>' +
+          '<a href="order.html">구매대행 신청</a>' +
+          '<a href="delivery.html">배송대행 신청</a>' +
+          '<a href="order-lookup.html">주문조회</a>' +
+          '<a href="guide.html">이용가이드</a>' +
+        '</div>' +
+      '</div>' +
+      '<div class="footer-bottom"><div class="container footer-bottom-inner">' +
+        '<nav class="footer-links">' +
+          '<a href="index.html#about">회사소개</a>' +
+          '<a href="terms.html">이용약관</a>' +
+          '<a href="privacy.html">개인정보처리방침</a>' +
+          '<a href="refund.html">취소·환불정책</a>' +
+          '<a href="notice.html">고객센터</a>' +
+        '</nav>' +
+        '<span class="footer-copy">© 2026 OSS. All rights reserved.</span>' +
+      '</div></div>';
+    if (window.lucide) lucide.createIcons();
+  }
+  paint();
+  // 관리자 설정(settings.footer_biz)이 있으면 덮어쓰기
+  if (window.OSS && window.OSS.getSetting) {
+    window.OSS.getSetting("footer_biz").then((v) => {
+      if (v && typeof v === "object") { Object.assign(biz, v); paint(); }
+    }).catch(() => {});
+  }
+})();
+
+// ===== 공통 상담 버튼 (전 페이지 통일) =====
+(function renderChatFab() {
+  if (document.querySelector(".chat-fab")) return;
+  const a = document.createElement("a");
+  a.href = "order.html";
+  a.className = "chat-fab";
+  a.title = "문의하기";
+  a.innerHTML = '<i data-lucide="message-circle"></i>';
+  document.body.appendChild(a);
+  if (window.lucide) lucide.createIcons();
+})();
+
+// ===== "전체 서비스" 드롭다운 (모든 페이지 공통) =====
+const catBtn = document.querySelector(".cat-btn");
+const navInner = document.querySelector(".main-nav-inner");
+if (catBtn && navInner) {
+  const panel = document.createElement("div");
+  panel.className = "cat-panel";
+  panel.hidden = true;
+  panel.innerHTML = [
+    ["order.html", "🛍️", "구매대행 신청"],
+    ["delivery.html", "📦", "배송대행 신청"],
+    ["guide.html", "📘", "이용가이드"],
+    ["index.html#fee", "🧮", "예상비용 안내"],
+    ["notice.html", "📢", "공지사항"],
+    ["order-lookup.html", "🔎", "주문조회"],
+  ].map(([href, emo, label]) => `<a href="${href}"><span>${emo}</span>${label}</a>`).join("");
+  navInner.appendChild(panel);
+
+  const toggledPanel = (show) => {
+    panel.hidden = typeof show === "boolean" ? !show : !panel.hidden;
+    catBtn.classList.toggle("open", !panel.hidden);
+  };
+  catBtn.addEventListener("click", (e) => { e.stopPropagation(); toggledPanel(); });
+  panel.addEventListener("click", (e) => e.stopPropagation());
+  document.addEventListener("click", () => toggledPanel(false));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") toggledPanel(false); });
+}
+
+// ===== 상단 검색 → 구매대행 신청으로 연결 (입력값 전달) =====
+document.querySelectorAll(".search-box").forEach((box) => {
+  box.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const q = (box.querySelector("input")?.value || "").trim();
+    if (q) {
+      try { sessionStorage.setItem("oss_search", q); } catch (_) {}
+    }
+    location.href = "order.html";
+  });
+});
+
 // ===== 배대지 주소 (설정에서 로드, 배송대행 페이지) =====
 const centerAddrBox = document.getElementById("centerAddrBox");
 if (centerAddrBox && window.OSS && window.OSS.getSetting) {
@@ -172,6 +279,19 @@ if (productList && addProduct) {
     .forEach((el) => el.addEventListener("input", recalcSubtotal));
   const applyAmount = document.getElementById("applyAmount");
   if (applyAmount) applyAmount.addEventListener("click", recalcSubtotal);
+
+  // 메인 검색에서 넘어온 값 자동 채우기
+  try {
+    const q = sessionStorage.getItem("oss_search");
+    if (q) {
+      sessionStorage.removeItem("oss_search");
+      const first = productList.querySelector(".product-item");
+      const isUrl = /^https?:\/\//i.test(q);
+      const sel = isUrl ? '[name="productUrl[]"]' : '[name="productName[]"]';
+      const field = first && first.querySelector(sel);
+      if (field) field.value = q;
+    }
+  } catch (_) {}
 
   renumberProducts();
   recalcSubtotal();
@@ -326,3 +446,114 @@ if (form && modal) {
   document.getElementById("closeModal").addEventListener("click", () => { modal.hidden = true; });
   modal.addEventListener("click", (e) => { if (e.target === modal) modal.hidden = true; });
 }
+
+// ===== 예상비용 계산기 (메인 #fee) =====
+(function calculator() {
+  const btn = document.getElementById("calcBtn");
+  if (!btn) return;
+  // 기본 품목분류 (관리자 settings.customs_categories 로 덮어쓸 수 있음)
+  // type: list(목록통관·면세한도 이하 면세) / general(일반통관) · duty=관세율(%)
+  let CATS = [
+    { name: "의류 / 패션잡화", type: "list", duty: 13 },
+    { name: "신발", type: "list", duty: 13 },
+    { name: "가방 / 지갑", type: "general", duty: 8 },
+    { name: "시계 / 주얼리", type: "general", duty: 8 },
+    { name: "전자제품 / 디지털", type: "list", duty: 8 },
+    { name: "화장품 / 향수", type: "general", duty: 6.5 },
+    { name: "건강식품 / 식품", type: "general", duty: 8 },
+    { name: "완구 / 취미 / 피규어", type: "list", duty: 8 },
+    { name: "기타", type: "general", duty: 8 },
+  ];
+  let RATES = [];
+  let FX = { applied: 0, gosi: 0, dutyFreeLimit: 23961 };
+
+  const won = (n) => "₩" + Math.round(n).toLocaleString();
+  const yen = (n) => "¥" + Math.round(n).toLocaleString();
+
+  function shipFeeYen(weightKg, center) {
+    const w = Number(weightKg);
+    if (!w || w <= 0 || !RATES.length) return 0;
+    const sorted = [...RATES].sort((a, b) => a.kg - b.kg);
+    const row = sorted.find((r) => w <= Number(r.kg)) || sorted[sorted.length - 1];
+    return Number(center === "sea" ? row.sea : row.air) || 0;
+  }
+
+  function fillCats() {
+    const sel = document.getElementById("calcCat");
+    sel.innerHTML = CATS.map((c, i) => `<option value="${i}">${c.name}</option>`).join("");
+  }
+  function showFx() {
+    const el = document.getElementById("calcFx");
+    if (FX.applied > 0) el.innerHTML = `적용환율 <b>100엔 = ₩${Number(FX.applied).toLocaleString()}</b>` + (FX.gosi ? ` <span style="opacity:.6">(고시 ₩${Number(FX.gosi).toLocaleString()})</span>` : "");
+    else el.innerHTML = '환율이 아직 설정되지 않았어요. (관리자 → 설정 → 환율)';
+  }
+
+  function calc() {
+    const perJpy = Number(FX.applied) / 100; // 1엔당 원
+    const jpy = Number(document.getElementById("calcJpy").value) || 0;
+    const kg = Number(document.getElementById("calcKg").value) || 0;
+    const center = document.getElementById("calcCenter").value;
+    const cat = CATS[Number(document.getElementById("calcCat").value)] || CATS[CATS.length - 1];
+    const set = (id, v) => (document.getElementById(id).textContent = v);
+
+    if (perJpy <= 0) { set("rJpy", "환율 미설정"); set("rShip", "-"); set("rTax", "-"); set("rTotal", "-"); return; }
+
+    const productKrw = jpy * perJpy;
+    const shipKrw = shipFeeYen(kg, center) * perJpy;
+    const base = productKrw + shipKrw; // 간이 과세표준
+    const dutyFreeKrw = Number(FX.dutyFreeLimit || 0) * perJpy;
+
+    let tax = 0;
+    const exempt = cat.type === "list" && productKrw <= dutyFreeKrw;
+    if (!exempt) {
+      const duty = base * (Number(cat.duty) || 0) / 100;
+      const vat = (base + duty) * 0.1;
+      tax = duty + vat;
+    }
+    set("rJpy", `${won(productKrw)}  (${yen(jpy)})`);
+    set("rShip", shipKrw > 0 ? won(shipKrw) : (RATES.length ? "무게 입력" : "요율 미설정"));
+    set("rTax", exempt ? "면세 (목록통관)" : won(tax));
+    set("rTotal", won(productKrw + shipKrw + tax));
+  }
+
+  btn.addEventListener("click", calc);
+  fillCats(); showFx();
+
+  if (window.OSS && window.OSS.getSetting) {
+    Promise.all([
+      window.OSS.getSetting("exchange_rate").catch(() => null),
+      window.OSS.getSetting("shipping_rates").catch(() => null),
+      window.OSS.getSetting("customs_categories").catch(() => null),
+    ]).then(([fx, rates, cats]) => {
+      if (fx && typeof fx === "object") FX = Object.assign(FX, fx);
+      if (Array.isArray(rates) && rates.length) RATES = rates;
+      if (Array.isArray(cats) && cats.length) { CATS = cats; fillCats(); }
+      showFx();
+    });
+  }
+})();
+
+// ===== 이용후기 (메인 #reviews) =====
+(function reviews() {
+  const grid = document.getElementById("reviewGrid");
+  if (!grid) return;
+  const SAMPLE = [
+    { author: "김*은", rating: 5, text: "다른 대행사보다 수수료가 저렴하고 문의 답변도 정말 빨라요. 계속 이용할게요!" },
+    { author: "이*리", rating: 5, text: "검수 사진 보내주셔서 안심하고 받았어요. 포장도 꼼꼼합니다." },
+    { author: "박*호", rating: 5, text: "일본어 하나도 몰라도 링크만 보내면 다 해주셔서 너무 편했어요." },
+  ];
+  const esc = (s) => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  function render(list) {
+    grid.innerHTML = list.map((r) => `<div class="review-card">
+      <div class="review-stars">${"★".repeat(Math.max(1, Math.min(5, Number(r.rating) || 5)))}</div>
+      <p class="review-text">${esc(r.text)}</p>
+      <p class="review-author">${esc(r.author || "고객님")}</p>
+    </div>`).join("");
+  }
+  render(SAMPLE);
+  if (window.OSS && window.OSS.getSetting) {
+    window.OSS.getSetting("reviews").then((r) => {
+      if (Array.isArray(r) && r.length) render(r);
+    }).catch(() => {});
+  }
+})();

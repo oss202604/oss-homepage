@@ -93,6 +93,8 @@ body.admin-body { background: #eef1f6; }
 .set-grid label.full { grid-column: 1 / -1; }
 .set-grid input { padding: 11px 13px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 14px; background: #fbfcfe; }
 .set-grid input:focus { outline: none; border-color: var(--blue); background: #fff; }
+.review-edit-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.review-edit-row input, .review-edit-row select { padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 13px; background: #fbfcfe; }
 .set-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
 .save-ok { color: #16a34a; font-size: 14px; font-weight: 700; }
 #rateRows input { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font-family: inherit; font-size: 14px; }

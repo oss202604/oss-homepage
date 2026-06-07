@@ -449,8 +449,63 @@ document.getElementById("savePage").addEventListener("click", async () => {
   } catch (e) { alert("저장 실패: " + (e.message || e)); }
 });
 
+// ----- 설정: 환율 -----
+async function loadFx() {
+  try {
+    const fx = (await window.OSS.getSetting("exchange_rate")) || {};
+    const v = (id, val) => { const e = document.getElementById(id); if (e && val != null) e.value = val; };
+    v("setFxApplied", fx.applied); v("setFxGosi", fx.gosi); v("setFxDuty", fx.dutyFreeLimit);
+  } catch (e) { console.error(e); }
+}
+document.getElementById("saveFx").addEventListener("click", async () => {
+  const num = (id) => { const x = Number(document.getElementById(id).value); return isFinite(x) ? x : 0; };
+  const ok = document.getElementById("fxSaved");
+  try {
+    await window.OSS.saveSetting("exchange_rate", {
+      applied: num("setFxApplied"), gosi: num("setFxGosi"), dutyFreeLimit: num("setFxDuty"),
+      updatedAt: new Date().toISOString(),
+    });
+    ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500);
+  } catch (e) { alert("저장 실패: " + (e.message || e)); }
+});
+
+// ----- 설정: 이용후기 -----
+let REVIEWS = [];
+function renderReviewRows() {
+  const box = document.getElementById("reviewRows");
+  box.innerHTML = REVIEWS.map((r, i) => `<div class="review-edit-row">
+    <input placeholder="작성자 (예: 양*향)" value="${(r.author||"").replace(/"/g,'&quot;')}" data-i="${i}" data-f="author" style="width:130px;" />
+    <select data-i="${i}" data-f="rating">${[5,4,3,2,1].map(n=>`<option value="${n}" ${Number(r.rating)===n?"selected":""}>${"★".repeat(n)}</option>`).join("")}</select>
+    <input placeholder="후기 내용" value="${(r.text||"").replace(/"/g,'&quot;')}" data-i="${i}" data-f="text" style="flex:1;min-width:200px;" />
+    <button class="btn btn-small remove-product" data-del="${i}">삭제</button>
+  </div>`).join("") || '<p class="form-note" style="text-align:left;">등록된 후기가 없습니다. "+ 후기 추가"를 누르세요.</p>';
+  box.querySelectorAll("input,select").forEach((inp) => inp.addEventListener("input", () => {
+    REVIEWS[inp.dataset.i][inp.dataset.f] = inp.dataset.f === "rating" ? Number(inp.value) : inp.value;
+  }));
+  box.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", () => {
+    REVIEWS.splice(Number(b.dataset.del), 1); renderReviewRows();
+  }));
+}
+async function loadReviews() {
+  try {
+    const r = await window.OSS.getSetting("reviews");
+    REVIEWS = Array.isArray(r) ? r : [];
+  } catch (e) { REVIEWS = []; }
+  renderReviewRows();
+}
+document.getElementById("addReview").addEventListener("click", () => { REVIEWS.push({ author: "", rating: 5, text: "" }); renderReviewRows(); });
+document.getElementById("saveReviews").addEventListener("click", async () => {
+  const ok = document.getElementById("reviewSaved");
+  try {
+    await window.OSS.saveSetting("reviews", REVIEWS.filter((r) => (r.text || "").trim()));
+    ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500);
+  } catch (e) { alert("저장 실패: " + (e.message || e)); }
+});
+
 // 시작
 init();
 loadCenter();
 loadRates();
 loadPageEditor();
+loadFx();
+loadReviews();

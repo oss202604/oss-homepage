@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=12" />
+  <link rel="stylesheet" href="styles.css?v=14" />
 </head>
 <body>
   <div class="utility-bar">
@@ -41,11 +41,12 @@
     <div class="container main-nav-inner">
       <button class="cat-btn"><i data-lucide="menu" class="ico-inline"></i> 전체 서비스</button>
       <ul class="main-menu" id="mainMenu">
-        <li><a href="order.html">구매대행 신청</a></li>
-        <li><a href="delivery.html">배송대행 신청</a></li>
+        <li><a href="order.html">구매대행 신청 <span class="nav-hot">HOT</span></a></li>
+        <li><a href="delivery.html">배송대행 신청 <span class="nav-hot">HOT</span></a></li>
         <li><a href="guide.html" class="active">이용가이드</a></li>
+        <li><a href="index.html#fee">예상비용</a></li>
+        <li><a href="notice.html">공지사항</a></li>
         <li><a href="order-lookup.html">주문조회</a></li>
-        <li><a href="notice.html">고객센터</a></li>
       </ul>
       <button class="menu-toggle" id="menuToggle" aria-label="메뉴"><i data-lucide="menu"></i></button>
     </div>
@@ -86,7 +87,7 @@
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=2"></script>
-  <script src="script.js"></script>
+  <script src="script.js?v=4"></script>
   <script>
     const GUIDE_PAGES = [
       { slug: "guide-how", title: "이용방법" },

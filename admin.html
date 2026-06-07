@@ -6,8 +6,8 @@
   <title>OSS 관리자</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=3" />
-  <link rel="stylesheet" href="admin.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=14" />
+  <link rel="stylesheet" href="admin.css?v=9" />
 </head>
 <body class="admin-body">
   <!-- 상단 바 -->
@@ -148,6 +148,17 @@
           <div class="set-actions"><button class="btn btn-primary" id="saveCenter">센터주소 저장</button><span class="save-ok" id="centerSaved"></span></div>
         </div>
 
+        <div class="dash-panel" style="margin-bottom:24px;">
+          <h3>환율 설정 (예상비용 계산 기준)</h3>
+          <p class="form-note" style="text-align:left;margin:0 0 16px;">사장님이 직접 입력합니다. 사이트 환율 위젯과 예상비용 계산기에 즉시 반영됩니다. (기준: 일본 100엔당 원화)</p>
+          <div class="set-grid">
+            <label>적용환율 (100엔 → 원) <input id="setFxApplied" type="number" step="0.01" placeholder="예: 1036.98" /></label>
+            <label>고시환율 (100엔 → 원, 표시용) <input id="setFxGosi" type="number" step="0.01" placeholder="예: 948.19" /></label>
+            <label>면세한도 (엔) <input id="setFxDuty" type="number" placeholder="예: 23961" /></label>
+          </div>
+          <div class="set-actions"><button class="btn btn-primary" id="saveFx">환율 저장</button><span class="save-ok" id="fxSaved"></span></div>
+        </div>
+
         <div class="dash-panel">
           <h3>배송비 요율표 (무게 이하 → 배송비)</h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">고객 예상비용·관리자 입고계산에 자동 반영됩니다. 행을 수정/추가하세요. 단위: 엔(¥)</p>
@@ -194,6 +205,17 @@
             <span class="save-ok" id="pageSaved"></span>
           </div>
         </div>
+
+        <div class="dash-panel" style="margin-top:24px;">
+          <h3>이용후기 관리</h3>
+          <p class="form-note" style="text-align:left;margin:0 0 16px;">메인 페이지 하단 후기 섹션에 표시됩니다. 작성자명은 가운데를 *로 가려 등록하세요. (예: 양*향)</p>
+          <div id="reviewRows"></div>
+          <div class="set-actions">
+            <button class="btn btn-small" id="addReview">+ 후기 추가</button>
+            <button class="btn btn-primary" id="saveReviews">후기 저장</button>
+            <span class="save-ok" id="reviewSaved"></span>
+          </div>
+        </div>
       </section>
     </main>
   </div>
@@ -232,7 +254,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=3"></script>
-  <script src="admin.js?v=4"></script>
+  <script src="admin.js?v=5"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

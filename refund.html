@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>로그인 | OSS(オッス)</title>
+  <title>취소·환불정책 | OSS(オッス)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
@@ -16,7 +16,8 @@
       <nav class="utility-right">
         <a href="login.html">로그인</a><span class="divider">|</span>
         <a href="signup.html">회원가입</a><span class="divider">|</span>
-        <a href="index.html#contact">고객센터</a>
+        <a href="order-lookup.html">주문조회</a><span class="divider">|</span>
+        <a href="notice.html">고객센터</a>
       </nav>
     </div>
   </div>
@@ -51,50 +52,59 @@
     </div>
   </nav>
 
-  <section class="auth-section">
-    <div class="auth-card">
-      <h1>로그인</h1>
-      <p class="auth-sub">로그인 후 구매대행·배송대행 서비스를 이용하실 수 있습니다.</p>
-      <form onsubmit="return false;">
-        <label class="auth-label">아이디<input type="text" placeholder="아이디를 입력하세요" /></label>
-        <label class="auth-label">비밀번호<input type="password" placeholder="비밀번호를 입력하세요" /></label>
-        <label class="auth-check"><input type="checkbox" /> <span>아이디 저장</span></label>
-        <button type="submit" class="btn btn-primary btn-block">로그인</button>
-      </form>
-      <div class="auth-links">
-        <a href="#">아이디 / 비밀번호 찾기</a>
-        <span class="divider">|</span>
-        <a href="signup.html">회원가입</a>
-      </div>
-      <div class="auth-sns">
-        <p>SNS 계정으로 간편 로그인</p>
-        <div class="sns-buttons">
-          <button class="sns-btn sns-kakao">카카오</button>
-          <button class="sns-btn sns-naver">네이버</button>
-          <button class="sns-btn sns-google">구글</button>
-        </div>
-      </div>
-      <p class="form-note">* 현재는 화면(디자인)만 만들어진 상태입니다. 실제 로그인 기능은 추후 연동합니다.</p>
+  <section class="page-hero">
+    <div class="container">
+      <h1>취소 · 환불정책</h1>
+      <p>구매대행·배송대행 단계별 취소 및 환불 기준을 안내합니다.</p>
     </div>
   </section>
 
-  <footer class="site-footer" id="contact">
-    <div class="container footer-inner">
-      <div>
-        <p class="footer-logo">OSS <small>オッス</small></p>
-        <p class="footer-desc">일본 현지인 구매대행 배대지</p>
-      </div>
-      <div class="footer-contact">
-        <p><i data-lucide="mail" class="ico-inline"></i> 이메일: oss202604@gmail.com</p>
-        <p><i data-lucide="message-circle" class="ico-inline"></i> 카카오톡: @OSS (등록 예정)</p>
-        <p><i data-lucide="clock" class="ico-inline"></i> 상담시간: 평일 10:00 ~ 18:00 (일본시간)</p>
-      </div>
+  <section class="section">
+    <div class="container">
+      <div class="legal-body" id="legalBody"><p class="section-lead">불러오는 중...</p></div>
     </div>
-    <div class="footer-bottom"><div class="container">© 2026 OSS. All rights reserved.</div></div>
-  </footer>
+  </section>
+
+  <footer class="site-footer" id="contact"></footer>
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>lucide.createIcons();</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=3"></script>
   <script src="script.js?v=4"></script>
+  <script>
+    const SLUG = "refund";
+    const DEFAULT_BODY = `OSS(オッス)의 취소·환불 정책은 다음과 같습니다.
+
+1. 구매대행 취소
+- 회사가 현지에서 상품을 구매하기 전(결제 전 단계)에는 전액 취소·환불이 가능합니다.
+- 회사가 이미 현지 구매를 완료한 경우, 일본 현지 쇼핑몰의 반품 정책에 따라 취소가 제한될 수 있으며, 현지 반품 수수료가 발생할 수 있습니다.
+
+2. 배송대행 취소
+- 상품이 일본 센터에 입고되기 전에는 신청 취소가 가능합니다.
+- 입고 후에는 검수·보관·반송 비용이 발생할 수 있습니다.
+
+3. 환불 방법 및 기간
+- 환불은 결제 수단 또는 등록된 계좌로 진행되며, 확인 후 영업일 기준 3~7일 이내 처리됩니다.
+- 국제배송비, 현지 수수료, 결제 수수료 등 실비는 환불 금액에서 차감될 수 있습니다.
+
+4. 단순 변심·오배송
+- 상품 불량 또는 회사 귀책 오배송은 회사 부담으로 처리합니다.
+- 단순 변심에 의한 반품은 왕복 배송비 및 수수료가 이용자 부담입니다.
+
+5. 통관·세금
+- 통관 과정에서 발생하는 관세·부가세는 이용자 부담이며 환불 대상이 아닙니다.
+
+※ 본 정책은 사업자 정보 확정 후 정식 검토하여 보완됩니다.`;
+
+    (async function () {
+      const box = document.getElementById("legalBody");
+      let data = null;
+      try { if (window.OSS && window.OSS.getPage) data = await window.OSS.getPage(SLUG); } catch (e) {}
+      const body = (data && data.body) ? data.body : DEFAULT_BODY;
+      const esc = (s) => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      box.innerHTML = esc(body).replace(/\n/g, "<br>");
+    })();
+  </script>
 </body>
 </html>
