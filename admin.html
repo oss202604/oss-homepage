@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=3" />
-  <link rel="stylesheet" href="admin.css?v=6" />
+  <link rel="stylesheet" href="admin.css?v=7" />
 </head>
 <body class="admin-body">
   <!-- 상단 바 -->
@@ -66,6 +66,21 @@
       <!-- ===== 주문관리 (칸반) ===== -->
       <section class="admin-page" id="page-orders">
         <h2 class="admin-page-title">주문관리</h2>
+
+        <div class="dash-panel" id="bundlePanel" style="margin-bottom:22px;">
+          <h3>합배송 묶기 <span style="font-size:13px;font-weight:400;color:var(--muted);">(입고완료 주문을 같은 고객끼리 묶어 한 박스로)</span></h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th></th><th>주문번호</th><th>고객</th><th>상품</th><th>합배송요청</th><th>묶음</th></tr></thead>
+              <tbody id="bundleRows"></tbody>
+            </table>
+          </div>
+          <div class="set-actions">
+            <button class="btn btn-primary" id="doBundle">선택 주문 합배송으로 묶기</button>
+            <span class="save-ok" id="bundleMsg"></span>
+          </div>
+        </div>
+
         <p class="kanban-section-label">정상 흐름 — 카드를 끌어다 다음 단계로 옮기세요</p>
         <div class="kanban" id="kanbanNormal"></div>
         <p class="kanban-section-label" style="margin-top:20px;">예외 처리 — 취소·반품·사고 등은 이쪽으로</p>
@@ -216,8 +231,8 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=2"></script>
-  <script src="admin.js?v=3"></script>
+  <script src="supabase.js?v=3"></script>
+  <script src="admin.js?v=4"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

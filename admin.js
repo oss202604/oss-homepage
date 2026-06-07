@@ -58,6 +58,8 @@ function mapRow(row) {
   return {
     id: String(row.id),
     no: row.order_no || ("#" + row.id),
+    bundleId: row.bundle_id || null,
+    bundleRequested: !!row.bundle_requested,
     type: row.type,
     name: name,
     customer: row.applicant_name || "-",
@@ -110,6 +112,7 @@ function cardHtml(o) {
       <span class="kc-type ${o.type}">${o.type === "purchase" ? "구매" : "배송"}</span>
     </div>
     <div class="kc-name">${o.name}</div>
+    ${o.bundleId ? `<div class="kc-bundle">🔗 ${o.bundleId}</div>` : ""}
     <div class="kc-cust">👤 ${o.customer}</div>
     <div class="kc-amount">¥${(o.amount || 0).toLocaleString()}</div>
   </div>`;
@@ -126,7 +129,53 @@ function renderKanban() {
   document.getElementById("kanbanException").innerHTML = EXCEPTION.map((s) => colHtml(s, true)).join("");
   bindDnd();
   bindCardClick();
+  renderBundlePanel();
 }
+
+// ----- 합배송 묶기 패널 -----
+function renderBundlePanel() {
+  const tb = document.getElementById("bundleRows");
+  if (!tb) return;
+  const items = ORDERS.filter((o) => o.status === "입고완료");
+  if (!items.length) {
+    tb.innerHTML = `<tr><td colspan="6" class="empty">합배송 가능한(입고완료) 주문이 없습니다.</td></tr>`;
+    return;
+  }
+  // 합배송 요청한 것 먼저
+  items.sort((a, b) => (b.bundleRequested ? 1 : 0) - (a.bundleRequested ? 1 : 0));
+  tb.innerHTML = items.map((o) => `<tr>
+    <td><input type="checkbox" class="bundle-chk" data-id="${o.id}" data-cust="${o.customer}" style="width:16px;height:16px;"></td>
+    <td>${o.no}</td>
+    <td>${o.customer}</td>
+    <td>${o.name}</td>
+    <td>${o.bundleRequested ? '<span class="status-badge status-new">고객요청</span>' : "-"}</td>
+    <td>${o.bundleId ? "🔗 " + o.bundleId : "-"}</td>
+  </tr>`).join("");
+}
+function genBundleId() {
+  const d = new Date();
+  const s = String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+  return "BDL-" + s + "-" + Math.random().toString(36).slice(2, 5).toUpperCase();
+}
+document.getElementById("doBundle").addEventListener("click", async () => {
+  const checked = [...document.querySelectorAll(".bundle-chk:checked")];
+  const msg = document.getElementById("bundleMsg");
+  if (checked.length < 2) { alert("합배송할 주문을 2개 이상 선택해 주세요."); return; }
+  const custs = new Set(checked.map((c) => c.dataset.cust));
+  if (custs.size > 1) { alert("같은 고객의 주문끼리만 묶을 수 있어요."); return; }
+  const bundleId = genBundleId();
+  const ids = checked.map((c) => c.dataset.id);
+  try {
+    for (const id of ids) {
+      await window.OSS.updateApplication(id, { bundle_id: bundleId, status: "포장/측정", bundle_requested: false });
+      const o = ORDERS.find((x) => x.id === id);
+      if (o) { o.bundleId = bundleId; o.status = "포장/측정"; o.bundleRequested = false; o.raw.bundle_id = bundleId; }
+    }
+    renderKanban(); renderDashboard();
+    msg.textContent = `✓ ${ids.length}건 → ${bundleId} 합배송 묶음 완료`;
+    setTimeout(() => (msg.textContent = ""), 4000);
+  } catch (e) { alert("묶기 실패: " + (e.message || e)); }
+});
 
 // ----- 드래그앤드롭 -----
 let dragId = null;

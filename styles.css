@@ -331,6 +331,13 @@ p { word-break: keep-all; }
 .status-done { background: #d7f5e3; color: #16a34a; }
 .status-hold { background: #ffe1e6; color: #c01933; }
 
+/* ===== 합배송 신청 (주문조회) ===== */
+.bundle-req { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+.bundle-req h3 { font-size: 16px; color: var(--navy); margin-bottom: 8px; }
+.bundle-req-desc { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 12px; }
+.bundle-req textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit; font-size: 14px; background: #fbfcfe; margin-bottom: 12px; resize: vertical; }
+.bundle-req textarea:focus { outline: none; border-color: var(--blue); background: #fff; }
+
 /* ===== 이용안내 ===== */
 .guide-layout { display: grid; grid-template-columns: 220px 1fr; gap: 28px; align-items: start; }
 .guide-nav { display: flex; flex-direction: column; gap: 8px; position: sticky; top: 80px; }

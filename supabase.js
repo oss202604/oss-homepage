@@ -28,6 +28,12 @@ async function lookupOrder(orderNo, phone) {
   return data || [];
 }
 
+// ---- 비회원 합배송 신청 (주문번호 여러 개 + 전화) ----
+async function requestBundle(orderNos, phone) {
+  const { error } = await sb.rpc("request_bundle", { p_order_nos: orderNos, p_phone: phone.trim() });
+  if (error) throw error;
+}
+
 // ---- 관리자: 신청 목록 조회 ----
 async function fetchApplications() {
   const { data, error } = await sb
@@ -110,6 +116,7 @@ window.OSS = {
   sb,
   submitApplication,
   lookupOrder,
+  requestBundle,
   fetchApplications,
   updateApplicationStatus,
   updateApplication,
