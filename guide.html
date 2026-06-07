@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>공지사항 | OSS(オッス)</title>
+  <title>이용안내 | OSS(オッス)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=5" />
 </head>
 <body>
   <div class="utility-bar">
@@ -47,8 +47,9 @@
       <ul class="main-menu" id="mainMenu">
         <li><a href="order.html">구매대행 신청</a></li>
         <li><a href="delivery.html">배송대행 신청</a></li>
+        <li><a href="guide.html" class="active">이용가이드</a></li>
         <li><a href="order-lookup.html">주문조회</a></li>
-        <li><a href="notice.html" class="active">고객센터</a></li>
+        <li><a href="notice.html">고객센터</a></li>
       </ul>
       <button class="menu-toggle" id="menuToggle" aria-label="메뉴"><i data-lucide="menu"></i></button>
     </div>
@@ -56,15 +57,16 @@
 
   <section class="page-hero">
     <div class="container">
-      <h1>공지사항</h1>
-      <p>OSS의 새로운 소식과 이용 안내를 확인하세요.</p>
+      <h1>이용안내</h1>
+      <p>OSS 구매대행·배송대행 이용 방법과 안내를 확인하세요.</p>
     </div>
   </section>
 
   <section class="section">
-    <div class="container">
-      <div class="notice-list" id="noticeList">
-        <p class="section-lead">공지사항을 불러오는 중...</p>
+    <div class="container guide-layout">
+      <aside class="guide-nav" id="guideNav"></aside>
+      <div class="guide-content" id="guideContent">
+        <p class="section-lead">불러오는 중...</p>
       </div>
     </div>
   </section>
@@ -90,30 +92,38 @@
   <script src="supabase.js?v=2"></script>
   <script src="script.js"></script>
   <script>
+    const GUIDE_PAGES = [
+      { slug: "guide-how", title: "이용방법" },
+      { slug: "guide-purchase", title: "구매대행 이용안내" },
+      { slug: "guide-delivery", title: "배송대행 이용안내" },
+      { slug: "guide-customs", title: "통관·관세 안내" },
+      { slug: "guide-refund", title: "취소·환불·반품 안내" },
+    ];
     function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
     (async function () {
-      const wrap = document.getElementById("noticeList");
+      const nav = document.getElementById("guideNav");
+      const content = document.getElementById("guideContent");
+      let loaded = {};
       try {
-        const list = await window.OSS.fetchNotices();
-        if (!list.length) { wrap.innerHTML = '<p class="section-lead">등록된 공지사항이 없습니다.</p>'; return; }
-        wrap.innerHTML = list.map((n) => `
-          <div class="notice-item">
-            <button class="notice-head" type="button">
-              <span class="notice-title">${n.pinned ? '<span class="notice-pin">중요</span> ' : ''}${esc(n.title)}</span>
-              <span class="notice-date">${(n.created_at||"").slice(0,10)}</span>
-            </button>
-            <div class="notice-body" hidden>${esc(n.body).replace(/\n/g,"<br>")}</div>
-          </div>`).join("");
-        wrap.querySelectorAll(".notice-head").forEach((h) => {
-          h.addEventListener("click", () => {
-            const body = h.nextElementSibling;
-            body.hidden = !body.hidden;
-            h.classList.toggle("open", !body.hidden);
-          });
+        const all = await window.OSS.fetchPages();
+        const map = {}; all.forEach((p) => (map[p.slug] = p));
+        GUIDE_PAGES.forEach((g) => {
+          const p = map[g.slug];
+          loaded[g.slug] = p && p.body ? { title: p.title || g.title, body: p.body } : null;
         });
       } catch (e) {
-        wrap.innerHTML = '<p class="section-lead">공지사항을 불러오지 못했어요: ' + (e.message || e) + '</p>';
+        content.innerHTML = '<p class="section-lead">불러오지 못했어요: ' + (e.message || e) + '</p>'; return;
       }
+      const avail = GUIDE_PAGES.filter((g) => loaded[g.slug]);
+      if (!avail.length) { nav.innerHTML = ""; content.innerHTML = '<p class="section-lead">아직 등록된 안내가 없습니다. 곧 업데이트됩니다.</p>'; return; }
+      nav.innerHTML = avail.map((g, i) => `<button class="guide-nav-btn${i===0?' active':''}" data-slug="${g.slug}">${esc(loaded[g.slug].title)}</button>`).join("");
+      function show(slug) {
+        const d = loaded[slug];
+        content.innerHTML = `<h2 class="guide-title">${esc(d.title)}</h2><div class="guide-body">${esc(d.body).replace(/\n/g,"<br>")}</div>`;
+        nav.querySelectorAll(".guide-nav-btn").forEach((b) => b.classList.toggle("active", b.dataset.slug === slug));
+      }
+      nav.querySelectorAll(".guide-nav-btn").forEach((b) => b.addEventListener("click", () => show(b.dataset.slug)));
+      show(avail[0].slug);
     })();
   </script>
 </body>

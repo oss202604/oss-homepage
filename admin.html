@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=3" />
-  <link rel="stylesheet" href="admin.css?v=5" />
+  <link rel="stylesheet" href="admin.css?v=6" />
 </head>
 <body class="admin-body">
   <!-- 상단 바 -->
@@ -156,6 +156,29 @@
             <span id="rcOut">-</span>
           </div>
         </div>
+
+        <div class="dash-panel" style="margin-top:24px;">
+          <h3>이용안내 페이지 편집</h3>
+          <p class="form-note" style="text-align:left;margin:0 0 16px;">고객 이용가이드 페이지에 표시됩니다. 항목을 선택해 내용을 작성/수정하세요.</p>
+          <div class="set-grid">
+            <label>편집할 항목
+              <select id="pageSlug">
+                <option value="guide-how">이용방법 (전체 흐름)</option>
+                <option value="guide-purchase">구매대행 이용안내</option>
+                <option value="guide-delivery">배송대행 이용안내</option>
+                <option value="guide-customs">통관·관세 안내</option>
+                <option value="guide-refund">취소·환불·반품 안내</option>
+              </select>
+            </label>
+            <label>제목<input id="pageTitle" placeholder="예: 구매대행 이용안내" /></label>
+          </div>
+          <textarea id="pageBody" rows="8" placeholder="안내 내용을 입력하세요. 줄바꿈은 그대로 표시됩니다." style="width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fbfcfe;"></textarea>
+          <div class="set-actions" style="margin-top:12px;">
+            <button class="btn btn-primary" id="savePage">이 항목 저장</button>
+            <a class="btn btn-small" href="guide.html" target="_blank">고객 페이지 미리보기 ↗</a>
+            <span class="save-ok" id="pageSaved"></span>
+          </div>
+        </div>
       </section>
     </main>
   </div>
@@ -193,8 +216,8 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js"></script>
-  <script src="admin.js?v=2"></script>
+  <script src="supabase.js?v=2"></script>
+  <script src="admin.js?v=3"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

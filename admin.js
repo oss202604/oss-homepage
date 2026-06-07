@@ -372,7 +372,36 @@ document.getElementById("rcCalc").addEventListener("click", () => {
   document.getElementById("rcOut").textContent = fee ? "¥" + fee.toLocaleString() : "요율 없음";
 });
 
+// ----- 설정: 이용안내 페이지 편집 -----
+const PAGE_TITLES = {
+  "guide-how": "이용방법",
+  "guide-purchase": "구매대행 이용안내",
+  "guide-delivery": "배송대행 이용안내",
+  "guide-customs": "통관·관세 안내",
+  "guide-refund": "취소·환불·반품 안내",
+};
+async function loadPageEditor() {
+  const slug = document.getElementById("pageSlug").value;
+  try {
+    const p = await window.OSS.getPage(slug);
+    document.getElementById("pageTitle").value = (p && p.title) || PAGE_TITLES[slug] || "";
+    document.getElementById("pageBody").value = (p && p.body) || "";
+  } catch (e) { console.error(e); }
+}
+document.getElementById("pageSlug").addEventListener("change", loadPageEditor);
+document.getElementById("savePage").addEventListener("click", async () => {
+  const slug = document.getElementById("pageSlug").value;
+  const title = document.getElementById("pageTitle").value.trim() || PAGE_TITLES[slug];
+  const body = document.getElementById("pageBody").value;
+  const ok = document.getElementById("pageSaved");
+  try {
+    await window.OSS.savePage(slug, title, body);
+    ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500);
+  } catch (e) { alert("저장 실패: " + (e.message || e)); }
+});
+
 // 시작
 init();
 loadCenter();
 loadRates();
+loadPageEditor();

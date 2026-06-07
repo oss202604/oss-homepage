@@ -82,6 +82,11 @@ async function getPage(slug) {
   if (error) throw error;
   return data;
 }
+async function fetchPages() {
+  const { data, error } = await sb.from("pages").select("*");
+  if (error) throw error;
+  return data || [];
+}
 async function savePage(slug, title, body) {
   const { error } = await sb.from("pages").upsert({ slug, title, body, updated_at: new Date().toISOString() });
   if (error) throw error;
@@ -114,6 +119,7 @@ window.OSS = {
   getSetting,
   saveSetting,
   getPage,
+  fetchPages,
   savePage,
   adminSignIn,
   adminGetSession,
