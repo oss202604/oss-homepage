@@ -365,6 +365,10 @@ p { word-break: keep-all; }
   .mypage-layout { grid-template-columns: 1fr; }
   .form-row-3 { grid-template-columns: 1fr; }
   .amount-grid { grid-template-columns: 1fr 1fr; }
+  .guide-layout { grid-template-columns: 1fr; }
+  .guide-nav { position: static; flex-direction: row; flex-wrap: wrap; }
+  .guide-nav-btn { flex: 1 1 auto; text-align: center; }
+  .guide-content { padding: 22px; }
   .header-inner { flex-wrap: wrap; gap: 16px; }
   .search-box { order: 3; max-width: none; flex-basis: 100%; }
   .quick-grid { grid-template-columns: 1fr 1fr; }
