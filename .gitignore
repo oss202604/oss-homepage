@@ -1,6 +1,7 @@
-# 컴퓨터마다 달라지는 로컬 설정 / 개발용 미리보기 설정 (동기화 제외)
-.claude/
 
 # OS 자동 생성 파일
-Thumbs.db
+# 컴퓨터마다 달라지는 로컬 설정 / 개발용 미리보기 설정 (동기화 제외)
 .DS_Store
+.claude/
+SATORI-REFERENCE.md
+Thumbs.db
