@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>시안 A · 미니멀 화이트</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans KR',sans-serif;color:#17181c;background:#fff;-webkit-font-smoothing:antialiased;}
+  .wrap{width:min(1120px,100% - 40px);margin:0 auto;}
+  a{text-decoration:none;color:inherit;}
+  /* header */
+  header{position:sticky;top:0;background:rgba(255,255,255,.8);backdrop-filter:blur(10px);border-bottom:1px solid #eee;z-index:10;}
+  .hd{display:flex;align-items:center;justify-content:space-between;height:68px;}
+  .logo{font-size:24px;font-weight:900;letter-spacing:-1px;}
+  .logo b{color:#ff6b2c;}
+  nav.menu{display:flex;gap:30px;font-size:15px;font-weight:500;color:#555;}
+  nav.menu a:hover{color:#ff6b2c;}
+  .hd-cta{background:#17181c;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;}
+  /* hero */
+  .hero{padding:110px 0 90px;text-align:center;}
+  .badge{display:inline-block;background:#fff3ec;color:#ff6b2c;font-weight:700;font-size:14px;padding:8px 16px;border-radius:999px;margin-bottom:28px;}
+  .hero h1{font-size:60px;font-weight:900;line-height:1.18;letter-spacing:-2px;margin-bottom:22px;}
+  .hero h1 span{color:#ff6b2c;}
+  .hero p{font-size:18px;color:#868b94;line-height:1.6;margin-bottom:36px;}
+  .btns{display:flex;gap:12px;justify-content:center;}
+  .btn{padding:16px 30px;border-radius:12px;font-size:16px;font-weight:700;}
+  .btn-pri{background:#ff6b2c;color:#fff;}
+  .btn-ghost{background:#f4f5f7;color:#17181c;}
+  /* features */
+  .feats{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;padding:40px 0 100px;}
+  .feat{text-align:center;padding:10px;}
+  .feat .ic{width:56px;height:56px;border-radius:16px;background:#fff3ec;color:#ff6b2c;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;}
+  .feat h3{font-size:18px;margin-bottom:8px;}
+  .feat p{font-size:14px;color:#868b94;line-height:1.6;}
+  @media(max-width:760px){.hd .menu{display:none;}.hero h1{font-size:38px;}.feats{grid-template-columns:1fr;}}
+</style></head>
+<body>
+<header><div class="wrap hd">
+  <div class="logo">OSS<b>.</b></div>
+  <nav class="menu"><a>구매대행</a><a>배송대행</a><a>이용가이드</a><a>고객센터</a></nav>
+  <a class="hd-cta">신청하기</a>
+</div></header>
+
+<section class="hero"><div class="wrap">
+  <span class="badge">일본 현지인이 직접 운영</span>
+  <h1>일본의 모든 것,<br/>가장 <span>간편하게</span></h1>
+  <p>메루카리·라쿠텐·야후옥션까지. 구매부터 검수·배송을 OSS가 한 번에 처리해 드려요.</p>
+  <div class="btns"><a class="btn btn-pri">구매대행 신청</a><a class="btn btn-ghost">배송대행 신청</a></div>
+</div></section>
+
+<section class="wrap"><div class="feats">
+  <div class="feat"><span class="ic"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h20l1 5"/><path d="M4 9v14h18V9"/><path d="M9 13h10"/></svg></span><h3>현지 직접 구매·검수</h3><p>일본 현지에서 직접 구매하고 꼼꼼히 검수해 안전해요.</p></div>
+  <div class="feat"><span class="ic"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h7v16H3V8h11z"/><path d="M3 12h18"/></svg></span><h3>합배송으로 절약</h3><p>여러 주문을 한 박스로 묶어 배송비를 아껴드려요.</p></div>
+  <div class="feat"><span class="ic"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="14" r="11"/><path d="M14 8v6l4 2"/></svg></span><h3>실시간 진행 조회</h3><p>내 주문이 지금 어디 있는지 언제든 확인하세요.</p></div>
+</div></section>
+</body></html>

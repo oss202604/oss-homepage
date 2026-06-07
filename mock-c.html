@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>시안 C · 볼드 오렌지</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans KR',sans-serif;color:#1a1a1a;background:#fff;-webkit-font-smoothing:antialiased;}
+  .wrap{width:min(1120px,100% - 40px);margin:0 auto;}
+  a{text-decoration:none;color:inherit;}
+  header{background:#fff;}
+  .hd{display:flex;align-items:center;justify-content:space-between;height:70px;}
+  .logo{font-size:24px;font-weight:900;letter-spacing:-1px;}.logo b{color:#ff6a18;}
+  nav.menu{display:flex;gap:28px;font-size:15px;font-weight:600;color:#444;}
+  .hd-cta{border:2px solid #1a1a1a;padding:9px 18px;border-radius:999px;font-size:14px;font-weight:800;}
+  /* hero bold orange */
+  .hero{background:linear-gradient(135deg,#ff7a1a,#ff5a00);color:#fff;border-radius:0 0 40px 40px;}
+  .hero .in{display:flex;align-items:center;justify-content:space-between;padding:80px 0;gap:30px;}
+  .badge{display:inline-block;background:rgba(255,255,255,.22);font-weight:700;font-size:14px;padding:8px 16px;border-radius:999px;margin-bottom:22px;}
+  .hero h1{font-size:54px;font-weight:900;line-height:1.15;letter-spacing:-2px;margin-bottom:18px;}
+  .hero p{font-size:18px;opacity:.92;margin-bottom:30px;line-height:1.6;}
+  .btn{display:inline-block;padding:17px 32px;border-radius:14px;font-size:17px;font-weight:800;background:#fff;color:#ff5a00;box-shadow:0 10px 24px rgba(0,0,0,.18);}
+  .mascot{width:240px;height:240px;flex-shrink:0;}
+  .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:60px 0;}
+  .qc{background:#fff;border:1px solid #eee;border-radius:18px;padding:28px 20px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.05);transition:.2s;}
+  .qc:hover{transform:translateY(-4px);border-color:#ff6a18;}
+  .qc .ic{width:56px;height:56px;border-radius:50%;background:#fff1e6;color:#ff6a18;display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;}
+  .qc h3{font-size:16px;}
+  @media(max-width:760px){.menu{display:none;}.hero .in{flex-direction:column;text-align:center;}.hero h1{font-size:36px;}.quick{grid-template-columns:1fr 1fr;}}
+</style></head>
+<body>
+<header><div class="wrap hd">
+  <div class="logo">OSS<b>.</b></div>
+  <nav class="menu"><a>구매대행</a><a>배송대행</a><a>이용가이드</a><a>주문조회</a><a>고객센터</a></nav>
+  <a class="hd-cta">로그인</a>
+</div></header>
+
+<section class="hero"><div class="wrap in">
+  <div>
+    <span class="badge">일본 현지인이 직접 운영</span>
+    <h1>일본직구,<br/>고민 없이 OSS</h1>
+    <p>링크만 보내주세요. 구매·검수·배송까지<br/>OSS가 전부 책임집니다.</p>
+    <a class="btn">지금 신청하기 →</a>
+  </div>
+  <svg class="mascot" viewBox="0 0 220 220" fill="none">
+    <ellipse cx="110" cy="198" rx="64" ry="10" fill="rgba(0,0,0,.12)"/>
+    <rect x="48" y="80" width="124" height="104" rx="18" fill="#fff" stroke="#1a1a1a" stroke-width="5"/>
+    <rect x="40" y="60" width="140" height="30" rx="11" fill="#fff" stroke="#1a1a1a" stroke-width="5"/>
+    <rect x="98" y="62" width="24" height="26" rx="2" fill="#ffc83d"/>
+    <circle cx="92" cy="122" r="7.5" fill="#1a1a1a"/><circle cx="128" cy="122" r="7.5" fill="#1a1a1a"/>
+    <circle cx="79" cy="137" r="6" fill="#ffb3c1"/><circle cx="141" cy="137" r="6" fill="#ffb3c1"/>
+    <path d="M100 136 Q110 148 120 136" stroke="#1a1a1a" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M150 44 l22 -8 -8 22 -5 -9 -9 -5z" fill="#ff5a00"/>
+  </svg>
+</div></section>
+
+<div class="wrap"><div class="quick">
+  <a class="qc"><span class="ic"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="20" height="18" rx="2"/><path d="M3 9h20"/></svg></span><h3>구매대행 신청</h3></a>
+  <a class="qc"><span class="ic"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3l9 5v10l-9 5-9-5V8z"/></svg></span><h3>배송대행 신청</h3></a>
+  <a class="qc"><span class="ic"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="16" height="20" rx="2"/><path d="M9 7h8M9 11h8"/></svg></span><h3>예상비용 계산</h3></a>
+  <a class="qc"><span class="ic"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13" cy="13" r="10"/><path d="M13 8v5l3 2"/></svg></span><h3>주문 조회</h3></a>
+</div></div>
+</body></html>
