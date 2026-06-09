@@ -244,6 +244,20 @@ p { word-break: keep-all; }
 .review-author { font-size: 14px; font-weight: 700; color: var(--muted); }
 @media (max-width: 860px) { .review-grid { grid-template-columns: 1fr; } }
 
+/* FAQ 탭 */
+.faq-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+.faq-tab { padding: 9px 18px; border: 1px solid var(--line); background: #fff; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; }
+.faq-tab:hover { border-color: var(--blue); color: var(--blue); }
+.faq-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.faq-cat { display: inline-block; background: #fff3ec; color: var(--blue); font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-right: 8px; }
+
+/* 1:1 문의 폼 */
+.contact-form { max-width: 640px; margin: 0 auto; background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); padding: 34px; }
+.contact-form label { display: block; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 18px; }
+.contact-form input, .contact-form select, .contact-form textarea { width: 100%; margin-top: 7px; padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; font-family: inherit; font-size: 15px; background: #fbfaf8; }
+.contact-form input:focus, .contact-form select:focus, .contact-form textarea:focus { outline: none; border-color: var(--blue); background: #fff; }
+.contact-note { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+
 /* ===== 오른쪽 고정 퀵메뉴 ===== */
 .quick-menu { position: fixed; top: 50%; right: 18px; transform: translateY(-50%); z-index: 40; background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); width: 76px; }
 .qm-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 6px; color: var(--text); font-size: 11.5px; font-weight: 500; border-bottom: 1px solid var(--line); text-align: center; transition: .15s; }

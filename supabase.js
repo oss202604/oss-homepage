@@ -62,6 +62,26 @@ async function deleteApplication(id) {
   if (error) throw error;
 }
 
+// ---- 1:1 문의 ----
+async function submitInquiry(payload) {
+  const { error } = await sb.from("inquiries").insert([payload]);
+  if (error) throw error;
+  return true;
+}
+async function fetchInquiries() {
+  const { data, error } = await sb.from("inquiries").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+async function answerInquiry(id, answer) {
+  const { error } = await sb.from("inquiries").update({ answer, status: "답변완료", answered_at: new Date().toISOString() }).eq("id", id);
+  if (error) throw error;
+}
+async function deleteInquiry(id) {
+  const { error } = await sb.from("inquiries").delete().eq("id", id);
+  if (error) throw error;
+}
+
 // ---- 공지사항 ----
 async function fetchNotices() {
   const { data, error } = await sb.from("notices").select("*").order("pinned", { ascending: false }).order("created_at", { ascending: false });
@@ -127,6 +147,10 @@ window.OSS = {
   updateApplicationStatus,
   updateApplication,
   deleteApplication,
+  submitInquiry,
+  fetchInquiries,
+  answerInquiry,
+  deleteInquiry,
   fetchNotices,
   createNotice,
   deleteNotice,

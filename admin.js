@@ -416,11 +416,7 @@ function renderDashboard() {
     ? recent.map((o) => `<tr><td>${o.no}</td><td>${o.type === "purchase" ? "구매" : "배송"}</td><td>${o.customer}</td><td><span class="status-badge ${badgeClass(o.status)}">${labelOf(o.status)}</span></td></tr>`).join("")
     : `<tr><td colspan="4" class="empty">아직 신청이 없습니다.</td></tr>`;
 
-  // 문의는 2단계(게시판) 연동 전 안내
-  const inqEmpty = `<tr><td colspan="3" class="empty">문의 기능은 2단계에서 연동됩니다.</td></tr>`;
-  document.getElementById("recentInquiries").innerHTML = inqEmpty;
-  const inqEmpty2 = `<tr><td colspan="4" class="empty">문의 기능은 2단계에서 연동됩니다.</td></tr>`;
-  document.getElementById("inquiryRows").innerHTML = inqEmpty2;
+  // 문의 목록은 loadInquiries()가 채웁니다.
 }
 function badgeClass(s) {
   if (s === "신규접수") return "status-new";
@@ -610,6 +606,83 @@ document.getElementById("saveReviews").addEventListener("click", async () => {
   } catch (e) { alert("저장 실패: " + (e.message || e)); }
 });
 
+// ----- 설정: FAQ -----
+let FAQS = [];
+const FAQ_CATS = ["배송/통관", "결제", "취소/환불", "회원관리", "기타"];
+function renderFaqRows() {
+  const box = document.getElementById("faqRows");
+  if (!box) return;
+  box.innerHTML = FAQS.map((f, i) => `<div class="review-edit-row" style="align-items:flex-start;">
+    <select data-i="${i}" data-f="category" style="width:120px;">${FAQ_CATS.map((c) => `<option ${f.category === c ? "selected" : ""}>${c}</option>`).join("")}</select>
+    <div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:6px;">
+      <input placeholder="질문" value="${(f.q || "").replace(/"/g, "&quot;")}" data-i="${i}" data-f="q" />
+      <textarea placeholder="답변" data-i="${i}" data-f="a" rows="2" style="padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13px;background:#fbfcfe;">${(f.a || "").replace(/</g, "&lt;")}</textarea>
+    </div>
+    <button class="btn btn-small remove-product" data-del="${i}">삭제</button>
+  </div>`).join("") || '<p class="form-note" style="text-align:left;">등록된 FAQ가 없습니다.</p>';
+  box.querySelectorAll("input,select,textarea").forEach((el) => el.addEventListener("input", () => { FAQS[el.dataset.i][el.dataset.f] = el.value; }));
+  box.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", () => { FAQS.splice(Number(b.dataset.del), 1); renderFaqRows(); }));
+}
+async function loadFaq() {
+  try { const f = await window.OSS.getSetting("faq"); FAQS = Array.isArray(f) ? f : []; } catch (e) { FAQS = []; }
+  renderFaqRows();
+}
+document.getElementById("addFaq")?.addEventListener("click", () => { FAQS.push({ category: "배송/통관", q: "", a: "" }); renderFaqRows(); });
+document.getElementById("saveFaq")?.addEventListener("click", async () => {
+  const ok = document.getElementById("faqSaved");
+  try { await window.OSS.saveSetting("faq", FAQS.filter((f) => (f.q || "").trim())); ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500); }
+  catch (e) { alert("저장 실패: " + (e.message || e)); }
+});
+
+// ----- 1:1 문의 관리 -----
+let INQUIRIES = [];
+function inqBadge(s) { return s === "답변완료" ? "status-done" : (s === "확인중" ? "status-progress" : "status-new"); }
+async function loadInquiries() {
+  const tbody = document.getElementById("inquiryRows");
+  const recent = document.getElementById("recentInquiries");
+  try {
+    INQUIRIES = await window.OSS.fetchInquiries();
+  } catch (e) {
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="empty">불러오기 실패(문의 테이블 미생성?): ${e.message || e}</td></tr>`;
+    return;
+  }
+  const esc = (s) => (s || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  if (tbody) {
+    tbody.innerHTML = INQUIRIES.length ? INQUIRIES.map((q) => `
+      <tr class="inq-head-row" data-id="${q.id}" style="cursor:pointer;">
+        <td>${esc(q.category)}</td><td>${esc(q.title)}</td><td>${esc(q.name)}</td>
+        <td>${(q.created_at || "").slice(0, 10)}</td>
+        <td><span class="status-badge ${inqBadge(q.status)}">${esc(q.status || "답변대기")}</span></td>
+      </tr>
+      <tr class="inq-detail-row" data-detail="${q.id}" hidden><td colspan="5" style="background:#fbfaf8;">
+        <p style="margin:0 0 8px;"><b>연락처</b> ${esc(q.phone)} ${q.order_no ? " · <b>주문</b> " + esc(q.order_no) : ""}</p>
+        <p style="white-space:pre-wrap;margin:0 0 12px;">${esc(q.body)}</p>
+        <textarea id="ans-${q.id}" rows="3" placeholder="답변 내용" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;">${esc(q.answer)}</textarea>
+        <div class="set-actions" style="margin-top:8px;">
+          <button class="btn btn-primary btn-small" data-ans="${q.id}">답변 저장</button>
+          <button class="btn btn-small remove-product" data-delinq="${q.id}">삭제</button>
+        </div>
+      </td></tr>`).join("") : `<tr><td colspan="5" class="empty">접수된 문의가 없습니다.</td></tr>`;
+    tbody.querySelectorAll(".inq-head-row").forEach((r) => r.addEventListener("click", () => {
+      const d = tbody.querySelector(`[data-detail="${r.dataset.id}"]`); if (d) d.hidden = !d.hidden;
+    }));
+    tbody.querySelectorAll("[data-ans]").forEach((b) => b.addEventListener("click", async () => {
+      const id = b.dataset.ans; const ans = document.getElementById("ans-" + id).value.trim();
+      if (!ans) { alert("답변 내용을 입력하세요."); return; }
+      try { await window.OSS.answerInquiry(id, ans); alert("답변이 저장되었습니다. (고객에게는 연락처로 안내해 주세요)"); loadInquiries(); }
+      catch (e) { alert("저장 실패: " + (e.message || e)); }
+    }));
+    tbody.querySelectorAll("[data-delinq]").forEach((b) => b.addEventListener("click", async () => {
+      if (!confirm("이 문의를 삭제할까요?")) return;
+      try { await window.OSS.deleteInquiry(b.dataset.delinq); loadInquiries(); } catch (e) { alert("삭제 실패: " + (e.message || e)); }
+    }));
+  }
+  if (recent) {
+    const top = INQUIRIES.slice(0, 5);
+    recent.innerHTML = top.length ? top.map((q) => `<tr><td>${esc(q.title)}</td><td>${esc(q.name)}</td><td><span class="status-badge ${inqBadge(q.status)}">${esc(q.status || "답변대기")}</span></td></tr>`).join("") : `<tr><td colspan="3" class="empty">접수된 문의가 없습니다.</td></tr>`;
+  }
+}
+
 // 시작
 init();
 loadCenter();
@@ -617,3 +690,5 @@ loadRates();
 loadPageEditor();
 loadFx();
 loadReviews();
+loadFaq();
+loadInquiries();

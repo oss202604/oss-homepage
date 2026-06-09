@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자주 묻는 질문 (FAQ) | OSS(オッス)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=14" />
+</head>
+<body>
+  <div class="utility-bar">
+    <div class="container utility-inner">
+      <span class="utility-left">일본 현지인이 직접 운영하는 구매대행 · 배송대행지</span>
+      <nav class="utility-right">
+        <a href="login.html">로그인</a><span class="divider">|</span>
+        <a href="signup.html">회원가입</a><span class="divider">|</span>
+        <a href="order-lookup.html">주문조회</a><span class="divider">|</span>
+        <a href="notice.html">고객센터</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-tag">Simply Trusted!</span>
+        <span class="logo-name">OSS<span class="logo-dot">.</span></span>
+        <span class="logo-jp">オッス</span>
+      </a>
+      <form class="search-box" onsubmit="return false;">
+        <select class="search-cat"><option>전체 검색</option><option>메루카리</option><option>라쿠텐</option><option>야후옥션</option><option>아마존JP</option></select>
+        <input type="text" placeholder="상품명 또는 상품 링크를 입력하세요." />
+        <button type="submit" aria-label="검색"><i data-lucide="search"></i></button>
+      </form>
+    </div>
+  </header>
+
+  <nav class="main-nav">
+    <div class="container main-nav-inner">
+      <button class="cat-btn"><i data-lucide="menu" class="ico-inline"></i> 전체 서비스</button>
+      <ul class="main-menu" id="mainMenu">
+        <li><a href="order.html">구매대행 신청 <span class="nav-hot">HOT</span></a></li>
+        <li><a href="delivery.html">배송대행 신청 <span class="nav-hot">HOT</span></a></li>
+        <li><a href="guide.html">이용가이드</a></li>
+        <li><a href="index.html#fee">예상비용</a></li>
+        <li><a href="notice.html">공지사항</a></li>
+        <li><a href="order-lookup.html">주문조회</a></li>
+      </ul>
+      <button class="menu-toggle" id="menuToggle" aria-label="메뉴"><i data-lucide="menu"></i></button>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>자주 묻는 질문</h1>
+      <p>궁금한 점을 빠르게 확인하세요. 더 필요하면 1:1 문의를 이용해 주세요.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="faq-tabs" id="faqTabs"></div>
+      <div class="notice-list" id="faqList"><p class="section-lead">불러오는 중...</p></div>
+      <p class="section-lead" style="text-align:center;margin-top:30px;">원하는 답이 없으신가요? <a href="contact.html" style="color:var(--blue);font-weight:700;">1:1 문의하기 →</a></p>
+    </div>
+  </section>
+
+  <footer class="site-footer" id="contact"></footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=4"></script>
+  <script src="script.js?v=5"></script>
+  <script>
+    const DEFAULT_FAQ = [
+      { category: "배송/통관", q: "배송은 얼마나 걸리나요?", a: "입고·검수·결제 완료 후 항공 기준 평균 3~5일 내 발송되며, 통관 상황에 따라 달라질 수 있습니다." },
+      { category: "배송/통관", q: "개인통관고유부호가 꼭 필요한가요?", a: "네, 해외직구 통관에는 개인통관고유부호가 필요합니다. 관세청 유니패스에서 무료로 발급받을 수 있어요." },
+      { category: "결제", q: "결제는 어떻게 하나요?", a: "현재는 견적 안내 후 계좌이체로 진행됩니다. (간편결제는 추후 도입 예정)" },
+      { category: "취소/환불", q: "주문을 취소할 수 있나요?", a: "현지에서 상품을 구매하기 전에는 취소가 가능합니다. 구매 완료 후에는 현지 쇼핑몰 정책에 따라 제한될 수 있어요." },
+      { category: "기타", q: "여러 쇼핑몰 상품을 한 번에 받을 수 있나요?", a: "네, 합배송 신청으로 여러 주문을 한 박스로 묶어 배송비를 절약할 수 있습니다." },
+    ];
+    const esc = (s) => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    (async function () {
+      let list = DEFAULT_FAQ;
+      try {
+        const f = await window.OSS.getSetting("faq");
+        if (Array.isArray(f) && f.length) list = f;
+      } catch (e) {}
+      const cats = ["전체", ...Array.from(new Set(list.map((x) => x.category || "기타")))];
+      const tabs = document.getElementById("faqTabs");
+      const box = document.getElementById("faqList");
+      function render(cat) {
+        const items = cat === "전체" ? list : list.filter((x) => (x.category || "기타") === cat);
+        box.innerHTML = items.length ? items.map((x) => `
+          <div class="notice-item">
+            <button class="notice-head" type="button">
+              <span class="notice-title"><span class="faq-cat">${esc(x.category || "기타")}</span> ${esc(x.q)}</span>
+            </button>
+            <div class="notice-body" hidden>${esc(x.a).replace(/\n/g, "<br>")}</div>
+          </div>`).join("") : '<p class="section-lead">등록된 질문이 없습니다.</p>';
+        box.querySelectorAll(".notice-head").forEach((h) => h.addEventListener("click", () => {
+          const b = h.nextElementSibling; b.hidden = !b.hidden; h.classList.toggle("open", !b.hidden);
+        }));
+      }
+      tabs.innerHTML = cats.map((c, i) => `<button class="faq-tab${i === 0 ? " active" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+      tabs.querySelectorAll(".faq-tab").forEach((b) => b.addEventListener("click", () => {
+        tabs.querySelectorAll(".faq-tab").forEach((x) => x.classList.remove("active"));
+        b.classList.add("active"); render(b.dataset.cat);
+      }));
+      render("전체");
+    })();
+  </script>
+</body>
+</html>

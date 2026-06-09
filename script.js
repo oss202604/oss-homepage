@@ -72,7 +72,8 @@ if (menuToggle && mainMenu) {
           '<a href="order.html">구매대행 신청</a>' +
           '<a href="delivery.html">배송대행 신청</a>' +
           '<a href="order-lookup.html">주문조회</a>' +
-          '<a href="guide.html">이용가이드</a>' +
+          '<a href="faq.html">자주 묻는 질문(FAQ)</a>' +
+          '<a href="contact.html">1:1 문의</a>' +
         '</div>' +
       '</div>' +
       '<div class="footer-bottom"><div class="container footer-bottom-inner">' +
@@ -81,7 +82,9 @@ if (menuToggle && mainMenu) {
           '<a href="terms.html">이용약관</a>' +
           '<a href="privacy.html">개인정보처리방침</a>' +
           '<a href="refund.html">취소·환불정책</a>' +
-          '<a href="notice.html">고객센터</a>' +
+          '<a href="notice.html">공지사항</a>' +
+          '<a href="faq.html">FAQ</a>' +
+          '<a href="contact.html">1:1 문의</a>' +
         '</nav>' +
         '<span class="footer-copy">© 2026 OSS. All rights reserved.</span>' +
       '</div></div>';
