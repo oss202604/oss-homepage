@@ -6,7 +6,7 @@
   <title>OSS 관리자</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=15" />
+  <link rel="stylesheet" href="styles.css?v=16" />
   <link rel="stylesheet" href="admin.css?v=10" />
 </head>
 <body class="admin-body">
@@ -174,6 +174,13 @@
           <div class="set-actions"><button class="btn btn-primary" id="saveFx">환율 저장</button><span class="save-ok" id="fxSaved"></span></div>
         </div>
 
+        <div class="dash-panel" style="margin-bottom:24px;">
+          <h3>상단 띠배너 문구</h3>
+          <p class="form-note" style="text-align:left;margin:0 0 12px;">모든 페이지 맨 위 띠에 표시됩니다. 비워두면 최신 공지가 자동으로 표시돼요. (예: 14시 전 입고분 당일 출고 / 설 연휴 배송 안내 / 이벤트)</p>
+          <input id="setTopbar" placeholder="예: 14시 전 입고분 당일 출고 / 이벤트 안내" style="width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fbfcfe;" />
+          <div class="set-actions" style="margin-top:12px;"><button class="btn btn-primary" id="saveTopbar">띠배너 저장</button><span class="save-ok" id="topbarSaved"></span></div>
+        </div>
+
         <div class="dash-panel">
           <h3>배송비 요율표 (무게 이하 → 배송비)</h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">고객 예상비용·관리자 입고계산에 자동 반영됩니다. 행을 수정/추가하세요. 단위: 엔(¥)</p>
@@ -312,7 +319,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=5"></script>
-  <script src="admin.js?v=7"></script>
+  <script src="admin.js?v=8"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

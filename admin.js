@@ -606,6 +606,16 @@ document.getElementById("saveReviews").addEventListener("click", async () => {
   } catch (e) { alert("저장 실패: " + (e.message || e)); }
 });
 
+// ----- 설정: 상단 띠배너 문구 -----
+async function loadTopbar() {
+  try { const v = await window.OSS.getSetting("topbar"); const el = document.getElementById("setTopbar"); if (el) el.value = (typeof v === "string" ? v : (v && v.text)) || ""; } catch (e) {}
+}
+document.getElementById("saveTopbar")?.addEventListener("click", async () => {
+  const ok = document.getElementById("topbarSaved");
+  try { await window.OSS.saveSetting("topbar", document.getElementById("setTopbar").value.trim()); ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500); }
+  catch (e) { alert("저장 실패: " + (e.message || e)); }
+});
+
 // ----- 설정: FAQ -----
 let FAQS = [];
 const FAQ_CATS = ["배송/통관", "결제", "취소/환불", "회원관리", "기타"];
@@ -692,3 +702,4 @@ loadFx();
 loadReviews();
 loadFaq();
 loadInquiries();
+loadTopbar();

@@ -497,6 +497,7 @@ if (form && modal) {
     }
     modal.hidden = false;
     form.reset();
+    try { localStorage.removeItem("oss_draft_" + (document.querySelector('[name="productOrderNo[]"]') ? "delivery" : "order")); } catch (e2) {}
     if (typeof recalcSubtotal === "function") recalcSubtotal();
   });
 
@@ -611,6 +612,73 @@ if (form && modal) {
   if (window.OSS && window.OSS.getSetting) {
     window.OSS.getSetting("reviews").then((r) => {
       if (Array.isArray(r) && r.length) render(r);
+    }).catch(() => {});
+  }
+})();
+
+// ===== 신청서 자동 임시저장 (구매/배송) =====
+(function draftAutosave() {
+  const form = document.getElementById("orderForm");
+  const productList = document.getElementById("productList");
+  const addBtn = document.getElementById("addProduct");
+  if (!form || !productList) return;
+  const KEY = "oss_draft_" + (document.querySelector('[name="productOrderNo[]"]') ? "delivery" : "order");
+
+  // 복구
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved && saved.products && saved.products.length) {
+      let guard = 0;
+      while (productList.querySelectorAll(".product-item").length < saved.products.length && guard < 50) { if (addBtn) addBtn.click(); guard++; }
+      const rows = productList.querySelectorAll(".product-item");
+      saved.products.forEach((p, i) => {
+        const r = rows[i]; if (!r) return;
+        Object.entries(p).forEach(([n, v]) => { const el = r.querySelector('[name="' + n + '"]'); if (el && el.type !== "file") el.value = v; });
+      });
+      Object.entries(saved.fields || {}).forEach(([n, v]) => { const el = form.querySelector('[name="' + n + '"]'); if (el && el.type !== "checkbox" && el.type !== "radio" && el.type !== "file") el.value = v; });
+      if (typeof recalcSubtotal === "function") recalcSubtotal();
+      const note = document.createElement("div");
+      note.className = "draft-note";
+      note.innerHTML = '💾 이전에 작성하던 내용을 불러왔어요. <button type="button" class="draft-clear">새로 작성</button>';
+      form.parentNode.insertBefore(note, form);
+      note.querySelector(".draft-clear").addEventListener("click", () => { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
+    }
+  } catch (e) {}
+
+  // 저장 (입력 후 0.8초 디바운스)
+  let t;
+  function save() {
+    try {
+      const products = [...productList.querySelectorAll(".product-item")].map((r) => {
+        const o = {}; r.querySelectorAll("input, select, textarea").forEach((el) => { if (el.name && el.name.endsWith("[]") && el.type !== "file") o[el.name] = el.value; }); return o;
+      });
+      const fields = {};
+      form.querySelectorAll("input, select, textarea").forEach((el) => { if (el.name && !el.name.endsWith("[]") && el.type !== "checkbox" && el.type !== "radio" && el.type !== "file" && el.name !== "_hp") fields[el.name] = el.value; });
+      localStorage.setItem(KEY, JSON.stringify({ products, fields }));
+    } catch (e) {}
+  }
+  form.addEventListener("input", () => { clearTimeout(t); t = setTimeout(save, 800); });
+  form.addEventListener("submit", () => clearTimeout(t));
+})();
+
+// ===== 상단 공지 띠배너 (전 페이지) =====
+(function renderTopBar() {
+  try { if (sessionStorage.getItem("oss_topbar_closed") === "1") return; } catch (e) {}
+  const bar = document.createElement("div");
+  bar.className = "top-noti";
+  bar.innerHTML = '<div class="container top-noti-in"><span class="top-noti-msg" id="topNotiMsg">📢 일본 직구, OSS와 함께 안전하게 — 구매대행 · 배송대행</span><button class="top-noti-x" type="button" aria-label="닫기">×</button></div>';
+  document.body.insertBefore(bar, document.body.firstChild);
+  bar.querySelector(".top-noti-x").addEventListener("click", () => { bar.remove(); try { sessionStorage.setItem("oss_topbar_closed", "1"); } catch (e) {} });
+  if (window.OSS && window.OSS.getSetting) {
+    window.OSS.getSetting("topbar").then((v) => {
+      const msg = document.getElementById("topNotiMsg");
+      const txt = typeof v === "string" ? v : (v && v.text);
+      if (msg && txt && txt.trim()) { msg.textContent = "📢 " + txt; return null; }
+      if (window.OSS.fetchNotices) return window.OSS.fetchNotices();
+      return null;
+    }).then((list) => {
+      const msg = document.getElementById("topNotiMsg");
+      if (list && list[0] && msg) msg.innerHTML = '📢 <a href="notice.html">' + (list[0].title || "") + "</a>";
     }).catch(() => {});
   }
 })();
