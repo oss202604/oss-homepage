@@ -86,7 +86,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=2"></script>
+  <script src="supabase.js?v=5"></script>
   <script src="script.js?v=5"></script>
   <script>
     const GUIDE_PAGES = [
@@ -96,31 +96,68 @@
       { slug: "guide-customs", title: "통관·관세 안내" },
       { slug: "guide-refund", title: "취소·환불·반품 안내" },
     ];
+    // 기본 내용 (관리자 설정에서 입력하면 덮어씀)
+    const DEFAULT_GUIDE = {
+      "guide-how": `OSS는 일본 현지인이 직접 운영하는 구매대행·배송대행지(배대지) 서비스입니다.
+
+[전체 이용 흐름]
+1. 신청 — 구매대행(상품 링크) 또는 배송대행(이미 구매한 상품) 신청서를 작성합니다.
+2. 견적 안내 — 상품가·수수료·국제배송비를 계산해 안내드립니다.
+3. 결제 — 안내된 금액을 계좌이체로 결제합니다. (간편결제 추후 도입)
+4. 현지 구매·입고·검수 — 일본 현지에서 구매하거나, 보내주신 상품을 센터에서 받아 검수합니다.
+5. 포장·무게측정 — 안전하게 포장 후 무게를 측정해 최종 배송비를 확정합니다.
+6. 한국 발송 — 발송 후 송장번호를 안내드리며, 주문조회에서 진행상황을 확인할 수 있습니다.
+
+* 처음이신 분은 예상비용 계산기로 대략 비용을 먼저 확인해 보세요.`,
+      "guide-purchase": `[구매대행 이용안내]
+- 메루카리·라쿠텐·야후옥션·아마존JP 등 일본 온라인 쇼핑몰 상품을 대신 구매해 드립니다.
+- 신청 시 상품 링크, 옵션(색상·사이즈), 수량을 정확히 입력해 주세요. 상품 이미지를 함께 주시면 더 정확합니다.
+- 결제 완료 후 현지에서 구매를 진행하며, 품절·가격변동 시 안내드립니다.
+- 구매대행 수수료는 상품가 기준으로 책정됩니다. (요율은 안내 기준 적용)
+- 결제 완료 후에는 현지 쇼핑몰 사정에 따라 취소가 제한될 수 있습니다.`,
+      "guide-delivery": `[배송대행 이용안내]
+- 일본에서 직접 구매하신 상품을 OSS 일본 센터로 보내신 뒤, 한국까지 안전하게 배송해 드립니다.
+- 신청 시 받는사람을 'OSS / 고객번호'로 입력하고, 센터 주소(배송대행 신청 화면에 표시)로 발송해 주세요.
+- 여러 쇼핑몰 상품을 모아 한 박스로 보내는 합배송으로 배송비를 절약할 수 있습니다.
+- 센터 입고 후 검수→포장→무게측정→발송 순으로 진행됩니다.
+- 출고 마감 시간 전 입고분은 당일 처리될 수 있습니다.`,
+      "guide-customs": `[통관·관세 안내]
+- 해외직구 통관에는 '개인통관고유부호'가 반드시 필요합니다. (수취인 본인 명의)
+- 발급: 관세청 유니패스( https://unipass.customs.go.kr/csp/persIndex.do )에서 무료로 발급받을 수 있습니다.
+- 목록통관 면세 한도: 물품가격 미화 150달러(미국발 200달러) 이하인 자가사용 물품은 관세·부가세가 면제될 수 있습니다.
+- 면세 한도를 초과하거나 일반통관 대상 품목은 관세 + 부가세(10%)가 부과되며, 이는 고객 부담입니다.
+- 품목분류(통관 유형)에 따라 세금이 달라지므로 신청 시 품목을 정확히 선택해 주세요.
+- 분할배송, 가격 허위신고 등 불법 통관 요청에는 협조하지 않습니다.`,
+      "guide-refund": `[취소·환불·반품 안내]
+- 구매대행: 현지 구매 전에는 전액 취소 가능, 구매 후에는 현지 쇼핑몰 정책에 따라 제한·수수료가 발생할 수 있습니다.
+- 배송대행: 센터 입고 전 취소 가능, 입고 후에는 검수·보관·반송 비용이 발생할 수 있습니다.
+- 환불은 확인 후 영업일 기준 3~7일 내 처리되며, 국제배송비·현지 수수료 등 실비는 차감될 수 있습니다.
+- 상품 불량·회사 귀책 오배송은 회사 부담, 단순 변심은 왕복 배송비·수수료 고객 부담입니다.
+- 자세한 내용은 취소·환불정책 페이지를 참고해 주세요.`,
+    };
     function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
     (async function () {
       const nav = document.getElementById("guideNav");
       const content = document.getElementById("guideContent");
       let loaded = {};
+      let map = {};
       try {
         const all = await window.OSS.fetchPages();
-        const map = {}; all.forEach((p) => (map[p.slug] = p));
-        GUIDE_PAGES.forEach((g) => {
-          const p = map[g.slug];
-          loaded[g.slug] = p && p.body ? { title: p.title || g.title, body: p.body } : null;
-        });
-      } catch (e) {
-        content.innerHTML = '<p class="section-lead">불러오지 못했어요: ' + (e.message || e) + '</p>'; return;
-      }
-      const avail = GUIDE_PAGES.filter((g) => loaded[g.slug]);
-      if (!avail.length) { nav.innerHTML = ""; content.innerHTML = '<p class="section-lead">아직 등록된 안내가 없습니다. 곧 업데이트됩니다.</p>'; return; }
-      nav.innerHTML = avail.map((g, i) => `<button class="guide-nav-btn${i===0?' active':''}" data-slug="${g.slug}">${esc(loaded[g.slug].title)}</button>`).join("");
+        all.forEach((p) => (map[p.slug] = p));
+      } catch (e) { /* 기본 내용으로 진행 */ }
+      GUIDE_PAGES.forEach((g) => {
+        const p = map[g.slug];
+        loaded[g.slug] = { title: (p && p.title) || g.title, body: (p && p.body) ? p.body : (DEFAULT_GUIDE[g.slug] || "") };
+      });
+      nav.innerHTML = GUIDE_PAGES.map((g, i) => `<button class="guide-nav-btn${i===0?' active':''}" data-slug="${g.slug}">${esc(loaded[g.slug].title)}</button>`).join("");
+      function linkify(s){ return esc(s).replace(/\n/g,"<br>").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:var(--blue);">$1</a>'); }
       function show(slug) {
         const d = loaded[slug];
-        content.innerHTML = `<h2 class="guide-title">${esc(d.title)}</h2><div class="guide-body">${esc(d.body).replace(/\n/g,"<br>")}</div>`;
+        content.innerHTML = `<h2 class="guide-title">${esc(d.title)}</h2><div class="guide-body">${linkify(d.body)}</div>`;
         nav.querySelectorAll(".guide-nav-btn").forEach((b) => b.classList.toggle("active", b.dataset.slug === slug));
       }
       nav.querySelectorAll(".guide-nav-btn").forEach((b) => b.addEventListener("click", () => show(b.dataset.slug)));
-      show(avail[0].slug);
+      show(GUIDE_PAGES[0].slug);
     })();
   </script>
 </body>

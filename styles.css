@@ -257,6 +257,8 @@ p { word-break: keep-all; }
 .contact-form input, .contact-form select, .contact-form textarea { width: 100%; margin-top: 7px; padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; font-family: inherit; font-size: 15px; background: #fbfaf8; }
 .contact-form input:focus, .contact-form select:focus, .contact-form textarea:focus { outline: none; border-color: var(--blue); background: #fff; }
 .contact-note { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+.ccode-help { display: inline-block; margin-top: 7px; font-size: 13px; color: var(--blue); font-weight: 600; }
+.ccode-help:hover { text-decoration: underline; }
 
 /* ===== 오른쪽 고정 퀵메뉴 ===== */
 .quick-menu { position: fixed; top: 50%; right: 18px; transform: translateY(-50%); z-index: 40; background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); width: 76px; }
