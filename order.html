@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=16" />
+  <link rel="stylesheet" href="styles.css?v=17" />
 </head>
 <body>
   <div class="utility-bar">
@@ -214,6 +214,11 @@
                 <label>제품 상세 URL <span class="req">*</span><input type="url" name="productUrl[]" required placeholder="https://..." /></label>
               </div>
               <label class="full">구매 요청메세지<input type="text" name="productMemo[]" placeholder="이 상품에 대한 요청사항 (선택)" /></label>
+              <label class="full product-img-field">상품 사진 (선택) — 정확한 검수에 도움돼요
+                <input type="file" class="product-img-file" accept="image/*" />
+                <input type="hidden" name="productImage[]" />
+                <span class="product-img-thumb"></span>
+              </label>
             </div>
           </div>
           <div class="product-actions">
@@ -320,7 +325,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=2"></script>
-  <script src="script.js?v=8"></script>
+  <script src="supabase.js?v=6"></script>
+  <script src="script.js?v=9"></script>
 </body>
 </html>

@@ -390,6 +390,7 @@ if (form && modal) {
       orderNo: data.getAll("productOrderNo[]")[i] || "",
       shipName: data.getAll("productShipName[]")[i] || "",
       memo: data.getAll("productMemo[]")[i] || "",
+      image: data.getAll("productImage[]")[i] || "",
     }));
     const center = document.querySelector('input[name="centerType"]:checked');
     const subNum = Number((subtotalEl?.textContent || "0").replace(/[^0-9]/g, "")) || 0;
@@ -660,6 +661,31 @@ if (form && modal) {
   form.addEventListener("input", () => { clearTimeout(t); t = setTimeout(save, 800); });
   form.addEventListener("submit", () => clearTimeout(t));
 })();
+
+// ===== 상품 사진 업로드 (신청서, 동적 행 포함) =====
+document.addEventListener("change", async (e) => {
+  const inp = e.target;
+  if (!inp.classList || !inp.classList.contains("product-img-file")) return;
+  const file = inp.files && inp.files[0];
+  const item = inp.closest(".product-item");
+  if (!file || !item) return;
+  const hidden = item.querySelector('[name="productImage[]"]');
+  const thumb = item.querySelector(".product-img-thumb");
+  if (file.size > 8 * 1024 * 1024) { if (thumb) thumb.textContent = "사진은 8MB 이하만 가능해요."; inp.value = ""; return; }
+  if (!(window.OSS && window.OSS.uploadProductImage)) { if (thumb) thumb.textContent = "(사진 업로드 준비 중)"; return; }
+  if (thumb) thumb.textContent = "업로드 중...";
+  try {
+    const url = await window.OSS.uploadProductImage(file);
+    if (hidden) hidden.value = url;
+    if (thumb) {
+      thumb.innerHTML = `<img src="${url}" alt="상품사진" /><button type="button" class="img-remove">✕ 삭제</button>`;
+      const rm = thumb.querySelector(".img-remove");
+      if (rm) rm.addEventListener("click", () => { if (hidden) hidden.value = ""; inp.value = ""; thumb.innerHTML = ""; });
+    }
+  } catch (err) {
+    if (thumb) thumb.textContent = "업로드 실패: " + (err.message || err) + " (저장공간 설정을 확인하세요)";
+  }
+});
 
 // ===== 상단 공지 띠배너 (전 페이지) =====
 (function renderTopBar() {

@@ -62,6 +62,16 @@ async function deleteApplication(id) {
   if (error) throw error;
 }
 
+// ---- 상품 사진 업로드 (Storage: product-images 버킷) ----
+async function uploadProductImage(file) {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const path = "p/" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext;
+  const { error } = await sb.storage.from("product-images").upload(path, file, { cacheControl: "3600", upsert: false });
+  if (error) throw error;
+  const { data } = sb.storage.from("product-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 // ---- 1:1 문의 ----
 async function submitInquiry(payload) {
   const { error } = await sb.from("inquiries").insert([payload]);
@@ -147,6 +157,7 @@ window.OSS = {
   updateApplicationStatus,
   updateApplication,
   deleteApplication,
+  uploadProductImage,
   submitInquiry,
   fetchInquiries,
   answerInquiry,

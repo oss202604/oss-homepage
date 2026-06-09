@@ -276,7 +276,8 @@ function openModal(id) {
   const products = Array.isArray(r.products) ? r.products : [];
   const prodHtml = products.map((p, i) =>
     `${i + 1}) ${p.name || "-"} ${p.category ? "[" + p.category + "]" : ""} ¥${p.price || 0} × ${p.qty || 0}` +
-    (p.orderNo ? ` / 오더:${p.orderNo}` : "") + (p.url ? `<br><a href="${p.url}" target="_blank" style="color:var(--blue);font-size:12px;">상품링크 ↗</a>` : "")
+    (p.orderNo ? ` / 오더:${p.orderNo}` : "") + (p.url ? `<br><a href="${p.url}" target="_blank" style="color:var(--blue);font-size:12px;">상품링크 ↗</a>` : "") +
+    (p.image ? `<br><a href="${p.image}" target="_blank"><img src="${p.image}" alt="상품사진" style="max-width:120px;max-height:120px;border-radius:8px;border:1px solid var(--line);margin-top:6px;" /></a>` : "")
   ).join("<br>");
   document.getElementById("modalName").textContent = o.name;
   document.getElementById("modalId").textContent = `${o.no} · ${o.type === "purchase" ? "구매대행" : "배송대행"} · ${o.created}`;
