@@ -66,6 +66,8 @@ function mapRow(row) {
     amount: row.subtotal || 0,
     status: row.status || "신규접수",
     created: (row.created_at || "").slice(0, 10),
+    flag: row.flag || "",
+    deleted: !!row.deleted_at,
     raw: row,
   };
 }
@@ -104,21 +106,33 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
   });
 });
 
+// ----- 검색 -----
+let SEARCH = "";
+function matchSearch(o) {
+  if (!SEARCH) return true;
+  const q = SEARCH.toLowerCase();
+  const r = o.raw || {};
+  return [o.no, o.customer, o.name, r.applicant_phone, r.receiver_name, r.receiver_phone, r.tracking_no]
+    .some((v) => (v || "").toString().toLowerCase().includes(q));
+}
+const FLAG_DOT = { red: "🔴", orange: "🟠", green: "🟢", blue: "🔵" };
+
 // ----- 칸반 렌더 -----
 function cardHtml(o) {
   return `<div class="kanban-card" draggable="true" data-id="${o.id}">
     <div class="kc-top">
-      <span class="kc-id">${o.no}</span>
+      <span class="kc-id">${o.flag ? (FLAG_DOT[o.flag] || "") + " " : ""}${o.no}</span>
       <span class="kc-type ${o.type}">${o.type === "purchase" ? "구매" : "배송"}</span>
     </div>
     <div class="kc-name">${o.name}</div>
     ${o.bundleId ? `<div class="kc-bundle">🔗 ${o.bundleId}</div>` : ""}
+    ${o.raw && o.raw.tracking_no ? `<div class="kc-bundle">📦 ${o.raw.tracking_no}</div>` : ""}
     <div class="kc-cust">👤 ${o.customer}</div>
     <div class="kc-amount">¥${(o.amount || 0).toLocaleString()}</div>
   </div>`;
 }
 function colHtml(s, isExc) {
-  const items = ORDERS.filter((o) => o.status === s.key);
+  const items = ORDERS.filter((o) => o.status === s.key && !o.deleted && matchSearch(o));
   return `<div class="kanban-col ${isExc ? "exception" : ""}" data-status="${s.key}">
     <div class="kanban-col-head"><span>${s.label}</span><span class="kanban-col-count">${items.length}</span></div>
     ${items.map(cardHtml).join("")}
@@ -130,13 +144,51 @@ function renderKanban() {
   bindDnd();
   bindCardClick();
   renderBundlePanel();
+  renderTrash();
 }
+
+// ----- 휴지통 (삭제된 주문) -----
+function renderTrash() {
+  const tb = document.getElementById("trashRows");
+  if (!tb) return;
+  const items = ORDERS.filter((o) => o.deleted);
+  const cnt = document.getElementById("trashCount");
+  if (cnt) cnt.textContent = items.length;
+  tb.innerHTML = items.length
+    ? items.map((o) => `<tr>
+        <td>${o.no}</td><td>${o.customer}</td><td>${o.name}</td>
+        <td>
+          <button class="btn btn-small" data-restore="${o.id}">복원</button>
+          <button class="btn btn-small remove-product" data-perm="${o.id}">영구삭제</button>
+        </td></tr>`).join("")
+    : `<tr><td colspan="4" class="empty">휴지통이 비어 있습니다.</td></tr>`;
+  tb.querySelectorAll("[data-restore]").forEach((b) => b.addEventListener("click", async () => {
+    const o = ORDERS.find((x) => x.id === b.dataset.restore);
+    try { await window.OSS.updateApplication(o.id, { deleted_at: null }); o.deleted = false; o.raw.deleted_at = null; renderKanban(); renderDashboard(); }
+    catch (e) { alert("복원 실패: " + (e.message || e)); }
+  }));
+  tb.querySelectorAll("[data-perm]").forEach((b) => b.addEventListener("click", async () => {
+    if (!confirm("정말 영구 삭제할까요? 되돌릴 수 없습니다.")) return;
+    const id = b.dataset.perm;
+    try { await window.OSS.deleteApplication(id); ORDERS = ORDERS.filter((x) => x.id !== id); renderKanban(); renderDashboard(); }
+    catch (e) { alert("영구삭제 실패: " + (e.message || e) + "\n(권한 정책이 없으면 복원만 사용하세요)"); }
+  }));
+}
+
+// 검색 / 휴지통 토글
+(function setupOrderToolbar() {
+  const s = document.getElementById("orderSearch");
+  if (s) s.addEventListener("input", () => { SEARCH = s.value.trim(); renderKanban(); });
+  const t = document.getElementById("trashToggle");
+  const panel = document.getElementById("trashPanel");
+  if (t && panel) t.addEventListener("click", () => { panel.hidden = !panel.hidden; if (!panel.hidden) renderTrash(); });
+})();
 
 // ----- 합배송 묶기 패널 -----
 function renderBundlePanel() {
   const tb = document.getElementById("bundleRows");
   if (!tb) return;
-  const items = ORDERS.filter((o) => o.status === "입고완료");
+  const items = ORDERS.filter((o) => o.status === "입고완료" && !o.deleted);
   if (!items.length) {
     tb.innerHTML = `<tr><td colspan="6" class="empty">합배송 가능한(입고완료) 주문이 없습니다.</td></tr>`;
     return;
@@ -245,10 +297,48 @@ function openModal(id) {
   document.getElementById("modalWeight").value = r.weight_kg != null ? r.weight_kg : "";
   document.getElementById("modalCenter").value = r.center_type === "sea" ? "sea" : "air";
   document.getElementById("modalFee").textContent = r.shipping_fee ? "₩" + Number(r.shipping_fee).toLocaleString() : "-";
+  // 플래그·송장·메모
+  const setVal = (id, v) => { const e = document.getElementById(id); if (e) e.value = v || ""; };
+  setVal("modalFlag", o.flag);
+  setVal("modalCourier", r.courier);
+  setVal("modalTracking", r.tracking_no);
+  setVal("modalMemo", r.admin_memo);
+  const mp = document.getElementById("modalMemoPublic"); if (mp) mp.checked = !!r.memo_visible;
+  // 단계별 날짜 타임라인
+  const tl = document.getElementById("modalTimeline");
+  if (tl) {
+    const sd = r.status_dates && typeof r.status_dates === "object" ? r.status_dates : {};
+    const keys = Object.keys(sd);
+    tl.innerHTML = keys.length
+      ? keys.map((k) => `<span class="tl-item">${labelOf(k)} <b>${(sd[k] || "").slice(0, 16).replace("T", " ")}</b></span>`).join("")
+      : '<span class="tl-empty">상태 변경 기록이 아직 없어요.</span>';
+  }
   modal.hidden = false;
 }
 document.getElementById("modalClose").addEventListener("click", () => { modal.hidden = true; });
 modal.addEventListener("click", (e) => { if (e.target === modal) modal.hidden = true; });
+
+// 삭제(휴지통으로)
+const modalDeleteBtn = document.getElementById("modalDelete");
+if (modalDeleteBtn) modalDeleteBtn.addEventListener("click", async () => {
+  const o = ORDERS.find((x) => x.id === modalOrderId);
+  if (!o) return;
+  if (!confirm(`${o.no} 주문을 휴지통으로 보낼까요?\n(휴지통에서 복원할 수 있어요)`)) return;
+  try {
+    await window.OSS.updateApplication(o.id, { deleted_at: new Date().toISOString() });
+    o.deleted = true; o.raw.deleted_at = new Date().toISOString();
+    modal.hidden = true; renderKanban(); renderDashboard();
+  } catch (e) { alert("삭제 실패: " + (e.message || e)); }
+});
+
+// 배송조회 (택배사 추적 — 새 창)
+const modalTrackBtn = document.getElementById("modalTrack");
+if (modalTrackBtn) modalTrackBtn.addEventListener("click", () => {
+  const no = (document.getElementById("modalTracking").value || "").trim();
+  if (!no) { alert("송장번호를 먼저 입력하세요."); return; }
+  // 통합 택배조회(스마트택배) — 송장번호로 검색
+  window.open("https://search.naver.com/search.naver?query=" + encodeURIComponent("택배조회 " + no), "_blank");
+});
 
 // 배송비 계산 버튼 (미리보기)
 document.getElementById("modalCalcFee").addEventListener("click", () => {
@@ -266,22 +356,40 @@ document.getElementById("modalSave").addEventListener("click", async () => {
     const weight = document.getElementById("modalWeight").value;
     const center = document.getElementById("modalCenter").value;
     const fee = calcShippingFee(weight, center);
+    const gv = (id) => { const e = document.getElementById(id); return e ? e.value.trim() : ""; };
+    // 상태가 바뀌면 날짜 자동기록
+    const sd = (o.raw.status_dates && typeof o.raw.status_dates === "object") ? { ...o.raw.status_dates } : {};
+    if (newStatus !== prev.status && !sd[newStatus]) sd[newStatus] = new Date().toISOString();
     const fields = {
       status: newStatus,
       center_type: center,
       weight_kg: weight ? Number(weight) : null,
       shipping_fee: fee || null,
+      flag: gv("modalFlag"),
+      courier: gv("modalCourier"),
+      tracking_no: gv("modalTracking"),
+      admin_memo: gv("modalMemo"),
+      memo_visible: !!document.getElementById("modalMemoPublic")?.checked,
+      status_dates: sd,
     };
     o.status = newStatus;
-    o.raw.weight_kg = fields.weight_kg;
-    o.raw.shipping_fee = fields.shipping_fee;
-    o.raw.center_type = center;
+    o.flag = fields.flag;
+    Object.assign(o.raw, fields);
     renderKanban(); renderDashboard();
     try {
       await window.OSS.updateApplication(o.id, fields);
     } catch (err) {
-      alert("저장 실패: " + (err.message || err));
-      o.status = prev.status; o.raw = prev.raw; renderKanban(); renderDashboard();
+      // 새 컬럼(flag/메모/송장 등)이 아직 DB에 없으면 핵심 항목만 다시 저장
+      try {
+        await window.OSS.updateApplication(o.id, {
+          status: newStatus, center_type: center,
+          weight_kg: fields.weight_kg, shipping_fee: fields.shipping_fee,
+        });
+        alert("상태·무게는 저장됐어요.\n메모·송장·중요표시는 DB 설정(SQL 1회)을 마치면 저장됩니다.");
+      } catch (err2) {
+        alert("저장 실패: " + (err2.message || err2));
+        o.status = prev.status; o.raw = prev.raw; renderKanban(); renderDashboard();
+      }
     }
   }
   modal.hidden = true;

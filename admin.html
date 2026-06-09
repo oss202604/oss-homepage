@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=14" />
-  <link rel="stylesheet" href="admin.css?v=9" />
+  <link rel="stylesheet" href="admin.css?v=10" />
 </head>
 <body class="admin-body">
   <!-- 상단 바 -->
@@ -81,10 +81,25 @@
           </div>
         </div>
 
+        <div class="kanban-toolbar">
+          <input id="orderSearch" placeholder="🔍 주문번호 · 고객명 · 연락처 · 송장번호로 검색" />
+          <button class="btn btn-small" id="trashToggle" type="button">🗑 휴지통 (<span id="trashCount">0</span>)</button>
+        </div>
+
         <p class="kanban-section-label">정상 흐름 — 카드를 끌어다 다음 단계로 옮기세요</p>
         <div class="kanban" id="kanbanNormal"></div>
         <p class="kanban-section-label" style="margin-top:20px;">예외 처리 — 취소·반품·사고 등은 이쪽으로</p>
         <div class="kanban" id="kanbanException"></div>
+
+        <div class="dash-panel" id="trashPanel" hidden style="margin-top:22px;">
+          <h3>🗑 휴지통 <span style="font-size:13px;font-weight:400;color:var(--muted);">(삭제된 주문 · 복원 가능)</span></h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>주문번호</th><th>고객</th><th>상품</th><th>관리</th></tr></thead>
+              <tbody id="trashRows"></tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <!-- ===== 회원관리 ===== -->
@@ -225,7 +240,38 @@
     <div class="admin-modal-box">
       <h3 id="modalName">주문 상세</h3>
       <p class="modal-id" id="modalId"></p>
+
+      <div class="modal-flag-row">
+        <span class="mf-label">중요표시</span>
+        <select id="modalFlag">
+          <option value="">없음</option>
+          <option value="red">🔴 급함</option>
+          <option value="orange">🟠 확인필요</option>
+          <option value="green">🟢 정상</option>
+          <option value="blue">🔵 보류·관찰</option>
+        </select>
+        <span class="mf-timeline" id="modalTimeline"></span>
+      </div>
+
       <div id="modalDetail"></div>
+
+      <div class="modal-fee-box">
+        <h4>송장 · 배송 추적</h4>
+        <div class="modal-fee-row">
+          <label>택배사<input id="modalCourier" placeholder="예: CJ대한통운" /></label>
+          <label>송장번호<input id="modalTracking" placeholder="국내 송장번호" /></label>
+        </div>
+        <div class="set-actions" style="margin-top:10px;">
+          <button class="btn btn-small" id="modalTrack" type="button">📦 배송조회</button>
+          <a class="btn btn-small" href="https://unipass.customs.go.kr/csp/persIndex.do" target="_blank" rel="noopener">🛃 통관조회(유니패스)</a>
+        </div>
+      </div>
+
+      <div class="modal-fee-box">
+        <h4>관리자 메모</h4>
+        <textarea id="modalMemo" rows="2" placeholder="이 주문에 대한 메모를 남기세요" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fbfcfe;"></textarea>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px;"><input type="checkbox" id="modalMemoPublic" style="width:auto;" /> 고객에게도 보이기 (주문조회 화면에 표시 — 2단계 예정)</label>
+      </div>
 
       <div class="modal-fee-box">
         <h4>입고 · 무게 · 배송비</h4>
@@ -247,14 +293,15 @@
         <select id="modalStatus"></select>
         <button class="btn btn-primary btn-small" id="modalSave">저장</button>
         <button class="btn btn-dark btn-small" id="modalClose">닫기</button>
+        <button class="btn btn-small" id="modalDelete" style="background:#fff0f1;color:var(--red);border:1px solid #f6c2c8;margin-left:auto;">🗑 휴지통</button>
       </div>
     </div>
   </div>
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=3"></script>
-  <script src="admin.js?v=5"></script>
+  <script src="supabase.js?v=4"></script>
+  <script src="admin.js?v=6"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

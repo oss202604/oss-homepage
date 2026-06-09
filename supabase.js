@@ -56,6 +56,12 @@ async function updateApplication(id, fields) {
   if (error) throw error;
 }
 
+// ---- 관리자: 주문 영구 삭제 (휴지통에서) ----
+async function deleteApplication(id) {
+  const { error } = await sb.from("applications").delete().eq("id", id);
+  if (error) throw error;
+}
+
 // ---- 공지사항 ----
 async function fetchNotices() {
   const { data, error } = await sb.from("notices").select("*").order("pinned", { ascending: false }).order("created_at", { ascending: false });
@@ -120,6 +126,7 @@ window.OSS = {
   fetchApplications,
   updateApplicationStatus,
   updateApplication,
+  deleteApplication,
   fetchNotices,
   createNotice,
   deleteNotice,

@@ -95,6 +95,17 @@ body.admin-body { background: #eef1f6; }
 .set-grid input:focus { outline: none; border-color: var(--blue); background: #fff; }
 .review-edit-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
 .review-edit-row input, .review-edit-row select { padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 13px; background: #fbfcfe; }
+/* 주문 툴바 (검색·휴지통) */
+.kanban-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
+.kanban-toolbar input { flex: 1; max-width: 420px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit; font-size: 14px; background: #fff; }
+.kanban-toolbar input:focus { outline: none; border-color: var(--blue); }
+/* 모달 플래그/타임라인 */
+.modal-flag-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 14px; }
+.modal-flag-row .mf-label { font-size: 14px; font-weight: 700; color: var(--navy); }
+.modal-flag-row select { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 14px; }
+.mf-timeline { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.mf-timeline .tl-item b { color: var(--navy); font-weight: 600; }
+.mf-timeline .tl-empty { color: var(--muted); }
 .set-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
 .save-ok { color: #16a34a; font-size: 14px; font-weight: 700; }
 #rateRows input { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font-family: inherit; font-size: 14px; }
