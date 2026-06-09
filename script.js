@@ -111,6 +111,26 @@ if (menuToggle && mainMenu) {
   if (window.lucide) lucide.createIcons();
 })();
 
+// ===== 우측 고정 퀵메뉴 (전 페이지 공통) =====
+(function renderQuickMenu() {
+  if (document.querySelector(".quick-menu")) return; // 메인 등 이미 있으면 건너뜀
+  const items = [
+    ["notice.html", "headphones", "고객센터"],
+    ["order.html", "shopping-bag", "구매대행"],
+    ["delivery.html", "package", "배송대행"],
+    ["index.html#fee", "calculator", "예상비용"],
+    ["guide.html", "book-open", "이용가이드"],
+  ];
+  const aside = document.createElement("aside");
+  aside.className = "quick-menu";
+  aside.innerHTML =
+    items.map(([h, ic, l]) => `<a href="${h}" class="qm-item"><span class="qm-ico"><i data-lucide="${ic}"></i></span>${l}</a>`).join("") +
+    '<button class="qm-top" type="button" title="맨 위로"><i data-lucide="chevron-up" class="ico-inline"></i><br /><small>TOP</small></button>';
+  document.body.appendChild(aside);
+  aside.querySelector(".qm-top").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  if (window.lucide) lucide.createIcons();
+})();
+
 // ===== 고객센터 사이드바 (공지·문의·FAQ·후기 허브) =====
 (function renderCsSidebar() {
   const el = document.querySelector(".cs-sidebar");
@@ -234,20 +254,39 @@ const productList = document.getElementById("productList");
 const addProduct = document.getElementById("addProduct");
 const subtotalEl = document.getElementById("subtotal");
 
-// 번호 다시 매기기 + 삭제버튼 정리
+// 번호 다시 매기기 + 복사/삭제 버튼 정리
 function renumberProducts() {
   if (!productList) return;
   const items = productList.querySelectorAll(".product-item");
   items.forEach((item, i) => {
     const noEl = item.querySelector(".product-item-no");
     if (noEl) noEl.textContent = i + 1;
-    // 삭제 버튼: 첫 상품엔 없음, 2번째부터 표시
-    let del = item.querySelector(".remove-product");
     const head = item.querySelector(".product-item-head");
-    if (i === 0) {
-      if (del) del.remove();
-    } else if (!del && head) {
-      del = document.createElement("button");
+    if (!head) return;
+    // 기존 복사/삭제 버튼 제거 후 재생성 (클론 중복 방지)
+    head.querySelectorAll(".copy-product, .remove-product").forEach((b) => b.remove());
+    // 복사 버튼 (모든 행) — 현재 입력값까지 복제
+    const copy = document.createElement("button");
+    copy.type = "button";
+    copy.className = "btn btn-small copy-product";
+    copy.textContent = "⧉ 복사";
+    copy.addEventListener("click", () => {
+      const clone = item.cloneNode(true);
+      clone.querySelectorAll(".copy-product, .remove-product").forEach((b) => b.remove());
+      const src = item.querySelectorAll("input, select, textarea");
+      const dst = clone.querySelectorAll("input, select, textarea");
+      src.forEach((s, idx) => {
+        const d = dst[idx]; if (!d) return;
+        if (s.type === "checkbox" || s.type === "radio") d.checked = s.checked;
+        else d.value = s.value;
+      });
+      item.after(clone);
+      renumberProducts(); recalcSubtotal();
+    });
+    head.appendChild(copy);
+    // 삭제 버튼 (2번째 행부터)
+    if (i > 0) {
+      const del = document.createElement("button");
       del.type = "button";
       del.className = "btn btn-small remove-product";
       del.textContent = "− 삭제";
