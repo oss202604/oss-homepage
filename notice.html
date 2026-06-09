@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=14" />
+  <link rel="stylesheet" href="styles.css?v=15" />
 </head>
 <body>
   <div class="utility-bar">
@@ -60,9 +60,12 @@
   </section>
 
   <section class="section">
-    <div class="container">
-      <div class="notice-list" id="noticeList">
-        <p class="section-lead">공지사항을 불러오는 중...</p>
+    <div class="container cs-layout">
+      <aside class="cs-sidebar" data-cs="notice"></aside>
+      <div class="cs-content">
+        <div class="notice-list" id="noticeList">
+          <p class="section-lead">공지사항을 불러오는 중...</p>
+        </div>
       </div>
     </div>
   </section>
@@ -86,7 +89,7 @@
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=2"></script>
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=6"></script>
   <script>
     function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
     (async function () {

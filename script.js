@@ -111,6 +111,21 @@ if (menuToggle && mainMenu) {
   if (window.lucide) lucide.createIcons();
 })();
 
+// ===== 고객센터 사이드바 (공지·문의·FAQ·후기 허브) =====
+(function renderCsSidebar() {
+  const el = document.querySelector(".cs-sidebar");
+  if (!el) return;
+  const active = el.dataset.cs || "";
+  const items = [
+    ["notice", "notice.html", "📢 공지사항"],
+    ["contact", "contact.html", "💬 1:1 문의"],
+    ["faq", "faq.html", "❓ 자주 묻는 질문"],
+    ["review", "index.html#reviews", "⭐ 이용후기"],
+  ];
+  el.innerHTML = '<p class="cs-sidebar-title">고객센터</p>' +
+    items.map(([k, h, l]) => `<a href="${h}" class="${k === active ? "active" : ""}">${l}</a>`).join("");
+})();
+
 // ===== "전체 서비스" 드롭다운 (모든 페이지 공통) =====
 const catBtn = document.querySelector(".cat-btn");
 const navInner = document.querySelector(".main-nav-inner");

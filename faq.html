@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=14" />
+  <link rel="stylesheet" href="styles.css?v=15" />
 </head>
 <body>
   <div class="utility-bar">
@@ -60,10 +60,13 @@
   </section>
 
   <section class="section">
-    <div class="container">
-      <div class="faq-tabs" id="faqTabs"></div>
-      <div class="notice-list" id="faqList"><p class="section-lead">불러오는 중...</p></div>
-      <p class="section-lead" style="text-align:center;margin-top:30px;">원하는 답이 없으신가요? <a href="contact.html" style="color:var(--blue);font-weight:700;">1:1 문의하기 →</a></p>
+    <div class="container cs-layout">
+      <aside class="cs-sidebar" data-cs="faq"></aside>
+      <div class="cs-content">
+        <div class="faq-tabs" id="faqTabs"></div>
+        <div class="notice-list" id="faqList"><p class="section-lead">불러오는 중...</p></div>
+        <p class="section-lead" style="text-align:center;margin-top:30px;">원하는 답이 없으신가요? <a href="contact.html" style="color:var(--blue);font-weight:700;">1:1 문의하기 →</a></p>
+      </div>
     </div>
   </section>
 
@@ -73,7 +76,7 @@
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=4"></script>
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=6"></script>
   <script>
     const DEFAULT_FAQ = [
       { category: "배송/통관", q: "배송은 얼마나 걸리나요?", a: "입고·검수·결제 완료 후 항공 기준 평균 3~5일 내 발송되며, 통관 상황에 따라 달라질 수 있습니다." },

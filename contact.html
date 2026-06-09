@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=14" />
+  <link rel="stylesheet" href="styles.css?v=15" />
 </head>
 <body>
   <div class="utility-bar">
@@ -60,7 +60,9 @@
   </section>
 
   <section class="section">
-    <div class="container">
+    <div class="container cs-layout">
+      <aside class="cs-sidebar" data-cs="contact"></aside>
+      <div class="cs-content">
       <form class="contact-form" id="inquiryForm">
         <label>문의 유형
           <select name="category" required>
@@ -81,6 +83,7 @@
         <p class="contact-note">* 답변은 입력하신 연락처(전화/카카오톡)로 안내드립니다. 평일 10:00~18:00(일본시간) 순차 답변됩니다.</p>
         <p class="login-error" id="inqMsg" style="color:var(--red);text-align:center;margin-top:10px;min-height:18px;"></p>
       </form>
+      </div>
     </div>
   </section>
 
@@ -90,7 +93,7 @@
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=5"></script>
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=6"></script>
   <script>
     const loadAt = Date.now();
     document.getElementById("inquiryForm").addEventListener("submit", async (e) => {
