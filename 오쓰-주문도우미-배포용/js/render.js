@@ -137,6 +137,8 @@ function addOrder(o){
   doSync(o,true);
 }
 function doSync(o,silent){
+  /* 홈페이지/ SNS에서 온 주문이면 진행상태·송장을 손님 사이트(Supabase)에도 반영 (2-way) */
+  if(window.OSSWeb&&window.OSSWeb.pushUp&&o&&o.dbId)window.OSSWeb.pushUp(o);
   if(!WEBHOOK){if(!silent)toast('시트 주소가 없어요 🥲');return;}
   if(navigator&&navigator.onLine===false){o.synced=false;saveOrders();if(!silent){renderOrders();toast('📴 오프라인 — 인터넷 되면 자동 전송돼요');}return;}
   syncToSheet(o).then(function(){o.synced=true;saveOrders();if(!silent){renderOrders();toast('🔄 시트 갱신했어요!');}},
@@ -183,7 +185,7 @@ function renderOrders(){
     if(q){var hay=((o.customer||'')+' '+(o.recipient||'')+' '+(o.itemName||'')+' '+(o.customsCode||'')+' '+(o.phone||'')+' '+(o.trackingNo||'')).toLowerCase();if(hay.indexOf(q)<0)return false;}
     return true;
   });
-  if(!list.length){box.innerHTML='<div class="empty"><b>📒</b>'+(state.ledgerFilter==='all'?'아직 주문이 없어요.<br>위 ＋ 버튼으로 새 주문을 등록해보세요!':'이 상태에 해당하는 주문이 없어요.')+'</div>';return;}
+  if(!list.length){box.innerHTML='<div class="empty"><b>📒</b>'+(state.ledgerFilter==='all'?'아직 주문이 없어요.<br>홈페이지·SNS 주문이 들어오면 여기 자동으로 떠요!<br><small>(위 🟢 연결 바에서 “지금 불러오기”)</small>':'이 상태에 해당하는 주문이 없어요.')+'</div>';return;}
   list.forEach(function(o){
     var card=document.createElement('div');card.className='card'+(state.expandedOrd===o.id?' expanded':'');
     card.style.borderLeft='5px solid '+(STATUS_COLOR[o.status]||'#cbd1da');
@@ -221,7 +223,9 @@ function renderOrders(){
       +'<div class="copyrow"><button class="actbtn" data-act="copy-ship" style="margin-top:8px;">📋 송장 복사</button><button class="actbtn" data-act="ship-notice" style="margin-top:8px;">📤 발송안내 복사</button></div>'
       +'<button class="syncbtn'+(o.synced?' synced':'')+'" data-act="sync">'+(o.synced?'🔄 시트 갱신 (변경사항 반영)':'📤 시트에 올리기')+'</button>'
       +'<div class="card-meta" style="text-align:center;margin-top:4px;">정보·진행상태·금액 바꾸면 시트도 자동으로 갱신돼요</div>';
-    det.innerHTML=sr+info+money+ship+'<button class="delbtn" data-act="del">🗑️ 주문 삭제</button>';
+    var _qa='<div class="copyrow" style="margin-bottom:8px;">'+(o.phone?'<a class="actbtn" style="margin-top:0;text-decoration:none;text-align:center;" href="tel:'+esc((o.phone||"").replace(/[^0-9+]/g,""))+'">📞 전화</a>':'')+'<button class="actbtn" data-act="copy-customs" style="margin-top:0;">📋 통관부호</button><button class="actbtn" data-act="copy-addr" style="margin-top:0;">📋 주소</button></div>';
+    var _ph=(o.images&&o.images.length)?('<div class="secttl">🖼️ 상품 사진</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">'+o.images.map(function(u){return '<a href="'+esc(u)+'" target="_blank"><img src="'+esc(u)+'" style="width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid #eee;"></a>';}).join('')+'</div>'):'';
+    det.innerHTML=_qa+_ph+sr+info+money+ship+'<button class="delbtn" data-act="del">🗑️ 주문 삭제</button>';
     card.appendChild(det);
     card.addEventListener('click',function(e){
       var st=e.target.getAttribute('data-st');
@@ -231,6 +235,8 @@ function renderOrders(){
       var act=e.target.getAttribute('data-act');
       if(act==='copy-ship'){copyText(shippingBlock(o));return;}
       if(act==='ship-notice'){copyText(shipNotice(o));return;}
+      if(act==='copy-customs'){copyText(o.customsCode||'');toast('📋 통관부호 복사!');return;}
+      if(act==='copy-addr'){copyText(joinAddress(o.zip,o.address)||o.address||'');toast('📋 주소 복사!');return;}
       if(act==='sync'){doSync(o,false);return;}
       if(act==='del'){if(confirm('이 주문을 휴지통으로 보낼까요? (나중에 되돌릴 수 있어요)')){if(o.synced)deleteFromSheet(o);o.deletedAt=nowIso();trash.unshift(o);saveTrash();orders=orders.filter(function(x){return x.id!==o.id;});saveOrders();renderOrders();renderSales();toast('🗑 휴지통으로 옮겼어요 (되돌릴 수 있어요)');}return;}
       if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
@@ -306,12 +312,13 @@ function renderHome(){
   var month=thisMonth();
   var inMonth=orders.filter(function(o){return fmtMonth(o.createdAt)===month&&(o.status==='shipped'||o.status==='tracking');});
   var sell=0;inMonth.forEach(function(o){sell+=num(o.sellKrw);});
+  var unsettled=0;orders.forEach(function(o){if(o.settled!=='정산'&&o.status!=='cancel')unsettled+=num(o.sellKrw);});
   box.innerHTML='<div class="home-greet">'+esc(todayQuote())+'</div>'
     +'<div class="secttl">📋 오늘 할 일</div>'+todoHtml
     +'<div class="secttl">💴 이번 달 ('+month+')</div>'
-    +'<div class="statgrid"><div class="stat"><div class="lab">매출</div><div class="val">'+won(sell)+'원</div></div><div class="stat"><div class="lab">출고 주문</div><div class="val">'+inMonth.length+'건</div></div></div>'
+    +'<div class="statgrid"><div class="stat"><div class="lab">매출</div><div class="val">'+won(sell)+'원</div></div><div class="stat"><div class="lab">출고 주문</div><div class="val">'+inMonth.length+'건</div></div><div class="stat"><div class="lab">미정산</div><div class="val" style="color:#e25d5d;">'+won(unsettled)+'원</div></div></div>'
     +'<div class="secttl">⚡ 빠른 시작</div>'
-    +'<div class="home-quick"><button class="actbtn solid" data-home-go="neworder">＋ 새 주문 등록</button><button class="actbtn" data-home-go="quote">💰 견적 내기</button><button class="actbtn" data-home-go="reply">💬 응대 문구</button></div>';
+    +'<div class="home-quick"><button class="actbtn solid" data-home-go="orders">📒 주문 관리</button><button class="actbtn" data-home-go="quote">💰 견적 내기</button><button class="actbtn" data-home-go="reply">💬 응대 문구</button></div>';
   box.querySelectorAll('[data-home-todo]').forEach(function(b){b.addEventListener('click',function(){
     var f=b.getAttribute('data-home-todo');setMode('manage');setTab('ledger');
     document.querySelectorAll('[data-filter]').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-filter')===f);});
@@ -319,7 +326,7 @@ function renderHome(){
   });});
   box.querySelectorAll('[data-home-go]').forEach(function(b){b.addEventListener('click',function(){
     var g=b.getAttribute('data-home-go');
-    if(g==='neworder'){setMode('manage');setTab('ledger');$('ord-form').classList.add('on');$('ord-form').scrollIntoView({block:'center'});}
+    if(g==='orders'){setMode('manage');setTab('ledger');}
     else if(g==='quote'){setMode('reply');setTab('quote');}
     else if(g==='reply'){setMode('reply');setTab('reply');}
   });});

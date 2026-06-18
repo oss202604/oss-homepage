@@ -92,66 +92,10 @@
 <button class="chip" data-filter="tracking">운송장</button>
 <button class="chip" data-filter="cancel">취소</button>
 </div>
-<button class="iconbtn" id="ord-add" title="새 주문 직접 등록">＋</button>
 <button class="iconbtn" id="trash-btn" title="휴지통">🗑</button>
 </div>
-<div class="saveform" id="ord-form">
-<h4>📒 새 주문 등록 <button class="x" id="ord-close" type="button">✕</button></h4>
-<div class="paste-box">
-<div class="lab">📋 손님이 보낸 정보 텍스트 붙여넣기 (통관·주소 자동 채움 + 단골 등록)</div>
-<textarea id="of-paste" placeholder="손님이 보낸 통관정보·주소 텍스트 그대로 붙여넣고 아래 버튼!"></textarea>
-<button class="parsebtn" id="of-parse" type="button">🔮 자동 채우기 + 단골 등록</button>
-</div>
-<div class="row">
-<div class="field"><label>판매처</label><select id="of-channel"><option>카톡</option><option>인스타</option><option>쓰레드</option><option>트위터</option><option>메루카리</option><option value="기타">기타(직접입력)</option></select><input id="of-channel-custom" placeholder="판매처 직접 입력" autocomplete="off" style="display:none;margin-top:6px;"></div>
-<div class="field"><label>수량</label><input id="of-qty" inputmode="numeric" value="1" autocomplete="off"></div>
-</div>
-<div class="row">
-<div class="field"><label>주문자</label><input id="of-customer" list="customer-list" autocomplete="off"><datalist id="customer-list"></datalist></div>
-<div class="field"><label>수취인</label><input id="of-recipient" autocomplete="off"></div>
-</div>
-<div class="field"><label>상품명</label><input id="of-item" autocomplete="off"></div>
-<div class="field"><label>옵션 (색상/사이즈, 선택)</label><input id="of-option" autocomplete="off"></div>
-<div class="field"><label>사입 링크 (선택)</label><input id="of-url" autocomplete="off" placeholder="https://..."></div>
-<div class="field"><label>사입처</label><input id="of-buyfrom" autocomplete="off" placeholder="예: 메루카리 / 라쿠텐 / 유니클로"></div>
-<div class="row">
-<div class="field"><label>사입가 (엔)</label><input id="of-buyyen" inputmode="numeric" autocomplete="off"></div>
-<div class="field"><label>사입날짜 (MMDD)</label><input id="of-paydate" inputmode="numeric" placeholder="0618" autocomplete="off"></div>
-</div>
-<div class="field"><label>결제수단</label>
-<div class="chips" id="of-paychips">
-<button type="button" class="chip" data-pay="현금">현금</button>
-<button type="button" class="chip" data-pay="라쿠텐카드">라쿠텐카드</button>
-<button type="button" class="chip" data-pay="페이페이">페이페이</button>
-<button type="button" class="chip" data-pay="메루카드">메루카드</button>
-</div>
-</div>
-<div class="row">
-<div class="field"><label>판매가 (원)</label><input id="of-sell" inputmode="numeric" autocomplete="off"></div>
-<div class="field"><label>정산가 (원)</label><input id="of-settle" inputmode="numeric" autocomplete="off"></div>
-</div>
-<div class="field"><label>비고</label>
-<div class="toggle-row" id="of-bigochips">
-<button type="button" class="chip on" data-bigo="구매대행">구매대행</button>
-<button type="button" class="chip" data-bigo="배송대행">배송대행</button>
-</div>
-</div>
-<div class="field"><label>증빙 (선택)</label>
-<div class="toggle-row" id="of-invchips">
-<button type="button" class="chip" data-inv="인보이스">인보이스</button>
-<button type="button" class="chip" data-inv="영수증">영수증</button>
-</div>
-</div>
-<div class="secttl" style="margin-top:4px;">📦 택배 정보 (붙여넣기로 자동 채움)</div>
-<div class="field"><label>통관부호</label><input id="of-customs" autocomplete="off"></div>
-<div class="row">
-<div class="field"><label>전화</label><input id="of-phone" autocomplete="off"></div>
-<div class="field"><label>우편번호</label><input id="of-zip" inputmode="numeric" autocomplete="off"></div>
-</div>
-<div class="field"><label>주소</label><textarea id="of-addr"></textarea></div>
-<div class="field"><label>배송메모 (선택)</label><input id="of-dmemo" autocomplete="off" placeholder="문 앞 등"></div>
-<button class="savebtn" id="ord-save" type="button">📒 장부에 저장</button>
-</div>
+<datalist id="customer-list"></datalist>
+<div class="saveform" id="ord-form" hidden></div>
 <div class="saveform" id="trash-panel">
 <h4>🗑 휴지통 <button class="x" id="trash-close" type="button">✕</button></h4>
 <div class="list" id="trash-list"></div>
@@ -198,11 +142,11 @@
 <div class="toast" id="toast">✅ 복사됐어요!</div>
 
 <!-- 스크립트는 순서대로: util → data → render → main → (온라인 주문 연동) -->
-<script src="js/util.js?v=9"></script>
-<script src="js/data.js?v=9"></script>
-<script src="js/render.js?v=9"></script>
-<script src="js/main.js?v=9"></script>
+<script src="js/util.js?v=10"></script>
+<script src="js/data.js?v=10"></script>
+<script src="js/render.js?v=10"></script>
+<script src="js/main.js?v=10"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/oss-sb.js?v=1"></script>
+<script src="js/oss-sb.js?v=2"></script>
 </body>
 </html>

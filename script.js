@@ -397,6 +397,8 @@ if (form && modal) {
     return {
       order_no: orderNo,
       type: isDelivery ? "delivery" : "purchase",
+      source: "web",
+      channel: "홈페이지",
       center_type: center ? center.value : null,
       applicant_name: data.get("name") || "",
       applicant_phone: data.get("phone") || "",

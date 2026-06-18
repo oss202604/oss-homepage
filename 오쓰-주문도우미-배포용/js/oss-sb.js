@@ -15,6 +15,20 @@
 
   /* 사이트 상태(한국어) → 폰앱 상태 키 */
   var WEB2APP = { '신규접수': 'req', '결제대기': 'reserve', '구매중': 'bought', '입고완료': 'office', '포장/측정': 'office', '배송중': 'shipped', '배송완료': 'tracking', '완료': 'tracking', '취소': 'cancel', '보류': 'reserve', '반품/교환': 'cancel' };
+  /* 폰앱 상태 → 사이트 상태(한국어) : 2-way 동기화용 (손님 주문조회에 반영) */
+  var APP2WEB = { req: '신규접수', reserve: '결제대기', bought: '구매중', office: '입고완료', shipped: '배송중', tracking: '배송완료', cancel: '취소' };
+
+  /* 폰앱에서 바꾼 진행상태·송장·정산을 손님 사이트(Supabase)에 반영 */
+  function pushUp(o) {
+    if (!loggedIn || !o || !o.dbId) return Promise.resolve(false);
+    var fields = { status: APP2WEB[o.status] || '신규접수' };
+    if (o.trackingNo) fields.tracking_no = o.trackingNo;
+    if (o.sellKrw) fields.sell_krw = o.sellKrw;
+    if (o.settleKrw) fields.settle_krw = o.settleKrw;
+    if (o.settled) fields.settled = o.settled;
+    return sb.from('applications').update(fields).eq('id', o.dbId)
+      .then(function (res) { return !res.error; }, function () { return false; });
+  }
 
   function optText(p) {
     if (p && p.options && p.options.length) return p.options.map(function (o) { return (o.option || '') + (o.qty > 1 ? ' x' + o.qty : ''); }).filter(Boolean).join(', ');
@@ -33,7 +47,7 @@
       customer: r.applicant_name || r.receiver_name || '(이름없음)',
       recipient: r.receiver_name || r.applicant_name || '',
       channel: r.channel || '홈페이지',
-      itemName: itemName, itemOption: opt, itemUrl: first.url || '', qty: qty,
+      itemName: itemName, itemOption: opt, itemUrl: first.url || '', images: prods.map(function (p) { return p && p.image; }).filter(Boolean), qty: qty,
       buyFrom: '', buyYen: Number(first.price) || 0, payCard: '', payDate: '',
       sellKrw: 0, settleKrw: 0, shipExtraKrw: 0,
       bigo: (r.type === 'delivery' ? '배송대행' : '구매대행'), invoice: '',
@@ -132,5 +146,5 @@
   if (document.readyState === 'complete' || document.readyState === 'interactive') init();
   else document.addEventListener('DOMContentLoaded', init);
 
-  window.OSSWeb = { syncDown: syncDown, login: showLogin, rowToOrder: rowToOrder };
+  window.OSSWeb = { syncDown: syncDown, login: showLogin, rowToOrder: rowToOrder, pushUp: pushUp };
 })();
