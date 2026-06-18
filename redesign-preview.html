@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OSS 리디자인 시안</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --cream:#FFFBF8; --peach:#FFEDE3; --peach2:#FFF5EF; --pink:#FFE0E8; --pink-ink:#E06A8B;
+    --coral:#FF7E66; --o:#F46A2C; --o-dark:#C24E18; --ink:#2E251F; --mute:#9C9088; --hint:#BCAFA6;
+    --line:#F1E5DB; --mint:#DCF2EA; --mint-ink:#1F9D6B; --lav:#ECE9FB; --lav-ink:#6F63C9; --white:#fff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);font-family:"Noto Sans KR",sans-serif;color:var(--ink);line-height:1.5;}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 18px;}
+  .ph{background:repeating-linear-gradient(45deg,#FBEEE6,#FBEEE6 10px,#F6E5DA 10px,#F6E5DA 20px);border:1.5px dashed #E8C8B4;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#B07A57;font-size:12.5px;font-weight:500;gap:3px;padding:14px;}
+  .ph b{font-size:13px;color:#9A5E3C;}
+  .ph span{font-size:11px;color:#C09277;}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:999px;padding:11px 22px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;text-decoration:none;}
+  .btn-o{background:var(--o);color:#fff;box-shadow:0 8px 18px rgba(244,106,44,.25);}
+  .btn-ghost{background:#fff;color:var(--o);border:1.5px solid #F6D8C6;}
+  .sec{padding:30px 0;}
+  .sec-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;}
+  .sec-h h2{font-size:21px;font-weight:900;letter-spacing:-.4px;}
+  .sec-h h2 small{display:block;font-size:12px;font-weight:500;color:var(--mute);margin-top:3px;letter-spacing:0;}
+  .sec-h a{font-size:12.5px;color:var(--mute);text-decoration:none;}
+
+  /* 상단 */
+  .util{background:#fff;border-bottom:1px solid var(--line);font-size:12px;color:var(--mute);}
+  .util .wrap{display:flex;justify-content:space-between;align-items:center;height:34px;}
+  .util a{color:var(--mute);text-decoration:none;margin-left:14px;}
+  .head{background:#fff;}
+  .head .wrap{display:flex;align-items:center;gap:22px;padding-top:16px;padding-bottom:16px;}
+  .logo{display:flex;flex-direction:column;line-height:1;}
+  .logo .tag{font-size:10px;color:var(--coral);font-weight:700;letter-spacing:1px;}
+  .logo .nm{font-size:30px;font-weight:900;color:var(--ink);letter-spacing:-1px;}
+  .logo .nm i{color:var(--o);font-style:normal;}
+  .search{flex:1;display:flex;align-items:center;background:var(--peach2);border:2px solid #FBE2D2;border-radius:999px;padding:5px 6px 5px 20px;max-width:560px;}
+  .search input{flex:1;border:none;background:transparent;font-family:inherit;font-size:14px;outline:none;color:var(--ink);}
+  .search button{border:none;background:var(--o);color:#fff;border-radius:999px;width:42px;height:42px;font-size:17px;cursor:pointer;}
+  .hicons{display:flex;gap:16px;font-size:13px;color:var(--mute);}
+  .hicons a{color:var(--mute);text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .hicons .ic{font-size:21px;}
+  .gnb{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
+  .gnb .wrap{display:flex;gap:8px;align-items:center;height:54px;overflow-x:auto;}
+  .gnb a{white-space:nowrap;text-decoration:none;color:var(--ink);font-weight:700;font-size:14.5px;padding:8px 16px;border-radius:999px;}
+  .gnb a.on{background:var(--peach);color:var(--o-dark);}
+  .gnb a .hot{font-size:9px;color:#fff;background:var(--coral);border-radius:8px;padding:1px 5px;margin-left:3px;vertical-align:top;}
+
+  /* 히어로 */
+  .hero{display:grid;grid-template-columns:1.9fr 1fr;gap:14px;margin-top:22px;}
+  .hero-main{position:relative;border-radius:22px;overflow:hidden;background:linear-gradient(135deg,#FFE7D9,#FFD9E2 70%,#FFE7F0);min-height:300px;padding:34px;display:flex;flex-direction:column;justify-content:center;}
+  .hero-main .kk{position:absolute;right:18px;bottom:0;width:210px;height:240px;}
+  .hero-main h1{font-size:30px;font-weight:900;letter-spacing:-1px;line-height:1.25;color:#3A2A22;}
+  .hero-main h1 em{font-style:normal;color:var(--o);}
+  .hero-main p{margin:12px 0 20px;font-size:14.5px;color:#8A6F60;font-weight:500;}
+  .hero-side{display:grid;grid-template-rows:1fr 1fr;gap:14px;}
+  .hero-side .ph{min-height:0;}
+  .dots{display:flex;gap:6px;margin-top:18px;}
+  .dots i{width:8px;height:8px;border-radius:50%;background:#fff8;}.dots i.on{background:#fff;width:20px;border-radius:5px;}
+
+  /* 스텝 */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .step{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 18px;text-align:center;}
+  .step .n{width:46px;height:46px;border-radius:50%;background:var(--peach);color:var(--o);font-weight:900;font-size:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+  .step h3{font-size:16px;font-weight:700;margin-bottom:6px;}
+  .step p{font-size:13px;color:var(--mute);}
+
+  /* 서비스 2카드 */
+  .svc{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .svc-card{border-radius:22px;overflow:hidden;border:1px solid var(--line);background:#fff;}
+  .svc-card .body{padding:22px;}
+  .svc-card h3{font-size:20px;font-weight:900;letter-spacing:-.5px;}
+  .svc-card p{font-size:13.5px;color:var(--mute);margin:8px 0 16px;line-height:1.6;}
+  .tagrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+  .tag{font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:999px;background:var(--mint);color:var(--mint-ink);}
+  .tag.p{background:var(--pink);color:var(--pink-ink);}
+  .tag.l{background:var(--lav);color:var(--lav-ink);}
+
+  /* 쇼핑몰 그리드 */
+  .malls{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+  .mall{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center;}
+  .mall .ph{min-height:62px;margin-bottom:8px;border-radius:12px;}
+  .mall p{font-size:12.5px;font-weight:700;}
+  .mall span{font-size:11px;color:var(--mute);}
+
+  /* 쿠폰 배너 */
+  .coupon{background:linear-gradient(115deg,#FF8E76,#FF6F8B);border-radius:22px;padding:26px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px;color:#fff;}
+  .coupon h3{font-size:23px;font-weight:900;letter-spacing:-.5px;}
+  .coupon p{font-size:13.5px;opacity:.95;margin-top:6px;}
+  .coupon .gift{font-size:60px;line-height:1;}
+  .coupon .btn{background:#fff;color:#E0556F;}
+
+  /* 후기 */
+  .reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .rv{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;}
+  .rv .stars{color:#FFB23E;font-size:14px;}
+  .rv .ph{height:120px;margin:10px 0;border-radius:12px;}
+  .rv p{font-size:13px;color:#5C5048;line-height:1.6;}
+  .rv .who{font-size:12px;color:var(--mute);margin-top:8px;}
+
+  /* 안심 */
+  .trust{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .tr{background:var(--peach2);border-radius:18px;padding:22px;text-align:center;}
+  .tr .ic{font-size:32px;}
+  .tr h4{font-size:15px;font-weight:700;margin:8px 0 5px;}
+  .tr p{font-size:12.5px;color:var(--mute);}
+
+  /* 푸터 */
+  .foot{background:#2E251F;color:#C9BDB4;margin-top:34px;padding:30px 0;font-size:12.5px;}
+  .foot .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .foot b{color:#fff;font-size:18px;font-weight:900;}
+
+  .note{background:#FFF8E6;border:1px solid #F3E2B0;border-radius:14px;padding:14px 18px;font-size:13px;color:#8A6D2A;margin:22px 0;}
+</style>
+</head>
+<body>
+
+  <!-- 상단 유틸 -->
+  <div class="util"><div class="wrap"><span>🇯🇵 일본 현지인이 직접 운영하는 구매대행 · 배송대행</span><nav><a>로그인</a><a>회원가입</a><a>고객센터</a><a>카카오톡 문의</a></nav></div></div>
+
+  <!-- 헤더 -->
+  <header class="head"><div class="wrap">
+    <div class="logo"><span class="tag">Simply Trusted!</span><span class="nm">OSS<i>.</i></span></div>
+    <div class="search"><input placeholder="사고 싶은 일본 상품 링크(URL)를 붙여넣어 보세요" /><button>🔍</button></div>
+    <div class="hicons"><a><span class="ic">♡</span>찜</a><a><span class="ic">👤</span>마이</a><a><span class="ic">🛒</span>주문</a></div>
+  </div></header>
+
+  <!-- 카테고리 -->
+  <nav class="gnb"><div class="wrap">
+    <a class="on">🏠 홈</a><a>구매대행 신청<span class="hot">HOT</span></a><a>배송대행 신청<span class="hot">HOT</span></a><a>이용가이드</a><a>예상비용</a><a>공지사항</a><a>주문조회</a>
+  </div></nav>
+
+  <div class="wrap">
+
+    <!-- 히어로 -->
+    <section class="hero">
+      <div class="hero-main">
+        <h1>일본 쇼핑,<br /><em>링크만 보내면</em> 끝!</h1>
+        <p>메루카리·라쿠텐·야후옥션… 어디든 OK<br />주문부터 검수·배송까지 한 번에 도와드려요</p>
+        <div><a class="btn btn-o">지금 주문하기 →</a></div>
+        <div class="dots"><i class="on"></i><i></i><i></i></div>
+        <div class="ph kk"><b>마스코트/배너 PNG</b><span>투명배경 210×240</span><span>택배상자 캐릭터</span></div>
+      </div>
+      <div class="hero-side">
+        <div class="ph"><b>서브배너 ①</b><span>460×150</span><span>가입쿠폰 이벤트</span></div>
+        <div class="ph"><b>서브배너 ②</b><span>460×150</span><span>이달의 인기상품</span></div>
+      </div>
+    </section>
+
+    <!-- 이용 스텝 -->
+    <section class="sec">
+      <div class="sec-h"><h2>이렇게 이용해요 <small>3분이면 주문 끝, 어렵지 않아요</small></h2></div>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><h3>링크 보내기</h3><p>사고 싶은 상품 URL을<br />붙여넣고 주문서 작성</p></div>
+        <div class="step"><div class="n">2</div><h3>견적 확인·결제</h3><p>예상 금액 확인 후<br />간편하게 입금</p></div>
+        <div class="step"><div class="n">3</div><h3>집까지 배송</h3><p>검수사진 확인하고<br />한국 집에서 받기</p></div>
+      </div>
+    </section>
+
+    <!-- 서비스 2카드 -->
+    <section class="sec">
+      <div class="svc">
+        <div class="svc-card">
+          <div class="ph" style="height:150px;border-radius:0;"><b>구매대행 이미지</b><span>가로 500×150 · 쇼핑백/상품 느낌</span></div>
+          <div class="body"><h3>🛍️ 구매대행</h3><p>일본 사이트에서 대신 구매해 한국까지. 링크만 주시면 끝!</p>
+            <div class="tagrow"><span class="tag">수수료 3%</span><span class="tag p">검수사진</span><span class="tag l">합배송</span></div>
+            <a class="btn btn-o">구매대행 신청 →</a></div>
+        </div>
+        <div class="svc-card">
+          <div class="ph" style="height:150px;border-radius:0;"><b>배송대행 이미지</b><span>가로 500×150 · 택배상자 느낌</span></div>
+          <div class="body"><h3>📦 배송대행</h3><p>일본에서 직접 산 물건, 우리 배대지로 받아 한국까지 안전하게.</p>
+            <div class="tagrow"><span class="tag">무게 실측</span><span class="tag p">묶음배송</span><span class="tag l">실시간 추적</span></div>
+            <a class="btn btn-ghost">배송대행 신청 →</a></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 인기 쇼핑몰 -->
+    <section class="sec">
+      <div class="sec-h"><h2>인기 일본 쇼핑몰 <small>어디든 대신 사드려요</small></h2><a>전체보기 ›</a></div>
+      <div class="malls">
+        <div class="mall"><div class="ph"><b>로고</b><span>120×120</span></div><p>메루카리</p><span>중고·한정</span></div>
+        <div class="mall"><div class="ph"><b>로고</b><span>120×120</span></div><p>라쿠텐</p><span>종합몰</span></div>
+        <div class="mall"><div class="ph"><b>로고</b><span>120×120</span></div><p>야후옥션</p><span>경매</span></div>
+        <div class="mall"><div class="ph"><b>로고</b><span>120×120</span></div><p>아마존JP</p><span>빠른배송</span></div>
+        <div class="mall"><div class="ph"><b>로고</b><span>120×120</span></div><p>조조타운</p><span>패션</span></div>
+      </div>
+    </section>
+
+    <!-- 가입 쿠폰 배너 -->
+    <section class="sec">
+      <div class="coupon">
+        <div><h3>회원가입하면 배송비 쿠폰 3장 🎁</h3><p>3,000원 × 3장 · 가입 즉시 지급 · 한 달간 사용 가능</p></div>
+        <a class="btn">회원가입하고 받기 →</a>
+      </div>
+    </section>
+
+    <!-- 예상비용 -->
+    <section class="sec">
+      <div class="sec-h"><h2>예상비용 미리 계산 <small>상품가·무게만 넣으면 바로 견적</small></h2></div>
+      <div class="ph" style="height:120px;"><b>계산기 영역</b><span>이미지 아님 · 입력하면 실시간 계산되는 기능 박스</span></div>
+    </section>
+
+    <!-- 후기 -->
+    <section class="sec">
+      <div class="sec-h"><h2>고객 후기 <small>실제 이용 후기예요 ⭐</small></h2><a>후기 작성하기 ›</a></div>
+      <div class="reviews">
+        <div class="rv"><div class="stars">★★★★★</div><div class="ph"><b>후기 사진(선택)</b><span>회원 업로드</span></div><p>일본어 하나도 몰라도 링크만 보내면 다 해주셔서 너무 편했어요!</p><p class="who">김*은 · 메루카리 구매대행</p></div>
+        <div class="rv"><div class="stars">★★★★★</div><div class="ph"><b>후기 사진(선택)</b><span>회원 업로드</span></div><p>검수 사진 보내주셔서 안심하고 받았어요. 포장도 꼼꼼!</p><p class="who">이*리 · 배송대행</p></div>
+        <div class="rv"><div class="stars">★★★★★</div><div class="ph"><b>후기 사진(선택)</b><span>회원 업로드</span></div><p>수수료도 저렴하고 답변이 정말 빨라요. 또 이용할게요 :)</p><p class="who">박*호 · 라쿠텐 구매대행</p></div>
+      </div>
+    </section>
+
+    <!-- 안심 포인트 -->
+    <section class="sec">
+      <div class="trust">
+        <div class="tr"><div class="ic">📸</div><h4>검수사진 제공</h4><p>받기 전에 사진으로 먼저 확인</p></div>
+        <div class="tr"><div class="ic">🚚</div><h4>실시간 배송추적</h4><p>지금 어디쯤인지 바로 확인</p></div>
+        <div class="tr"><div class="ic">💬</div><h4>카톡 1:1 상담</h4><p>궁금하면 언제든 물어보세요</p></div>
+      </div>
+    </section>
+
+    <div class="note">📌 점선 박스 = 사장님이 만들 이미지 자리예요. 각 박스에 적힌 크기·내용대로 캔바 등에서 만들어 주시면 그대로 넣어드려요. (없어도 사이트는 동작해요)</div>
+
+  </div>
+
+  <!-- 푸터 -->
+  <footer class="foot"><div class="wrap">
+    <div><b>OSS <span style="font-size:12px;font-weight:400;">オッス</span></b><p style="margin-top:8px;">일본 현지인이 직접 운영하는 구매대행 · 배송대행지</p></div>
+    <div>상호 OSS · 대표 송상익 · 사업자등록번호 000-00-00000<br />통신판매업신고 0000-지역-0000 · 입금 농협 302-2154-8330-21</div>
+  </div></footer>
+
+</body>
+</html>
