@@ -49,9 +49,18 @@ p { word-break: keep-all; }
 .utility-bar { background: #fff; color: var(--muted); font-size: 12.5px; border-bottom: 1px solid var(--line); }
 .utility-inner { display: flex; justify-content: space-between; align-items: center; height: 38px; }
 .utility-left { color: var(--muted); }
+.utility-right { display: flex; align-items: center; }
 .utility-right a { color: var(--muted); }
 .utility-right a:hover { color: var(--blue); }
 .utility-right .divider { margin: 0 10px; color: var(--line); }
+/* 상단바 SNS 아이콘 (로그인 왼쪽) */
+.utility-sns { display: inline-flex; align-items: center; gap: 2px; }
+.utility-sns .usns { display: inline-flex; align-items: center; justify-content: center; width: 27px; height: 27px; border-radius: 50%; color: var(--muted); transition: .15s; }
+.utility-sns .usns [data-lucide] { width: 16px; height: 16px; }
+.utility-sns .usns:hover { color: #fff; }
+.utility-sns .usns[data-sns="instagram"]:hover { background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: #fff; }
+.utility-sns .usns[data-sns="kakao"]:hover { background: #FEE500; color: #3c1e1e; }
+.utility-sns .usns[data-sns="threads"]:hover { background: #000; color: #fff; }
 
 /* ===== 헤더 (화이트) ===== */
 .site-header { background: #fff; }
@@ -312,6 +321,16 @@ p { word-break: keep-all; }
 .modal-box h3 { font-size: 22px; color: var(--navy); margin-bottom: 8px; }
 .modal-sub { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
 .modal-box pre { background: var(--bg); border-radius: 10px; padding: 16px; font-size: 13px; white-space: pre-wrap; word-break: break-all; margin-bottom: 18px; font-family: "Noto Sans KR", monospace; }
+/* 예상비용 계산기 팝업 (넓은 모달 + 닫기 버튼) */
+.calc-modal-box { max-width: 760px; position: relative; }
+.calc-modal-box h3 { display: flex; align-items: center; gap: 8px; }
+.modal-x { position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 28px; line-height: 1; color: var(--muted); cursor: pointer; padding: 4px 8px; border-radius: 8px; }
+.modal-x:hover { color: var(--text); background: var(--bg); }
+/* 로그인/회원가입 결과 팝업 */
+.auth-modal-box { max-width: 400px; text-align: center; position: relative; }
+.am-ico { font-size: 46px; line-height: 1; margin-bottom: 10px; }
+.auth-modal-box h3 { margin-bottom: 6px; }
+.auth-modal-box .modal-sub { margin-bottom: 22px; }
 
 /* ===== 현재 메뉴 표시 ===== */
 .main-menu a.active { color: var(--blue); font-weight: 700; }

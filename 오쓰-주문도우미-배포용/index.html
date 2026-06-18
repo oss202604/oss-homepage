@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="오쓰 응대">
+<meta name="theme-color" content="#1b2330">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="css/style.css">
+<title>OSS 주문 도우미</title>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="ttl"><b>OSS</b> 주문 도우미 🧮</div>
+<div class="sub">견적·배송비·응대 + 주문 장부·매출 · 폰 저장 + 시트 자동백업 ☁️</div>
+<div class="modes">
+<button class="mode on" data-mode="home">🏠 홈</button>
+<button class="mode" data-mode="reply">💬 응대 도구</button>
+<button class="mode" data-mode="manage">📒 주문 관리</button>
+</div>
+</header>
+
+<!-- ── 응대 도구 모드 탭 ── -->
+<div class="tabs" data-tabs="reply">
+<button class="tab on" data-tab="quote">💰견적</button>
+<button class="tab" data-tab="ship">📦배송비</button>
+<button class="tab" data-tab="reply">💬응대</button>
+<button class="tab" data-tab="customer">👤단골</button>
+</div>
+
+<!-- ── 주문 관리 모드 탭 ── -->
+<div class="tabs" data-tabs="manage" style="display:none;">
+<button class="tab on" data-tab="ledger">📒 주문 장부</button>
+<button class="tab" data-tab="sales">💴 매출 정리</button>
+</div>
+
+<!-- ─────── 🏠 홈 ─────── -->
+<section class="panel on" data-panel="home"><div id="home-body"></div></section>
+
+<!-- ─────── 💰 견적 ─────── -->
+<section class="panel" data-panel="quote">
+<div class="field"><label>상품가 합계 (엔)</label><input id="q-price" inputmode="numeric" placeholder="예: 10,000" autocomplete="off"><div class="hint">엔화만 넣으면 상품가 + 수수료 3%가 자동 계산돼요.<br>배송비는 출고 때 무게 보고 별도로 안내돼요 (📦배송비 탭).</div></div>
+<!-- 주문 저장은 '주문 관리' 탭에서 (견적 탭은 계산·복사만) -->
+</section>
+
+<!-- ─────── 📦 배송비 ─────── -->
+<section class="panel" data-panel="ship">
+<div class="freehelp">무게를 고르면 아래 <b>미리보기</b>에 배송비 안내가 떠요. (1엔 = 10원)</div>
+<div class="frames">
+<button class="framebtn" data-kg="1">1kg 이하<small>900엔 · 9,000원</small></button>
+<button class="framebtn" data-kg="2">2kg 이하<small>1,100엔 · 11,000원</small></button>
+<button class="framebtn" data-kg="3">3kg 이하<small>1,350엔 · 13,500원</small></button>
+<button class="framebtn" data-kg="4">4kg 이하<small>1,600엔 · 16,000원</small></button>
+<button class="framebtn" data-kg="5">5kg 이하<small>1,850엔 · 18,500원</small></button>
+<button class="framebtn" data-kg="custom" style="grid-column:1 / -1;">⚖️ 6kg 이상 · 직접 입력</button>
+</div>
+<input id="ship-custom" inputmode="numeric" placeholder="배송비 ¥ 직접 입력 (예: 2200)" autocomplete="off" style="display:none;margin-top:8px;width:100%;padding:11px 12px;font-size:16px;border:1.5px solid var(--line);border-radius:10px;color:var(--navy);">
+</section>
+
+<!-- ─────── 💬 응대 ─────── -->
+<section class="panel" data-panel="reply">
+<div class="chips" id="reply-chips">
+<button class="chip on" data-cat="msg">💌 응대 문구</button>
+<button class="chip" data-cat="faq">❓ FAQ</button>
+</div>
+<div class="freehelp" id="reply-help">상황을 고르면 답변이 <b>미리보기</b>에 떠요. <b>[대괄호]</b>는 직접 채워서 복사하세요 ✏️</div>
+<div class="frames" id="reply-frames"></div>
+</section>
+
+<!-- ─────── 👤 단골 ─────── -->
+<section class="panel" data-panel="customer">
+<div class="freehelp">같은 손님(이름·통관부호·휴대폰·주소 동일)의 <b>출고완료 주문이 3건 이상</b> 쌓이면 자동으로 단골로 등록돼요. <b>통관부호</b>는 가려져 있고 카드 누르면 펼쳐져요.</div>
+<div class="list" id="cus-list"></div>
+</section>
+
+<!-- ─────── 📒 주문 장부 ─────── -->
+<section class="panel" data-panel="ledger">
+<div class="todo" id="todo-summary"></div>
+<div class="toolbar">
+<div class="chips" style="flex:1;margin:0;flex-wrap:nowrap;overflow-x:auto;">
+<button class="chip on" data-filter="all">전체</button>
+<button class="chip" data-filter="req">사입요청</button>
+<button class="chip" data-filter="reserve">예약</button>
+<button class="chip" data-filter="bought">사입완료</button>
+<button class="chip" data-filter="office">사무실도착</button>
+<button class="chip" data-filter="shipped">출고완료</button>
+<button class="chip" data-filter="tracking">운송장</button>
+<button class="chip" data-filter="cancel">취소</button>
+</div>
+<button class="iconbtn" id="ord-add" title="새 주문 직접 등록">＋</button>
+<button class="iconbtn" id="trash-btn" title="휴지통">🗑</button>
+</div>
+<div class="saveform" id="ord-form">
+<h4>📒 새 주문 등록 <button class="x" id="ord-close" type="button">✕</button></h4>
+<div class="paste-box">
+<div class="lab">📋 손님이 보낸 정보 텍스트 붙여넣기 (통관·주소 자동 채움 + 단골 등록)</div>
+<textarea id="of-paste" placeholder="손님이 보낸 통관정보·주소 텍스트 그대로 붙여넣고 아래 버튼!"></textarea>
+<button class="parsebtn" id="of-parse" type="button">🔮 자동 채우기 + 단골 등록</button>
+</div>
+<div class="row">
+<div class="field"><label>판매처</label><select id="of-channel"><option>카톡</option><option>인스타</option><option>쓰레드</option><option>트위터</option><option>메루카리</option><option value="기타">기타(직접입력)</option></select><input id="of-channel-custom" placeholder="판매처 직접 입력" autocomplete="off" style="display:none;margin-top:6px;"></div>
+<div class="field"><label>수량</label><input id="of-qty" inputmode="numeric" value="1" autocomplete="off"></div>
+</div>
+<div class="row">
+<div class="field"><label>주문자</label><input id="of-customer" list="customer-list" autocomplete="off"><datalist id="customer-list"></datalist></div>
+<div class="field"><label>수취인</label><input id="of-recipient" autocomplete="off"></div>
+</div>
+<div class="field"><label>상품명</label><input id="of-item" autocomplete="off"></div>
+<div class="field"><label>옵션 (색상/사이즈, 선택)</label><input id="of-option" autocomplete="off"></div>
+<div class="field"><label>사입 링크 (선택)</label><input id="of-url" autocomplete="off" placeholder="https://..."></div>
+<div class="field"><label>사입처</label><input id="of-buyfrom" autocomplete="off" placeholder="예: 메루카리 / 라쿠텐 / 유니클로"></div>
+<div class="row">
+<div class="field"><label>사입가 (엔)</label><input id="of-buyyen" inputmode="numeric" autocomplete="off"></div>
+<div class="field"><label>사입날짜 (MMDD)</label><input id="of-paydate" inputmode="numeric" placeholder="0618" autocomplete="off"></div>
+</div>
+<div class="field"><label>결제수단</label>
+<div class="chips" id="of-paychips">
+<button type="button" class="chip" data-pay="현금">현금</button>
+<button type="button" class="chip" data-pay="라쿠텐카드">라쿠텐카드</button>
+<button type="button" class="chip" data-pay="페이페이">페이페이</button>
+<button type="button" class="chip" data-pay="메루카드">메루카드</button>
+</div>
+</div>
+<div class="row">
+<div class="field"><label>판매가 (원)</label><input id="of-sell" inputmode="numeric" autocomplete="off"></div>
+<div class="field"><label>정산가 (원)</label><input id="of-settle" inputmode="numeric" autocomplete="off"></div>
+</div>
+<div class="field"><label>비고</label>
+<div class="toggle-row" id="of-bigochips">
+<button type="button" class="chip on" data-bigo="구매대행">구매대행</button>
+<button type="button" class="chip" data-bigo="배송대행">배송대행</button>
+</div>
+</div>
+<div class="field"><label>증빙 (선택)</label>
+<div class="toggle-row" id="of-invchips">
+<button type="button" class="chip" data-inv="인보이스">인보이스</button>
+<button type="button" class="chip" data-inv="영수증">영수증</button>
+</div>
+</div>
+<div class="secttl" style="margin-top:4px;">📦 택배 정보 (붙여넣기로 자동 채움)</div>
+<div class="field"><label>통관부호</label><input id="of-customs" autocomplete="off"></div>
+<div class="row">
+<div class="field"><label>전화</label><input id="of-phone" autocomplete="off"></div>
+<div class="field"><label>우편번호</label><input id="of-zip" inputmode="numeric" autocomplete="off"></div>
+</div>
+<div class="field"><label>주소</label><textarea id="of-addr"></textarea></div>
+<div class="field"><label>배송메모 (선택)</label><input id="of-dmemo" autocomplete="off" placeholder="문 앞 등"></div>
+<button class="savebtn" id="ord-save" type="button">📒 장부에 저장</button>
+</div>
+<div class="saveform" id="trash-panel">
+<h4>🗑 휴지통 <button class="x" id="trash-close" type="button">✕</button></h4>
+<div class="list" id="trash-list"></div>
+</div>
+<input id="ord-search" placeholder="🔍 손님·상품·통관·전화·송장 검색" autocomplete="off" style="width:100%;padding:10px 12px;font-size:14px;border:1.5px solid var(--line);border-radius:10px;margin:2px 0 10px;">
+<div class="list" id="ord-list"></div>
+</section>
+
+<!-- ─────── 💴 매출 정리 ─────── -->
+<section class="panel" data-panel="sales">
+<div class="field"><label>월 선택</label>
+<select id="sales-month"></select>
+<div class="hint">출고완료·운송장입력 상태 주문 기준으로 집계해요.</div>
+</div>
+<div class="statgrid">
+<div class="stat"><div class="lab">총 판매가</div><div class="val" id="st-total">0원</div></div>
+<div class="stat"><div class="lab">주문 건수</div><div class="val" id="st-count">0건</div></div>
+<div class="stat"><div class="lab">정산가 합계</div><div class="val" id="st-goods">0원</div></div>
+<div class="stat"><div class="lab">사입비 합계</div><div class="val" id="st-fee">¥0</div></div>
+</div>
+<div class="freehelp" style="margin-bottom:6px;">📡 채널별 주문 건수</div>
+<div class="bars" id="st-bars">데이터 없음</div>
+<button class="actbtn solid" id="st-csv" type="button">📥 이 달 주문 CSV 내보내기</button>
+<div class="freehelp" style="margin:14px 0 6px;">☁️ <b>자동 백업</b> — 주문·단골·휴지통이 바뀔 때마다 시트에 자동 저장돼요. 폰을 잃거나 새 폰에서도 아래 버튼으로 통째로 복원돼요.</div>
+<button class="actbtn solid" id="st-cloud-restore" type="button">☁️ 시트 백업에서 복원</button>
+<button class="actbtn" id="st-backup" type="button">📦 파일로 백업 (JSON 저장)</button>
+<button class="actbtn" id="st-restore" type="button">♻️ 파일에서 복원 (JSON)</button>
+<input type="file" id="st-file" accept="application/json,.json" style="display:none;">
+</section>
+
+<div class="pvwrap" id="pvwrap">
+<div class="pvlabel"><span>👀 미리보기 <small style="color:var(--mute)">(직접 고쳐도 OK ✏️)</small></span><button class="minireset" id="reset" type="button">↺ 비우기</button></div>
+<textarea class="preview" id="output" spellcheck="false"></textarea>
+</div>
+</div>
+
+<div class="actions" id="actions">
+<div class="inner">
+<button class="backbtn" id="backbtn" type="button">← 뒤로</button>
+<button class="copybtn" id="copy" type="button">📋 복사하기</button>
+</div>
+</div>
+
+<div class="toast" id="toast">✅ 복사됐어요!</div>
+
+<!-- 스크립트는 순서대로: util → data → render → main → (온라인 주문 연동) -->
+<script src="js/util.js?v=9"></script>
+<script src="js/data.js?v=9"></script>
+<script src="js/render.js?v=9"></script>
+<script src="js/main.js?v=9"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/oss-sb.js?v=1"></script>
+</body>
+</html>

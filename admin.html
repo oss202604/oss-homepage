@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=17" />
-  <link rel="stylesheet" href="admin.css?v=10" />
+  <link rel="stylesheet" href="admin.css?v=11" />
 </head>
 <body class="admin-body">
   <!-- 상단 바 -->
@@ -104,13 +104,14 @@
 
       <!-- ===== 회원관리 ===== -->
       <section class="admin-page" id="page-members">
-        <h2 class="admin-page-title">회원관리</h2>
+        <h2 class="admin-page-title">회원관리 <span id="memberCount" style="font-size:14px;font-weight:400;color:var(--muted);"></span></h2>
+        <p class="form-note" id="memberHint" style="text-align:left;margin:0 0 14px;">등급·역할 변경과 매니저 권한 부여는 <b>마스터관리자</b>만 할 수 있어요.</p>
         <div class="dash-panel">
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr><th>이름</th><th>연락처</th><th>이메일</th><th>가입일</th><th>누적 신청</th></tr></thead>
+              <thead><tr><th>아이디</th><th>이름</th><th>연락처</th><th>이메일</th><th>등급</th><th>역할</th><th>매니저 권한</th><th>가입일</th><th>최근로그인</th></tr></thead>
               <tbody id="memberRows">
-                <tr><td colspan="5" class="empty">회원 기능은 2단계(회원가입/로그인)에서 연동됩니다.</td></tr>
+                <tr><td colspan="9" class="empty">불러오는 중…</td></tr>
               </tbody>
             </table>
           </div>
@@ -318,8 +319,8 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=6"></script>
-  <script src="admin.js?v=8"></script>
+  <script src="supabase.js?v=7"></script>
+  <script src="admin.js?v=9"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

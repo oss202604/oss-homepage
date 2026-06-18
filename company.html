@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OSS(オッス) | 일본 현지인 구매대행 · 배송대행 회사소개</title>
+<meta name="description" content="OSS(オッス)는 일본 현지인이 직접 운영하는 구매대행·배송대행지(배대지) 전문 기업입니다. 메루카리·라쿠텐·야후옥션·아마존JP 상품을 한국까지 안전하게." />
+
+<!-- ============================================================
+  독립형 회사소개 페이지 (company.html)
+  - CSS / JS 전부 이 파일 한 장에 내장되어 있습니다.
+  - 기존 styles.css / script.js 에 전혀 의존하지 않습니다.
+  - 그대로 복사해 넣으면 바로 동작합니다.
+============================================================ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+<style>
+/* ===== 디자인 토큰 ===== */
+:root{
+  --ink:#1a1d24;        /* 본문 텍스트 */
+  --ink-soft:#5a616e;   /* 보조 텍스트 */
+  --line:#e7e9ee;       /* 경계선 */
+  --bg:#ffffff;         /* 기본 배경 */
+  --bg-soft:#f6f7f9;    /* 옅은 섹션 배경 */
+  --accent:#ffd400;     /* 포인트(브랜드 옐로) — 절제해서 사용 */
+  --accent-ink:#11141a; /* 옐로 위 텍스트 */
+  --radius:16px;
+  --maxw:1180px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--ink);background:var(--bg);line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+.wrap{width:min(var(--maxw),100% - 40px);margin:0 auto}
+
+/* ===== 헤더 / 내비 ===== */
+.site-header{
+  position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);
+  backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid var(--line);
+}
+.nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+.brand{display:flex;align-items:baseline;gap:8px}
+.brand .mark{font-size:24px;font-weight:900;letter-spacing:-.5px}
+.brand .mark b{
+  background:var(--accent);color:var(--accent-ink);
+  padding:0 8px;border-radius:7px;
+}
+.brand .jp{font-size:12px;color:var(--ink-soft);font-weight:700}
+.menu{display:flex;align-items:center;gap:34px;list-style:none}
+.menu a{font-size:15px;font-weight:500;color:var(--ink-soft);transition:color .15s}
+.menu a:hover{color:var(--ink)}
+.nav-cta{
+  display:inline-flex;align-items:center;height:42px;padding:0 20px;
+  border-radius:999px;background:var(--ink);color:#fff;font-weight:700;font-size:14px;
+  transition:transform .15s,background .15s;
+}
+.nav-cta:hover{background:#000;transform:translateY(-1px)}
+.nav-toggle{display:none;background:none;border:none;font-size:26px;cursor:pointer;color:var(--ink)}
+
+/* ===== 히어로 ===== */
+.hero{padding:96px 0 84px;text-align:center}
+.eyebrow{
+  display:inline-block;font-size:13px;font-weight:700;letter-spacing:2px;
+  color:var(--ink-soft);text-transform:uppercase;margin-bottom:22px;
+}
+.eyebrow .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:middle}
+.hero h1{font-size:clamp(34px,5vw,58px);font-weight:900;line-height:1.18;letter-spacing:-1.5px}
+.hero h1 .hl{position:relative;white-space:nowrap}
+.hero h1 .hl::after{
+  content:"";position:absolute;left:-2px;right:-2px;bottom:6px;height:14px;
+  background:var(--accent);z-index:-1;border-radius:3px;
+}
+.hero p.lead{
+  max-width:620px;margin:26px auto 0;font-size:18px;color:var(--ink-soft);
+}
+.hero-actions{display:flex;gap:12px;justify-content:center;margin-top:38px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;height:54px;padding:0 30px;
+  border-radius:999px;font-size:16px;font-weight:700;cursor:pointer;border:none;
+  font-family:inherit;transition:transform .15s,background .15s,box-shadow .15s;
+}
+.btn-primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 24px rgba(255,212,0,.35)}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn-ghost:hover{border-color:var(--ink);transform:translateY(-2px)}
+
+/* ===== 신뢰 지표 ===== */
+.stats{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg-soft)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.stat{padding:36px 20px;text-align:center;border-right:1px solid var(--line)}
+.stat:last-child{border-right:none}
+.stat .num{font-size:34px;font-weight:900;letter-spacing:-1px}
+.stat .lab{font-size:14px;color:var(--ink-soft);margin-top:4px}
+
+/* ===== 섹션 공통 ===== */
+.section{padding:92px 0}
+.section-soft{background:var(--bg-soft)}
+.sec-head{max-width:680px;margin-bottom:48px}
+.sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
+.sec-eyebrow{font-size:13px;font-weight:700;letter-spacing:2px;color:var(--ink-soft);text-transform:uppercase;margin-bottom:14px}
+.sec-title{font-size:clamp(26px,3.4vw,38px);font-weight:900;letter-spacing:-1px;line-height:1.25}
+.sec-desc{margin-top:16px;font-size:17px;color:var(--ink-soft)}
+
+/* ===== 서비스(취급) 타일 그리드 ===== */
+.tile-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.tile{
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  padding:30px 26px;transition:transform .18s,box-shadow .18s,border-color .18s;
+}
+.tile:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(26,29,36,.08);border-color:#dfe2e9}
+.tile .ico{
+  width:54px;height:54px;border-radius:14px;background:var(--bg-soft);
+  display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px;
+}
+.tile h3{font-size:18px;font-weight:700;margin-bottom:8px}
+.tile p{font-size:14.5px;color:var(--ink-soft)}
+
+/* ===== 취급 플랫폼 ===== */
+.platforms{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.platform{
+  display:inline-flex;align-items:center;gap:8px;padding:12px 20px;
+  border:1px solid var(--line);border-radius:999px;background:#fff;font-weight:700;font-size:15px;
+}
+.platform .pdot{width:9px;height:9px;border-radius:50%;background:var(--accent)}
+
+/* ===== 회사소개(어바웃) 2단 ===== */
+.about{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
+.about-card{
+  background:var(--ink);color:#fff;border-radius:24px;padding:44px;
+  position:relative;overflow:hidden;
+}
+.about-card::before{
+  content:"オッス";position:absolute;right:24px;bottom:8px;
+  font-size:92px;font-weight:900;color:rgba(255,255,255,.06);letter-spacing:-2px;
+}
+.about-card .badge{display:inline-block;background:var(--accent);color:var(--accent-ink);font-weight:900;font-size:13px;padding:6px 14px;border-radius:999px;margin-bottom:22px}
+.about-card h3{font-size:26px;font-weight:900;line-height:1.4;margin-bottom:18px;position:relative}
+.about-card p{color:rgba(255,255,255,.78);font-size:15.5px;position:relative}
+.about-points{list-style:none}
+.about-points li{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--line)}
+.about-points li:last-child{border-bottom:none}
+.about-points .pi{
+  flex-shrink:0;width:40px;height:40px;border-radius:12px;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.about-points h4{font-size:17px;font-weight:700;margin-bottom:3px}
+.about-points span{font-size:14.5px;color:var(--ink-soft)}
+
+/* ===== 이용 흐름 ===== */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;counter-reset:step}
+.step{position:relative;padding:30px 24px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
+.step .n{
+  counter-increment:step;display:flex;align-items:center;justify-content:center;
+  width:44px;height:44px;border-radius:12px;background:var(--ink);color:#fff;
+  font-weight:900;font-size:18px;margin-bottom:16px;
+}
+.step .n::before{content:counter(step)}
+.step h4{font-size:17px;font-weight:700;margin-bottom:6px}
+.step p{font-size:14px;color:var(--ink-soft)}
+
+/* ===== 문의 CTA ===== */
+.contact{background:var(--ink);color:#fff;border-radius:28px;padding:60px;text-align:center;position:relative;overflow:hidden}
+.contact h2{font-size:clamp(26px,3.5vw,40px);font-weight:900;letter-spacing:-1px;line-height:1.25}
+.contact p{color:rgba(255,255,255,.75);font-size:17px;margin-top:16px}
+.contact-grid{display:flex;gap:36px;justify-content:center;flex-wrap:wrap;margin-top:40px}
+.contact-item{text-align:left}
+.contact-item .k{font-size:13px;color:rgba(255,255,255,.55);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.contact-item .v{font-size:18px;font-weight:700}
+.contact .btn{margin-top:40px}
+
+/* ===== 푸터 ===== */
+.site-footer{padding:54px 0 40px;border-top:1px solid var(--line)}
+.footer-top{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap;align-items:flex-start}
+.footer-brand .mark{font-size:22px;font-weight:900}
+.footer-brand .mark b{background:var(--accent);color:var(--accent-ink);padding:0 7px;border-radius:6px}
+.footer-brand p{font-size:14px;color:var(--ink-soft);margin-top:10px;max-width:320px}
+.footer-cols{display:flex;gap:64px;flex-wrap:wrap}
+.footer-col h5{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px}
+.footer-col a,.footer-col p{display:block;font-size:14.5px;color:var(--ink);margin-bottom:9px}
+.footer-col a:hover{color:var(--ink-soft)}
+.footer-bottom{margin-top:40px;padding-top:24px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+/* ===== 맨위로 ===== */
+.to-top{position:fixed;right:22px;bottom:22px;width:48px;height:48px;border-radius:50%;background:var(--ink);color:#fff;border:none;font-size:20px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s,transform .15s;z-index:60}
+.to-top.show{opacity:1;pointer-events:auto}
+.to-top:hover{transform:translateY(-3px)}
+
+/* ===== 반응형 ===== */
+@media (max-width:920px){
+  .menu,.nav-cta{display:none}
+  .nav-toggle{display:block}
+  .menu.open{display:flex;position:absolute;top:72px;left:0;right:0;flex-direction:column;gap:0;background:#fff;border-bottom:1px solid var(--line);padding:8px 20px 16px}
+  .menu.open li{width:100%}
+  .menu.open a{display:block;padding:14px 0;border-bottom:1px solid var(--line)}
+  .tile-grid,.steps{grid-template-columns:repeat(2,1fr)}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .stat:nth-child(2){border-right:none}
+  .stat{border-bottom:1px solid var(--line)}
+  .about{grid-template-columns:1fr;gap:34px}
+  .contact{padding:44px 26px}
+}
+@media (max-width:560px){
+  .tile-grid,.steps,.stats-grid{grid-template-columns:1fr}
+  .stat{border-right:none}
+  .section{padding:64px 0}
+  .hero{padding:64px 0 56px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 헤더 ===== -->
+<header class="site-header">
+  <div class="wrap nav">
+    <a href="#top" class="brand">
+      <span class="mark">O<b>SS</b></span>
+      <span class="jp">オッス</span>
+    </a>
+    <nav>
+      <ul class="menu" id="menu">
+        <li><a href="#about">회사소개</a></li>
+        <li><a href="#service">서비스</a></li>
+        <li><a href="#platform">취급 플랫폼</a></li>
+        <li><a href="#how">이용안내</a></li>
+        <li><a href="#contact">문의</a></li>
+      </ul>
+    </nav>
+    <a href="#contact" class="nav-cta">상담 문의 →</a>
+    <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기">☰</button>
+  </div>
+</header>
+
+<!-- ===== 히어로 ===== -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>Japan Buying &amp; Forwarding Service</span>
+    <h1>일본 직구, <span class="hl">현지인이 직접</span><br />대신 사고 보내드립니다</h1>
+    <p class="lead">
+      OSS(オッス)는 일본 현지인이 직접 운영하는 구매대행 · 배송대행지(배대지) 전문 기업입니다.
+      언어 · 결제 · 배송 걱정 없이 원하는 일본 상품을 가장 안전하게 받아보세요.
+    </p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn btn-primary">상담 문의하기</a>
+      <a href="#service" class="btn btn-ghost">서비스 둘러보기</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 신뢰 지표 ===== -->
+<section class="stats">
+  <div class="wrap stats-grid">
+    <div class="stat"><div class="num">🇯🇵 현지</div><div class="lab">일본 현지인 직접 운영</div></div>
+    <div class="stat"><div class="num">4+</div><div class="lab">메루카리·라쿠텐·야후옥션·아마존JP</div></div>
+    <div class="stat"><div class="num">합배송</div><div class="lab">여러 상품 한 번에 모아 배송</div></div>
+    <div class="stat"><div class="num">검수</div><div class="lab">발송 전 현지 직접 검수</div></div>
+  </div>
+</section>
+
+<!-- ===== 서비스 ===== -->
+<section class="section" id="service">
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="sec-eyebrow">Our Service</p>
+      <h2 class="sec-title">OSS가 제공하는 서비스</h2>
+      <p class="sec-desc">구매부터 검수, 합배송까지 — 일본 쇼핑의 모든 과정을 한 번에 대행합니다.</p>
+    </div>
+    <div class="tile-grid">
+      <div class="tile">
+        <div class="ico">🛍️</div>
+        <h3>구매대행</h3>
+        <p>일본어 · 일본 결제 없이, 링크만 보내주시면 OSS가 대신 구매합니다.</p>
+      </div>
+      <div class="tile">
+        <div class="ico">📦</div>
+        <h3>배송대행 (배대지)</h3>
+        <p>일본 내 주소로 받은 상품을 모아 한국까지 안전하게 발송합니다.</p>
+      </div>
+      <div class="tile">
+        <div class="ico">🔍</div>
+        <h3>현지 검수</h3>
+        <p>발송 전 현지에서 상품 상태를 직접 확인해 오배송 · 불량을 줄입니다.</p>
+      </div>
+      <div class="tile">
+        <div class="ico">🧮</div>
+        <h3>합배송 &amp; 비용절감</h3>
+        <p>여러 쇼핑몰 상품을 하나로 합쳐 국제배송비를 아껴드립니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 취급 플랫폼 ===== -->
+<section class="section section-soft" id="platform">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="sec-eyebrow">Platforms</p>
+      <h2 class="sec-title">이런 일본 쇼핑몰, 모두 대행합니다</h2>
+      <p class="sec-desc">대표적인 일본 쇼핑 플랫폼은 물론, 링크가 있는 상품이라면 대부분 구매가 가능합니다.</p>
+    </div>
+    <div class="platforms">
+      <span class="platform"><span class="pdot"></span>메루카리 (Mercari)</span>
+      <span class="platform"><span class="pdot"></span>라쿠텐 (Rakuten)</span>
+      <span class="platform"><span class="pdot"></span>야후옥션 (Yahoo! Auction)</span>
+      <span class="platform"><span class="pdot"></span>아마존 재팬 (Amazon.jp)</span>
+      <span class="platform"><span class="pdot"></span>스루가야 · 만다라케</span>
+      <span class="platform"><span class="pdot"></span>그 외 일본 온라인몰</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 회사소개 ===== -->
+<section class="section" id="about">
+  <div class="wrap about">
+    <div class="about-card">
+      <span class="badge">ABOUT OSS</span>
+      <h3>일본 현지에서,<br />가장 가까이서 챙깁니다</h3>
+      <p>
+        OSS는 일본 현지인이 직접 상품을 구매하고 검수해, 한국 고객님께 안전하게 전달하는 것을
+        가장 중요하게 생각합니다. 언어와 결제, 복잡한 배송 절차의 부담을 OSS가 대신 짊어집니다.
+      </p>
+    </div>
+    <ul class="about-points">
+      <li>
+        <span class="pi">🇯🇵</span>
+        <div><h4>현지인 직접 운영</h4><span>일본 현지에서 직접 구매 · 검수해 오배송과 불량 위험을 줄입니다.</span></div>
+      </li>
+      <li>
+        <span class="pi">💬</span>
+        <div><h4>한국어 상담</h4><span>주문부터 배송까지 전 과정을 한국어로 편하게 문의하실 수 있습니다.</span></div>
+      </li>
+      <li>
+        <span class="pi">🧾</span>
+        <div><h4>투명한 비용 안내</h4><span>상품가 · 수수료 · 배송비를 미리 안내해 추가 비용 걱정이 없습니다.</span></div>
+      </li>
+      <li>
+        <span class="pi">🛡️</span>
+        <div><h4>안전한 포장 · 발송</h4><span>파손에 강한 포장 후 발송하고 송장번호를 공유해 드립니다.</span></div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== 이용 흐름 ===== -->
+<section class="section section-soft" id="how">
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="sec-eyebrow">How It Works</p>
+      <h2 class="sec-title">이용 방법은 간단합니다</h2>
+      <p class="sec-desc">링크만 보내주시면, 나머지는 OSS가 알아서 진행합니다.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="n"></div><h4>신청 · 문의</h4><p>상품 링크 · 옵션 · 배송지를 알려주세요.</p></div>
+      <div class="step"><div class="n"></div><h4>견적 안내</h4><p>상품가 + 수수료 + 배송비 합산 견적을 안내드립니다.</p></div>
+      <div class="step"><div class="n"></div><h4>결제 · 구매 · 검수</h4><p>결제 확인 후 현지에서 구매하고 직접 검수합니다.</p></div>
+      <div class="step"><div class="n"></div><h4>한국 배송</h4><p>안전 포장 후 발송하고 송장번호를 공유합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 문의 CTA ===== -->
+<section class="section" id="contact">
+  <div class="wrap">
+    <div class="contact">
+      <h2>일본 상품, 무엇이든 물어보세요</h2>
+      <p>원하는 상품 링크와 함께 편하게 문의 주시면 빠르게 안내해 드립니다.</p>
+      <div class="contact-grid">
+        <div class="contact-item">
+          <div class="k">Email</div>
+          <div class="v">oss202604@gmail.com</div>
+        </div>
+        <div class="contact-item">
+          <div class="k">KakaoTalk</div>
+          <div class="v">@OSS (등록 예정)</div>
+        </div>
+        <div class="contact-item">
+          <div class="k">상담시간 (일본시간)</div>
+          <div class="v">평일 10:00 ~ 18:00</div>
+        </div>
+      </div>
+      <a href="mailto:oss202604@gmail.com" class="btn btn-primary">이메일로 문의하기</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 푸터 ===== -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="mark">O<b>SS</b></div>
+        <p>일본 현지인이 직접 운영하는 구매대행 · 배송대행지(배대지) 전문 서비스, OSS(オッス).</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h5>서비스</h5>
+          <a href="#service">구매대행</a>
+          <a href="#service">배송대행</a>
+          <a href="#platform">취급 플랫폼</a>
+          <a href="#how">이용안내</a>
+        </div>
+        <div class="footer-col">
+          <h5>회사</h5>
+          <a href="#about">회사소개</a>
+          <a href="#contact">문의하기</a>
+        </div>
+        <div class="footer-col">
+          <h5>고객센터</h5>
+          <p>oss202604@gmail.com</p>
+          <p>평일 10:00~18:00 (JST)</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 OSS(オッス). All rights reserved.</span>
+      <span>일본 현지 구매대행 · 배대지</span>
+    </div>
+  </div>
+</footer>
+
+<button class="to-top" id="toTop" aria-label="맨 위로">↑</button>
+
+<script>
+/* 모바일 메뉴 토글 */
+var navToggle = document.getElementById('navToggle');
+var menu = document.getElementById('menu');
+navToggle.addEventListener('click', function(){ menu.classList.toggle('open'); });
+menu.addEventListener('click', function(e){
+  if(e.target.tagName === 'A') menu.classList.remove('open');
+});
+
+/* 맨 위로 버튼 */
+var toTop = document.getElementById('toTop');
+window.addEventListener('scroll', function(){
+  if(window.scrollY > 500) toTop.classList.add('show');
+  else toTop.classList.remove('show');
+});
+toTop.addEventListener('click', function(){
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+</script>
+</body>
+</html>

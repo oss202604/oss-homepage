@@ -55,28 +55,38 @@
     <div class="auth-card">
       <h1>로그인</h1>
       <p class="auth-sub">로그인 후 구매대행·배송대행 서비스를 이용하실 수 있습니다.</p>
-      <form onsubmit="return false;">
-        <label class="auth-label">아이디<input type="text" placeholder="아이디를 입력하세요" /></label>
-        <label class="auth-label">비밀번호<input type="password" placeholder="비밀번호를 입력하세요" /></label>
-        <label class="auth-check"><input type="checkbox" /> <span>아이디 저장</span></label>
-        <button type="submit" class="btn btn-primary btn-block">로그인</button>
+      <form id="loginForm">
+        <label class="auth-label">아이디<input type="text" id="loginId" placeholder="아이디를 입력하세요" autocomplete="username" /></label>
+        <label class="auth-label">비밀번호<input type="password" id="loginPw" placeholder="비밀번호를 입력하세요" autocomplete="current-password" /></label>
+        <label class="auth-check"><input type="checkbox" id="rememberId" /> <span>아이디 저장</span></label>
+        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">로그인</button>
       </form>
       <div class="auth-links">
-        <a href="#">아이디 / 비밀번호 찾기</a>
+        <a href="contact.html">아이디 / 비밀번호 찾기</a>
         <span class="divider">|</span>
         <a href="signup.html">회원가입</a>
       </div>
       <div class="auth-sns">
         <p>SNS 계정으로 간편 로그인</p>
         <div class="sns-buttons">
-          <button class="sns-btn sns-kakao">카카오</button>
-          <button class="sns-btn sns-naver">네이버</button>
-          <button class="sns-btn sns-google">구글</button>
+          <button type="button" class="sns-btn sns-kakao" disabled>카카오</button>
+          <button type="button" class="sns-btn sns-naver" disabled>네이버</button>
+          <button type="button" class="sns-btn sns-google" disabled>구글</button>
         </div>
+        <p class="form-note" style="margin-top:10px;">* SNS 간편로그인은 준비 중입니다.</p>
       </div>
-      <p class="form-note">* 현재는 화면(디자인)만 만들어진 상태입니다. 실제 로그인 기능은 추후 연동합니다.</p>
     </div>
   </section>
+
+  <!-- ===== 로그인 결과 팝업 ===== -->
+  <div class="modal" id="authModal" hidden>
+    <div class="modal-box auth-modal-box">
+      <div class="am-ico" id="amIco">⚠️</div>
+      <h3 id="amTitle">알림</h3>
+      <p class="modal-sub" id="amMsg"></p>
+      <button type="button" class="btn btn-primary btn-block" id="amClose">확인</button>
+    </div>
+  </div>
 
   <footer class="site-footer" id="contact">
     <div class="container footer-inner">
@@ -95,6 +105,93 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>lucide.createIcons();</script>
-  <script src="script.js?v=9"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=7"></script>
+  <script src="script.js?v=10"></script>
+  <script>
+    (function () {
+      const modal = document.getElementById("authModal");
+      const amIco = document.getElementById("amIco");
+      const amTitle = document.getElementById("amTitle");
+      const amMsg = document.getElementById("amMsg");
+      const form = document.getElementById("loginForm");
+      const btn = document.getElementById("loginBtn");
+      const idEl = document.getElementById("loginId");
+      const pwEl = document.getElementById("loginPw");
+      const rememberEl = document.getElementById("rememberId");
+      let onCloseGo = null;
+
+      function popup(ok, title, msg, goUrl) {
+        amIco.textContent = ok ? "✅" : "⚠️";
+        amTitle.textContent = title;
+        amMsg.textContent = msg;
+        onCloseGo = goUrl || null;
+        modal.hidden = false;
+      }
+      function closePopup() { modal.hidden = true; if (onCloseGo) location.href = onCloseGo; }
+      document.getElementById("amClose").addEventListener("click", closePopup);
+      modal.addEventListener("click", (e) => { if (e.target === modal) closePopup(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) closePopup(); });
+
+      // 저장된 아이디 불러오기
+      try {
+        const saved = localStorage.getItem("oss_saved_id");
+        if (saved) { idEl.value = saved; rememberEl.checked = true; }
+      } catch (e) {}
+
+      // 이미 로그인돼 있으면 등급에 맞게 이동
+      if (window.OSS && window.OSS.getMyProfile) {
+        window.OSS.getMyProfile().then((p) => {
+          if (p) location.href = (p.role === "master" || p.role === "manager") ? "admin.html" : "mypage.html";
+        }).catch(() => {});
+      }
+
+      function dest(role) { return (role === "master" || role === "manager") ? "admin.html" : "mypage.html"; }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = idEl.value.trim();
+        const pw = pwEl.value;
+        if (!username) { popup(false, "아이디를 입력하세요", "로그인할 아이디를 입력해 주세요."); return; }
+        if (!pw) { popup(false, "비밀번호를 입력하세요", "비밀번호를 입력해 주세요."); return; }
+
+        btn.disabled = true; btn.textContent = "로그인 중...";
+        try {
+          // 1) 아이디 존재 확인 → 없으면 아이디 오류
+          const exists = await window.OSS.usernameExists(username);
+          if (!exists) {
+            popup(false, "아이디가 틀렸어요", "가입되지 않은 아이디예요. 아이디를 다시 확인하거나 회원가입해 주세요.");
+            btn.disabled = false; btn.textContent = "로그인"; return;
+          }
+          // 2) 비번 검증
+          await window.OSS.signInMember(username, pw);
+          // 3) 등급 확인
+          const profile = await window.OSS.getMyProfile();
+          if (profile && profile.grade === "guest") {
+            await window.OSS.signOut();
+            popup(false, "로그인할 수 없는 등급", "guest 등급은 로그인할 수 없어요. 고객센터에 문의해 주세요.");
+            btn.disabled = false; btn.textContent = "로그인"; return;
+          }
+          // 아이디 저장
+          try {
+            if (rememberEl.checked) localStorage.setItem("oss_saved_id", username);
+            else localStorage.removeItem("oss_saved_id");
+          } catch (e) {}
+          window.OSS.touchLogin();
+          popup(true, "로그인 성공", "환영합니다! 잠시 후 이동합니다.", dest(profile ? profile.role : "member"));
+        } catch (err) {
+          const m = (err && err.message) || "";
+          if (/invalid login/i.test(m)) {
+            popup(false, "비밀번호가 틀렸어요", "아이디는 맞지만 비밀번호가 일치하지 않아요. 다시 입력해 주세요.");
+          } else if (/not confirmed/i.test(m)) {
+            popup(false, "이메일 인증 설정 필요", "Supabase에서 이메일 인증(Confirm email)을 꺼주세요. (관리자 설정)");
+          } else {
+            popup(false, "로그인 실패", m || "알 수 없는 오류가 발생했어요.");
+          }
+          btn.disabled = false; btn.textContent = "로그인";
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

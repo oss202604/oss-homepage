@@ -170,10 +170,83 @@
     <div class="footer-bottom"><div class="container">© 2026 OSS. All rights reserved.</div></div>
   </footer>
 
-  <script src="script.js?v=9"></script>
-  <!-- TODO: Supabase 연동 후 활성화
-  <script type="module" src="supabase.js"></script>
-  <script type="module" src="mypage.js"></script>
-  -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=7"></script>
+  <script src="script.js?v=10"></script>
+  <script>
+    (function () {
+      const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const fmtDate = (s) => { try { return new Date(s).toLocaleDateString("ko-KR"); } catch (e) { return s || "-"; } };
+
+      if (!(window.OSS && window.OSS.getMyProfile)) return;
+
+      window.OSS.getMyProfile().then(async (p) => {
+        if (!p) { location.href = "login.html"; return; }
+        // 운영진이면 관리자페이지로
+        if (p.role === "master" || p.role === "manager") { location.href = "admin.html"; return; }
+
+        // 프로필 표시
+        document.getElementById("myName").textContent = (p.name || p.username || "회원") + "님";
+        document.getElementById("myEmail").textContent = p.email || p.username || "";
+        const cn = document.getElementById("myCustomerNo"); if (cn) cn.textContent = p.mailbox_code || "OSS-0000";
+        const pfName = document.getElementById("pfName"); if (pfName) pfName.value = p.name || "";
+        const pfPhone = document.getElementById("pfPhone"); if (pfPhone) pfPhone.value = p.phone || "";
+        const pfEmail = document.getElementById("pfEmail"); if (pfEmail) pfEmail.value = p.email || "";
+
+        // 주문내역
+        let orders = [];
+        try { orders = await window.OSS.myOrders(); } catch (e) {}
+        const purchases = orders.filter((o) => o.type !== "delivery");
+        const deliveries = orders.filter((o) => o.type === "delivery");
+
+        const oTb = document.getElementById("orderTbody");
+        if (purchases.length) {
+          oTb.innerHTML = purchases.map((o) => {
+            const prods = Array.isArray(o.products) ? o.products : [];
+            const title = prods.length ? esc(prods[0].name || "상품") + (prods.length > 1 ? ` 외 ${prods.length - 1}건` : "") : "-";
+            return `<tr>
+              <td>${esc(o.order_no || "-")}</td>
+              <td>${title}</td>
+              <td>¥${Number(o.subtotal || 0).toLocaleString()}</td>
+              <td>${esc(o.status || "-")}</td>
+              <td>${fmtDate(o.created_at)}</td>
+              <td><a class="btn btn-small" href="order-lookup.html">조회</a></td>
+            </tr>`;
+          }).join("");
+        }
+        const dTb = document.getElementById("deliveryTbody");
+        if (deliveries.length) {
+          dTb.innerHTML = deliveries.map((o) => {
+            const prods = Array.isArray(o.products) ? o.products : [];
+            return `<tr>
+              <td>${esc(o.order_no || "-")}</td>
+              <td>${esc((prods[0] && prods[0].brand) || "-")}</td>
+              <td>${esc((prods[0] && prods[0].code) || "-")}</td>
+              <td>${esc(o.status || "-")}</td>
+              <td>${fmtDate(o.created_at)}</td>
+            </tr>`;
+          }).join("");
+        }
+
+        // 회원정보 수정
+        const pf = document.getElementById("profileForm");
+        if (pf) pf.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          try {
+            await window.OSS.updateMyProfile(pfName.value.trim(), pfPhone.value.trim(), pfEmail.value.trim());
+            alert("정보가 수정되었어요.");
+          } catch (err) { alert("수정 실패: " + (err.message || err)); }
+        });
+      }).catch(() => { location.href = "login.html"; });
+
+      // 로그아웃
+      const lo = document.getElementById("logoutBtn");
+      if (lo) lo.addEventListener("click", async (e) => {
+        e.preventDefault();
+        try { await window.OSS.signOut(); } catch (err) {}
+        location.href = "index.html";
+      });
+    })();
+  </script>
 </body>
 </html>

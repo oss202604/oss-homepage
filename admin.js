@@ -72,10 +72,41 @@ function mapRow(row) {
   };
 }
 
-// ----- 로그인 가드 + 초기 로드 -----
+// ----- 로그인 가드 + 권한 + 초기 로드 -----
+let MY = null;
+function can(key) {
+  return !!(MY && (MY.role === "master" || (MY.permissions && MY.permissions[key])));
+}
+function hideNav(page) {
+  const btn = document.querySelector('.admin-nav button[data-page="' + page + '"]');
+  if (btn && btn.parentElement) btn.parentElement.style.display = "none";
+}
+function applyPermGate() {
+  // 마스터는 전부 보임. 매니저는 부여된 권한만.
+  if (MY.role === "master") return;
+  if (!can("orders_view")) hideNav("orders");
+  if (!can("board_manage")) hideNav("board");
+  if (!can("settings_manage")) hideNav("settings");
+  hideNav("members"); // 회원관리(등급·권한)는 마스터 전용
+  if (!can("orders_delete")) {
+    const md = document.getElementById("modalDelete");
+    if (md) md.style.display = "none";
+  }
+}
+
 async function init() {
   const session = await window.OSS.adminGetSession();
   if (!session) { location.href = "admin-login.html"; return; }
+
+  // 역할 확인 — 운영진(master/manager)만 접근
+  try { MY = await window.OSS.getMyProfile(); } catch (e) { MY = null; }
+  if (!MY || (MY.role !== "master" && MY.role !== "manager")) {
+    alert("관리자 권한이 없는 계정이에요. 마이페이지로 이동합니다.");
+    location.href = "mypage.html";
+    return;
+  }
+  window.MY = MY;
+  applyPermGate();
 
   try {
     const rows = await window.OSS.fetchApplications();
@@ -88,6 +119,70 @@ async function init() {
   renderKanban();
   renderDashboard();
   loadNotices();
+  loadMembers();
+}
+
+// ----- 회원관리 (마스터: 등급·역할·권한 편집 / 매니저: 마스터 전용이라 진입 불가) -----
+async function loadMembers() {
+  const tb = document.getElementById("memberRows");
+  if (!tb) return;
+  const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const GRADES = ["guest", "silver", "gold", "diamond", "red", "biz"];
+  const ROLES = [["member", "일반회원"], ["manager", "매니저관리자"], ["master", "마스터관리자"]];
+  const PERMS = [["orders_view", "주문조회"], ["orders_edit", "주문수정"], ["orders_delete", "주문삭제"], ["board_manage", "공지·문의"], ["settings_manage", "설정"]];
+  const isMaster = MY.role === "master";
+
+  let members = [];
+  try { members = await window.OSS.listMembers(); }
+  catch (e) { tb.innerHTML = '<tr><td colspan="9" class="empty">회원을 불러오지 못했어요: ' + (e.message || e) + "</td></tr>"; return; }
+
+  const cnt = document.getElementById("memberCount");
+  if (cnt) cnt.textContent = "(" + members.length + "명)";
+  if (!members.length) { tb.innerHTML = '<tr><td colspan="9" class="empty">회원이 없습니다.</td></tr>'; return; }
+
+  tb.innerHTML = members.map((m) => {
+    const perm = m.permissions || {};
+    const gradeCell = isMaster
+      ? `<select class="m-grade" data-id="${m.id}">${GRADES.map((g) => `<option ${m.grade === g ? "selected" : ""}>${g}</option>`).join("")}</select>`
+      : esc(m.grade);
+    const roleCell = isMaster
+      ? `<select class="m-role" data-id="${m.id}">${ROLES.map(([v, l]) => `<option value="${v}" ${m.role === v ? "selected" : ""}>${l}</option>`).join("")}</select>`
+      : esc((ROLES.find((r) => r[0] === m.role) || [])[1] || m.role);
+    let permCell;
+    if (m.role === "master") permCell = '<span class="m-allperm">전체 권한</span>';
+    else if (isMaster && m.role === "manager")
+      permCell = `<div class="m-perms" data-id="${m.id}">${PERMS.map(([k, l]) => `<label><input type="checkbox" class="m-perm" data-id="${m.id}" data-key="${k}" ${perm[k] ? "checked" : ""}/>${l}</label>`).join("")}</div>`;
+    else if (m.role === "manager") permCell = esc(PERMS.filter(([k]) => perm[k]).map(([, l]) => l).join(", ") || "-");
+    else permCell = "-";
+    return `<tr>
+      <td>${esc(m.username || "-")}</td>
+      <td>${esc(m.name || "-")}</td>
+      <td>${esc(m.phone || "-")}</td>
+      <td>${esc(m.email || "-")}</td>
+      <td>${gradeCell}</td>
+      <td>${roleCell}</td>
+      <td>${permCell}</td>
+      <td>${(m.created_at || "").slice(0, 10)}</td>
+      <td>${(m.last_login_at || "").slice(0, 10) || "-"}</td>
+    </tr>`;
+  }).join("");
+
+  if (!isMaster) return; // 매니저는 편집 불가
+  tb.querySelectorAll(".m-role").forEach((sel) => sel.addEventListener("change", async () => {
+    try { await window.OSS.setMemberRole(sel.dataset.id, sel.value); loadMembers(); }
+    catch (e) { alert("역할 변경 실패: " + (e.message || e)); }
+  }));
+  tb.querySelectorAll(".m-grade").forEach((sel) => sel.addEventListener("change", async () => {
+    try { await window.OSS.setMemberGrade(sel.dataset.id, sel.value); }
+    catch (e) { alert("등급 변경 실패: " + (e.message || e)); }
+  }));
+  tb.querySelectorAll(".m-perm").forEach((cb) => cb.addEventListener("change", async () => {
+    const id = cb.dataset.id;
+    const perms = {};
+    tb.querySelectorAll('.m-perm[data-id="' + id + '"]').forEach((c) => { perms[c.dataset.key] = c.checked; });
+    try { await window.OSS.setMemberPermissions(id, perms); }
+    catch (e) { alert("권한 변경 실패: " + (e.message || e)); }
+  }));
 }
 
 document.getElementById("adminLogout").addEventListener("click", async (e) => {

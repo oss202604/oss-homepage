@@ -144,3 +144,10 @@ body.admin-body { background: #eef1f6; }
   .modal-fee-row input { width: 100%; }
   .rate-preview input { width: 80px; }
 }
+
+/* ===== 회원관리 (등급·역할·권한) ===== */
+.m-grade, .m-role { padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 13px; background: #fff; }
+.m-perms { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+.m-perms label { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; white-space: nowrap; cursor: pointer; }
+.m-perms input { width: auto; margin: 0; }
+.m-allperm { display: inline-block; background: #fff7e0; color: #9a7b00; font-weight: 700; font-size: 12px; padding: 3px 9px; border-radius: 999px; }

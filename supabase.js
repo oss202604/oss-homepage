@@ -148,6 +148,103 @@ async function adminSignOut() {
   await sb.auth.signOut();
 }
 
+// ============================================================
+// 회원(고객) 인증 — 아이디 기반
+// 아이디는 내부적으로 "아이디@oss.local" 가짜 이메일로 변환해 Supabase Auth에 저장.
+// ⚠️ Supabase → Authentication → Providers → Email → "Confirm email" 을 OFF 해야
+//    가입 즉시 로그인됩니다(가짜 이메일이라 인증메일 수신 불가).
+// ============================================================
+const OSS_LOGIN_DOMAIN = "@oss.local";
+function usernameToEmail(username) {
+  return String(username).trim().toLowerCase() + OSS_LOGIN_DOMAIN;
+}
+
+// 회원가입
+async function signUpMember(username, password, info) {
+  info = info || {};
+  const { data, error } = await sb.auth.signUp({
+    email: usernameToEmail(username),
+    password,
+    options: {
+      data: {
+        username: String(username).trim(),
+        name: info.name || "",
+        phone: info.phone || "",
+        email: info.email || "",
+      },
+    },
+  });
+  if (error) throw error;
+  return data;
+}
+
+// 로그인 (아이디 + 비번)
+async function signInMember(username, password) {
+  const { data, error } = await sb.auth.signInWithPassword({
+    email: usernameToEmail(username),
+    password,
+  });
+  if (error) throw error;
+  return data;
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+}
+
+// 아이디 존재 여부 (가입 중복확인 / 로그인 아이디·비번 구분용)
+async function usernameExists(username) {
+  const { data, error } = await sb.rpc("oss_username_exists", { u: String(username).trim() });
+  if (error) throw error;
+  return !!data;
+}
+
+// 내 프로필 (역할·등급·권한 포함). 비로그인 시 null
+async function getMyProfile() {
+  const { data: s } = await sb.auth.getSession();
+  if (!s || !s.session) return null;
+  const { data, error } = await sb.from("profiles").select("*").eq("id", s.session.user.id).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+// 내 주문내역 (가입 이메일/전화와 일치하는 신청건)
+async function myOrders() {
+  const { data, error } = await sb.rpc("oss_my_orders");
+  if (error) throw error;
+  return data || [];
+}
+
+// 내 기본정보 수정 (역할/등급은 못 바꿈)
+async function updateMyProfile(name, phone, email) {
+  const { error } = await sb.rpc("oss_update_my_profile", { p_name: name, p_phone: phone, p_email: email });
+  if (error) throw error;
+}
+
+// 마지막 로그인 시각 갱신 (실패해도 무시)
+async function touchLogin() {
+  try { await sb.rpc("oss_touch_login"); } catch (e) {}
+}
+
+// ---- 마스터 전용: 회원 관리 ----
+async function listMembers() {
+  const { data, error } = await sb.from("profiles").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+async function setMemberRole(id, role) {
+  const { error } = await sb.from("profiles").update({ role }).eq("id", id);
+  if (error) throw error;
+}
+async function setMemberGrade(id, grade) {
+  const { error } = await sb.from("profiles").update({ grade }).eq("id", id);
+  if (error) throw error;
+}
+async function setMemberPermissions(id, permissions) {
+  const { error } = await sb.from("profiles").update({ permissions }).eq("id", id);
+  if (error) throw error;
+}
+
 window.OSS = {
   sb,
   submitApplication,
@@ -173,4 +270,18 @@ window.OSS = {
   adminSignIn,
   adminGetSession,
   adminSignOut,
+  // 회원 인증
+  signUpMember,
+  signInMember,
+  signOut,
+  usernameExists,
+  getMyProfile,
+  myOrders,
+  updateMyProfile,
+  touchLogin,
+  // 마스터: 회원관리
+  listMembers,
+  setMemberRole,
+  setMemberGrade,
+  setMemberPermissions,
 };

@@ -708,3 +708,72 @@ document.addEventListener("change", async (e) => {
     }).catch(() => {});
   }
 })();
+
+// ===== 예상비용 계산기 팝업 열기/닫기 (메인) =====
+(function feePopup() {
+  const modal = document.getElementById("feeModal");
+  if (!modal) return; // 모달이 있는 페이지(메인)에서만 동작
+  const open = () => { modal.hidden = false; document.body.style.overflow = "hidden"; };
+  const close = () => { modal.hidden = true; document.body.style.overflow = ""; };
+
+  // 페이지 안의 '예상비용' 링크(#fee / index.html#fee) 클릭 → 팝업
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href="#fee"], a[href="index.html#fee"]');
+    if (!a) return;
+    e.preventDefault();
+    open();
+  });
+
+  document.getElementById("feeModalClose").addEventListener("click", close);
+  modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) close(); });
+
+  // 다른 페이지에서 index.html#fee 로 들어온 경우 자동으로 열기
+  if (location.hash === "#fee") open();
+})();
+
+// ===== 상단바 로그인 상태 표시 (전 페이지 공통) =====
+// 로그인하면 "로그인 | 회원가입" → "○○○님 | 마이페이지 | 로그아웃"
+(function renderAuthState() {
+  if (!(window.OSS && window.OSS.getMyProfile)) return;
+  const nav = document.querySelector(".utility-right");
+  if (!nav) return;
+  window.OSS.getMyProfile().then((p) => {
+    if (!p) return;
+    // 기존 로그인/회원가입 링크 + 뒤따르는 구분선 제거
+    nav.querySelectorAll('a[href="login.html"], a[href="signup.html"]').forEach((a) => {
+      const nx = a.nextElementSibling;
+      if (nx && nx.classList.contains("divider")) nx.remove();
+      a.remove();
+    });
+    const name = (p.name || p.username || "회원").replace(/[<>&]/g, "");
+    const staff = p.role === "master" || p.role === "manager";
+    const home = staff ? "admin.html" : "mypage.html";
+    const label = staff ? "관리자" : "마이페이지";
+    nav.insertAdjacentHTML("afterbegin",
+      `<a href="${home}" class="oss-greet">${name}님</a><span class="divider">|</span>` +
+      `<a href="${home}">${label}</a><span class="divider">|</span>` +
+      `<a href="#" class="oss-logout">로그아웃</a><span class="divider">|</span>`
+    );
+  }).catch(() => {});
+})();
+document.addEventListener("click", async (e) => {
+  const lo = e.target.closest(".oss-logout");
+  if (!lo) return;
+  e.preventDefault();
+  try { if (window.OSS && window.OSS.signOut) await window.OSS.signOut(); } catch (err) {}
+  location.href = "index.html";
+});
+
+// ===== SNS 링크 적용 (상단바 아이콘 + 하단 배너 공통) =====
+// 관리자 설정(social_links = {instagram, kakao, threads})이 있으면 그 주소로 연결됩니다.
+(function socialLinks() {
+  const links = document.querySelectorAll("[data-sns]");
+  if (!links.length) return;
+  if (window.OSS && window.OSS.getSetting) {
+    window.OSS.getSetting("social_links").then((v) => {
+      if (!v || typeof v !== "object") return;
+      links.forEach((a) => { if (v[a.dataset.sns]) a.href = v[a.dataset.sns]; });
+    }).catch(() => {});
+  }
+})();

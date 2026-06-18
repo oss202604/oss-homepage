@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>구매대행 주문서 | OSS(オッス)</title>
+  <meta name="description" content="OSS 공식 구매대행 주문서 — 링크만 보내주시면 일본 상품을 대신 구매해 한국까지 보내드려요." />
+  <!-- 카톡/문자 미리보기 카드 (OG) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="OSS 구매대행" />
+  <meta property="og:title" content="OSS 공식 구매대행 주문서" />
+  <meta property="og:description" content="링크만 보내주시면 일본 상품을 대신 구매해 한국까지! 1분이면 주문 끝." />
+  <!-- TODO: 캔바로 만든 미리보기 이미지(1200x630) 업로드 후 아래 주소로 교체 -->
+  <meta property="og:image" content="og-order.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --o:#F15E1C; --o-dark:#B5470F; --o-soft:#FFEFE6; --o-tint:#FFF3EC; --o-line2:#FBE0CF;
+      --ink:#171310; --mute:#8C8178; --hint:#A99B91; --line:#EFE3DA; --cardline:#F0E6DD; --ph:#B8AEA6;
+      --page:#FBF7F4;
+    }
+    *{box-sizing:border-box;}
+    [hidden]{display:none !important;}
+    body{margin:0;background:var(--page);font-family:"Noto Sans KR",system-ui,sans-serif;color:var(--ink);-webkit-text-size-adjust:100%;}
+    .oq-wrap{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;}
+    /* 상단 신뢰바 */
+    .oq-trust{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#fff;border-bottom:1px solid var(--cardline);}
+    .oq-trust .l{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--mute);}
+    .oq-trust .l i{color:#2BBF8A;width:15px;height:15px;}
+    .oq-logo{font-size:16px;font-weight:700;letter-spacing:2px;color:var(--ink);}
+    /* 단계 표시 */
+    .oq-steps{padding:16px 20px 0;}
+    .oq-bars{display:flex;gap:6px;margin-bottom:9px;}
+    .oq-bars span{flex:1;height:5px;border-radius:3px;background:var(--line);}
+    .oq-bars span.on{background:var(--o);}
+    .oq-steptitle{display:flex;align-items:baseline;gap:8px;}
+    .oq-steptitle h2{margin:0;font-size:20px;font-weight:700;}
+    .oq-steptitle .frac{font-size:12.5px;color:var(--hint);}
+    /* 패널 */
+    .oq-panel{display:none;}
+    .oq-panel.active{display:block;}
+    .oq-body{padding:14px 18px 0;}
+    .oq-stickybar{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:480px;width:100%;background:#fff;border-top:1px solid var(--cardline);box-shadow:0 -4px 14px rgba(23,19,16,.07);z-index:10;}
+    .oq-total{padding:11px 18px 2px;}
+    .oq-total-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mute);margin-bottom:3px;}
+    .oq-total-row span:last-child{color:var(--ink);font-weight:500;}
+    .oq-total-row.total{margin:5px 0 0;padding-top:7px;border-top:1px dashed var(--line);font-size:15px;}
+    .oq-total-row.total span:first-child{color:var(--ink);}
+    .oq-total-row.total span:first-child small{color:var(--hint);font-size:11px;font-weight:400;}
+    .oq-total-row.total span:last-child{color:var(--o);font-weight:700;}
+    .oq-stickybar .oq-foot{padding:8px 18px 14px;}
+    #panel1{padding-bottom:176px;}
+    /* 라벨/입력 */
+    .oq-label{display:block;font-size:12px;color:var(--mute);margin:0 0 5px;}
+    .oq-input{width:100%;height:46px;border:1px solid var(--line);border-radius:13px;background:#fff;padding:0 13px;font-size:16px;color:var(--ink);font-family:inherit;}
+    .oq-input::placeholder{color:var(--ph);}
+    .oq-input:focus{outline:none;border-color:var(--o);box-shadow:0 0 0 3px rgba(241,94,28,.14);}
+    textarea.oq-input{height:auto;min-height:64px;padding:11px 13px;line-height:1.5;resize:vertical;}
+    .oq-help{display:flex;align-items:center;gap:4px;font-size:11.5px;color:var(--hint);margin-top:5px;word-break:keep-all;}
+    .oq-help i{width:13px;height:13px;}
+    .oq-row{display:flex;flex-direction:column;gap:12px;}
+    /* 필독안내(0단계) */
+    .oq-notice-head{position:relative;overflow:hidden;background:var(--o-tint);padding:22px 18px 18px;text-align:center;}
+    .oq-bubble{position:absolute;border-radius:50%;}
+    .oq-notice-ic{width:48px;height:48px;border-radius:15px;background:#fff;color:var(--o);display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px;}
+    .oq-notice-ic i{width:26px;height:26px;}
+    .oq-notice-head h2{margin:0;font-size:19px;font-weight:700;}
+    .oq-notice-head p{margin:4px 0 0;font-size:12.5px;color:var(--o-dark);}
+    .oq-note{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--cardline);border-radius:14px;background:#fff;padding:12px 13px;margin-bottom:9px;}
+    .oq-note-ic{width:34px;height:34px;border-radius:10px;background:var(--o-soft);color:var(--o);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .oq-note-ic i{width:18px;height:18px;}
+    .oq-note h3{margin:0;font-size:13.5px;font-weight:700;}
+    .oq-note p{margin:3px 0 0;font-size:12.5px;color:var(--mute);line-height:1.55;word-break:keep-all;text-wrap:pretty;}
+    .oq-agree{display:flex;align-items:center;gap:10px;background:var(--o-tint);border:1px solid var(--o-line2);border-radius:13px;padding:13px;cursor:pointer;margin-top:3px;}
+    .oq-agree .box{width:24px;height:24px;border-radius:7px;border:1.5px solid var(--ph);background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .oq-agree .box i{width:16px;height:16px;color:#fff;display:none;}
+    .oq-agree.on .box{background:var(--o);border-color:var(--o);}
+    .oq-agree.on .box i{display:block;}
+    .oq-agree span{font-size:13px;font-weight:500;word-break:keep-all;}
+    /* 상품 카드 */
+    .oq-product{border:1px solid var(--cardline);border-radius:16px;background:#FFFDFB;padding:12px 13px 14px;margin-bottom:12px;}
+    .oq-phead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+    .oq-plabel{font-size:12.5px;font-weight:700;color:var(--o);}
+    .oq-pactions{display:flex;gap:7px;}
+    .oq-mini{border:none;background:#F3EDE8;color:#7A6E63;border-radius:9px;height:30px;padding:0 11px;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-family:inherit;}
+    .oq-mini i{width:14px;height:14px;}
+    .oq-mini.danger{color:#B83232;background:#FBEAEA;}
+    .oq-namebox{display:flex;gap:7px;}
+    .oq-namebox .oq-input{flex:1;min-width:0;}
+    .oq-translate{flex-shrink:0;border:none;background:#FCE3D5;color:var(--o-dark);border-radius:11px;height:46px;padding:0 12px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer;font-family:inherit;}
+    .oq-translate i{width:15px;height:15px;}
+    .oq-trans{margin-top:6px;display:flex;align-items:center;gap:7px;background:var(--o-tint);border:1px solid var(--o-line2);border-radius:11px;padding:8px 11px;}
+    .oq-trans .tag{font-size:10px;font-weight:700;color:var(--o-dark);background:#FCE3D5;border-radius:6px;padding:2px 6px;flex-shrink:0;}
+    .oq-trans .txt{font-size:13px;flex:1;min-width:0;word-break:keep-all;}
+    .oq-pricebox{position:relative;}
+    .oq-pricebox .yen{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--o-dark);font-weight:700;font-size:15px;}
+    .oq-pricebox .oq-input{padding-left:28px;}
+    .oq-optrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+    .oq-optrow .oq-opt{flex:1;min-width:0;}
+    .oq-optrow .oq-qty{width:58px;text-align:center;padding:0 4px;}
+    .oq-optx{flex-shrink:0;width:30px;height:30px;border:none;background:none;color:var(--hint);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .oq-optx i{width:18px;height:18px;}
+    .oq-addopt{border:none;background:none;color:var(--o-dark);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;gap:4px;padding:0;margin-bottom:12px;cursor:pointer;font-family:inherit;}
+    .oq-addopt i{width:14px;height:14px;}
+    .oq-photo-btn{width:100%;height:44px;border:1px dashed #F0C3A6;border-radius:13px;background:#FFF7F1;color:var(--o-dark);font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-family:inherit;}
+    .oq-photo-btn i{width:16px;height:16px;}
+    .oq-photo-thumb{margin-top:8px;}
+    .oq-photo-thumb img{max-width:100%;border-radius:12px;display:block;}
+    .oq-photo-thumb .rm{margin-top:6px;font-size:12px;color:#B83232;background:none;border:none;cursor:pointer;padding:0;}
+    .oq-addproduct{width:100%;height:46px;border:1.5px dashed var(--ink);border-radius:14px;background:#fff;color:var(--ink);font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-family:inherit;margin-bottom:4px;}
+    .oq-addproduct i{width:17px;height:17px;}
+    /* 주소검색 */
+    .oq-zip{display:flex;gap:8px;}
+    .oq-zip .oq-input{width:108px;flex:none;}
+    .oq-zip .oq-addrbtn{flex:1;border:none;background:var(--ink);color:#fff;border-radius:13px;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;font-family:inherit;}
+    .oq-zip .oq-addrbtn i{width:15px;height:15px;}
+    /* 하단 버튼 */
+    .oq-foot{padding:18px;display:flex;gap:10px;}
+    .oq-btn{height:50px;border-radius:15px;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-family:inherit;border:none;}
+    .oq-btn i{width:18px;height:18px;}
+    .oq-btn-primary{flex:1;background:var(--o);color:#fff;}
+    .oq-btn-primary:disabled{background:#F4C8B2;cursor:not-allowed;}
+    .oq-btn-ghost{width:92px;background:#fff;border:1px solid #E0D5CC;color:#7A6E63;font-weight:500;}
+    .oq-err{color:#B83232;font-size:13px;text-align:center;padding:0 18px;min-height:18px;word-break:keep-all;}
+    /* 완료 */
+    .oq-done{display:none;text-align:center;padding:40px 24px 48px;}
+    .oq-done .check{width:64px;height:64px;border-radius:50%;background:var(--o-soft);color:var(--o);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;}
+    .oq-done .check i{width:34px;height:34px;}
+    .oq-done h2{margin:0 0 6px;font-size:21px;font-weight:700;}
+    .oq-done p{margin:0;font-size:13.5px;color:var(--mute);line-height:1.6;word-break:keep-all;}
+    .oq-ordno{margin:18px auto;background:var(--o-tint);border:1px solid var(--o-line2);border-radius:14px;padding:14px;max-width:280px;}
+    .oq-ordno .lab{font-size:11.5px;color:var(--o-dark);}
+    .oq-ordno .num{font-size:22px;font-weight:700;letter-spacing:1px;margin-top:2px;}
+    .oq-copybtn{margin-top:10px;height:46px;width:100%;max-width:280px;border:none;border-radius:13px;background:var(--o);color:#fff;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-family:inherit;}
+    .oq-copybtn i{width:17px;height:17px;}
+    .oq-foot-links{display:flex;align-items:center;justify-content:center;gap:10px;font-size:11.5px;color:var(--hint);padding:6px 0 22px;}
+    .oq-foot-links a{color:var(--hint);text-decoration:none;}
+    /* Lucide는 <i>를 <svg>로 바꾸므로 아이콘 크기/토글은 svg로 지정 */
+    .oq-wrap svg{flex-shrink:0;}
+    .oq-trust .l svg{width:15px;height:15px;}
+    .oq-notice-ic svg{width:26px;height:26px;}
+    .oq-note-ic svg{width:18px;height:18px;}
+    .oq-agree .box svg{width:15px;height:15px;color:#fff;display:none;}
+    .oq-agree.on .box svg{display:block;}
+    .oq-mini svg{width:14px;height:14px;}
+    .oq-translate svg{width:15px;height:15px;}
+    .oq-addopt svg{width:14px;height:14px;}
+    .oq-optx svg{width:18px;height:18px;}
+    .oq-photo-btn svg{width:16px;height:16px;}
+    .oq-addproduct svg{width:17px;height:17px;}
+    .oq-zip .oq-addrbtn svg{width:15px;height:15px;}
+    .oq-help svg{width:13px;height:13px;}
+    .oq-btn svg{width:18px;height:18px;}
+    .oq-done .check svg{width:34px;height:34px;}
+    .oq-copybtn svg{width:17px;height:17px;}
+  </style>
+</head>
+<body>
+  <div class="oq-wrap">
+    <div class="oq-trust">
+      <span class="l"><i data-lucide="lock"></i> 공식 주문서</span>
+      <span class="oq-logo">OSS</span>
+    </div>
+
+    <!-- 단계 표시 (0단계에서는 숨김) -->
+    <div class="oq-steps" id="oqSteps" hidden>
+      <div class="oq-bars"><span id="bar1"></span><span id="bar2"></span></div>
+      <div class="oq-steptitle"><h2 id="stepTitle">상품정보</h2><span class="frac" id="stepFrac">1 / 2</span></div>
+    </div>
+
+    <!-- ===== 0단계: 필독안내 동의 ===== -->
+    <section class="oq-panel active" id="panel0">
+      <div class="oq-notice-head">
+        <span class="oq-bubble" style="width:72px;height:72px;background:#FCDECF;top:-26px;right:-12px;"></span>
+        <span class="oq-bubble" style="width:34px;height:34px;background:#FCE3D5;bottom:-10px;left:24px;"></span>
+        <span class="oq-bubble" style="width:18px;height:18px;background:#FBD3BE;top:18px;left:22px;"></span>
+        <span class="oq-notice-ic" style="position:relative;"><i data-lucide="clipboard-list"></i></span>
+        <h2 style="position:relative;">구매대행 필독안내</h2>
+        <p style="position:relative;">신청 전 꼭 읽어주세요</p>
+      </div>
+      <div class="oq-body">
+        <div id="noticeList"></div>
+        <div class="oq-agree" id="agreeRow">
+          <span class="box"><i data-lucide="check"></i></span>
+          <span>위 내용을 모두 확인했고 동의합니다</span>
+        </div>
+      </div>
+      <div class="oq-foot">
+        <button class="oq-btn oq-btn-primary" id="startBtn" disabled>동의하고 시작하기 <i data-lucide="arrow-right"></i></button>
+      </div>
+    </section>
+
+    <!-- ===== 1단계: 상품정보 ===== -->
+    <section class="oq-panel" id="panel1">
+      <div class="oq-body">
+        <div id="oqProducts"></div>
+        <button class="oq-addproduct" id="addProductBtn"><i data-lucide="plus"></i> 상품 추가</button>
+      </div>
+      <p class="oq-err" id="err1"></p>
+      <div class="oq-stickybar">
+        <div class="oq-total" id="oqTotal">
+          <div class="oq-total-row"><span>상품 합계</span><span id="totGoods">¥0</span></div>
+          <div class="oq-total-row"><span>구매대행 수수료 (3%)</span><span id="totFee">¥0</span></div>
+          <div class="oq-total-row total"><span>예상 합계 <small>· 배송비·관부가세 별도</small></span><span id="totFinal">¥0</span></div>
+        </div>
+        <div class="oq-foot">
+          <button class="oq-btn oq-btn-ghost" data-back="0"><i data-lucide="arrow-left"></i> 이전</button>
+          <button class="oq-btn oq-btn-primary" id="toStep2">다음 <i data-lucide="arrow-right"></i></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 2단계: 배송지정보 ===== -->
+    <section class="oq-panel" id="panel2">
+      <div class="oq-body oq-row">
+        <div><label class="oq-label">수취인명</label><input class="oq-input" id="fName" placeholder="받으실 분 성함" autocomplete="name" /></div>
+        <div><label class="oq-label">휴대폰번호</label><input class="oq-input" id="fPhone" type="tel" placeholder="010-0000-0000" autocomplete="tel" /></div>
+        <div>
+          <label class="oq-label">개인통관고유부호</label>
+          <input class="oq-input" id="fCustoms" placeholder="P + 12자리" />
+          <span class="oq-help"><i data-lucide="lock"></i> 통관에만 쓰이고 안전하게 보관돼요</span>
+        </div>
+        <div>
+          <label class="oq-label">우편번호</label>
+          <div class="oq-zip">
+            <input class="oq-input" id="fZip" placeholder="우편번호" readonly />
+            <button type="button" class="oq-addrbtn" id="addrBtn"><i data-lucide="search"></i> 주소 검색</button>
+          </div>
+        </div>
+        <div><label class="oq-label">주소 (도로명 + 상세)</label><input class="oq-input" id="fAddr" placeholder="주소 검색 후 상세주소를 이어서 입력" /></div>
+      </div>
+      <p class="oq-err" id="err2"></p>
+      <div class="oq-foot">
+        <button class="oq-btn oq-btn-ghost" data-back="1"><i data-lucide="arrow-left"></i> 이전</button>
+        <button class="oq-btn oq-btn-primary" id="submitBtn"><i data-lucide="check"></i> 주문하기</button>
+      </div>
+    </section>
+
+    <!-- ===== 완료 ===== -->
+    <section class="oq-done" id="panelDone">
+      <span class="check"><i data-lucide="check"></i></span>
+      <h2>주문이 접수됐어요!</h2>
+      <p>아래 <b>주문번호</b>를 카톡/DM으로 보내주시면<br />더 빠르게 도와드릴 수 있어요.</p>
+      <div class="oq-ordno">
+        <div class="lab">주문번호</div>
+        <div class="num" id="doneNo">OSS-000000-XXXX</div>
+      </div>
+      <button class="oq-copybtn" id="copyNoBtn"><i data-lucide="copy"></i> 주문번호 복사하기</button>
+      <div class="oq-foot-links">
+        <a href="index.html">홈으로</a><span>·</span>
+        <a href="order-lookup.html">주문조회</a><span>·</span>
+        <a href="order-quick.html">새 주문</a>
+      </div>
+    </section>
+  </div>
+
+  <!-- 상품 카드 템플릿 -->
+  <template id="productTpl">
+    <div class="oq-product">
+      <div class="oq-phead">
+        <span class="oq-plabel">상품</span>
+        <div class="oq-pactions">
+          <button type="button" class="oq-mini oq-copy"><i data-lucide="copy"></i> 복사</button>
+          <button type="button" class="oq-mini danger oq-remove" hidden>삭제</button>
+        </div>
+      </div>
+      <label class="oq-label">상품명</label>
+      <div class="oq-namebox">
+        <input class="oq-input oq-name" placeholder="상품명 (일본어 그대로 OK)" />
+        <button type="button" class="oq-translate"><i data-lucide="languages"></i> 번역</button>
+      </div>
+      <div class="oq-trans" hidden><span class="tag">한국어</span><span class="txt"></span></div>
+      <label class="oq-label" style="margin-top:10px;">상품 링크</label>
+      <input class="oq-input oq-url" placeholder="상품 링크 붙여넣기" inputmode="url" />
+      <label class="oq-label" style="margin-top:10px;">단가 (1개)</label>
+      <div class="oq-pricebox"><span class="yen">¥</span><input class="oq-input oq-price" inputmode="numeric" placeholder="12,800" /></div>
+      <label class="oq-label" style="margin-top:10px;">옵션 · 수량</label>
+      <div class="oq-options"></div>
+      <button type="button" class="oq-addopt"><i data-lucide="plus"></i> 옵션 추가</button>
+      <label class="oq-label">상품 사진</label>
+      <input type="file" accept="image/*" class="oq-photo-file" hidden />
+      <button type="button" class="oq-photo-btn"><i data-lucide="upload"></i> 사진 추가</button>
+      <div class="oq-photo-thumb"></div>
+    </div>
+  </template>
+  <template id="optionTpl">
+    <div class="oq-optrow">
+      <input class="oq-input oq-opt" placeholder="색상 / 사이즈" />
+      <input class="oq-input oq-qty" inputmode="numeric" value="1" />
+      <button type="button" class="oq-optx" hidden><i data-lucide="x"></i></button>
+    </div>
+  </template>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=7"></script>
+  <script>
+  (function () {
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var icons = function () { try { lucide.createIcons(); } catch (e) {} };
+
+    // ----- 채널 태그 (?c=insta 등) -----
+    var CH = { insta: "인스타그램", instagram: "인스타그램", kakao: "카카오톡", talk: "카카오톡", threads: "스레드", thread: "스레드", meru: "메루카리", mercari: "메루카리", web: "홈페이지", twitter: "트위터", x: "트위터" };
+    var cParam = (new URLSearchParams(location.search).get("c") || "web").toLowerCase();
+    var CHANNEL = CH[cParam] || "홈페이지";
+    var SOURCE = (cParam === "web" || cParam === "") ? "web" : "sns";
+
+    // ----- 필독안내 기본문구 (관리자에서 수정 가능: settings.order_notice_purchase) -----
+    var NOTICE = [
+      { icon: "shopping-bag", title: "신청 정보 · 공식 판매처", body: "상품 URL·옵션·수량을 정확히 적어주세요. 공식 판매처 여부는 직접 확인 부탁드려요 — 비공식 사이트로 인한 가품·미발송은 책임지기 어려워요. (재고 사정으로 품절될 수 있어요.)" },
+      { icon: "credit-card", title: "수수료 · 결제 · 취소", body: "구매대행 수수료는 상품가의 3%예요. 현지 구매가 시작되면 취소·수정이 어렵고(미주문 건만 예외), 신청 후 24시간 내 미결제 시 자동 취소돼요." },
+      { icon: "eye", title: "검수 · 상품 상태", body: "기본 검수는 사이즈·색상·수량·심한 파손이에요. 봉제·오염 정밀검수는 메모로 요청해 주세요(전자제품 작동·대형상품은 어려워요). 공식매장 바잉 특성상 미세 스크래치·패키지 구겨짐이 있을 수 있어요." },
+      { icon: "calendar-clock", title: "예약 · 수주 생산 상품", body: "예약·수주생산 상품은 도착까지 시간이 걸려요. 발매일을 꼭 확인해 주시고, 판매처 사정으로 인한 발매일 지연·변경은 책임지기 어려워요." },
+      { icon: "truck", title: "배송 기간", body: "출고일 기준 3~5일, CJ대한통운으로 보내 주말에도 받아보실 수 있어요. (현지·통관 사정에 따라 지연될 수 있어요.)" },
+      { icon: "rotate-ccw", title: "반품 · 환불", body: "입고 시 하자·파손이 확인되면 환불 또는 교환해 드려요. 단순 변심 반품은 반품 수수료(1,000엔)+택배비가 들고, 구매대행 수수료는 환불되지 않아요." },
+      { icon: "shield-check", title: "통관 · 관부가세", body: "통관 가능 여부는 관세청(125)에 확인 부탁드려요. 통관부호 오류·수취인명 불일치, 통관 불가로 인한 반송·폐기·벌금은 책임지기 어려워요. 미화 $150 초과 시 관·부가세가 부과될 수 있어요." }
+    ];
+    function renderNotice(list) {
+      $("#noticeList").innerHTML = list.map(function (n) {
+        return '<div class="oq-note"><div class="oq-note-ic"><i data-lucide="' + n.icon + '"></i></div>' +
+          '<div><h3>' + esc(n.title) + '</h3><p>' + esc(n.body) + '</p></div></div>';
+      }).join("");
+      icons();
+    }
+    function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+    renderNotice(NOTICE);
+    // 관리자 문구가 있으면 덮어쓰기
+    if (window.OSS && OSS.getSetting) {
+      OSS.getSetting("order_notice_purchase").then(function (v) {
+        if (Array.isArray(v) && v.length) renderNotice(v);
+      }).catch(function () {});
+    }
+
+    // ----- 동의 체크 -----
+    var agreed = false;
+    $("#agreeRow").addEventListener("click", function () {
+      agreed = !agreed;
+      this.classList.toggle("on", agreed);
+      $("#startBtn").disabled = !agreed;
+    });
+
+    // ----- 단계 이동 -----
+    function showStep(n) {
+      $("#panel0").classList.toggle("active", n === 0);
+      $("#panel1").classList.toggle("active", n === 1);
+      $("#panel2").classList.toggle("active", n === 2);
+      var steps = $("#oqSteps");
+      if (n === 0) { steps.hidden = true; }
+      else {
+        steps.hidden = false;
+        $("#bar1").className = n >= 1 ? "on" : "";
+        $("#bar2").className = n >= 2 ? "on" : "";
+        $("#stepTitle").textContent = n === 1 ? "상품정보" : "배송지정보";
+        $("#stepFrac").textContent = n + " / 2";
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    $("#startBtn").addEventListener("click", function () { if (agreed) showStep(1); });
+    document.querySelectorAll("[data-back]").forEach(function (b) {
+      b.addEventListener("click", function () { showStep(Number(b.getAttribute("data-back"))); });
+    });
+
+    // ----- 상품/옵션 동적 -----
+    var productTpl = $("#productTpl").content;
+    var optionTpl = $("#optionTpl").content;
+    var productsBox = $("#oqProducts");
+
+    function formatPrice(el){var d=el.value.replace(/[^0-9]/g,"");el.value=d?Number(d).toLocaleString():"";}
+    function formatPhone(el){var d=el.value.replace(/[^0-9]/g,"").slice(0,11);var o=d;if(d.length>=8)o=d.slice(0,3)+"-"+d.slice(3,7)+"-"+d.slice(7);else if(d.length>=4)o=d.slice(0,3)+"-"+d.slice(3);el.value=o;}
+    function recompute(){var goods=0;productsBox.querySelectorAll(".oq-product").forEach(function(p){var price=numOnly(p.querySelector(".oq-price").value);var q=0;p.querySelectorAll(".oq-options .oq-optrow").forEach(function(r){q+=numOnly(r.querySelector(".oq-qty").value);});if(!q)q=1;goods+=price*q;});var fee=Math.round(goods*0.03);var fmt=function(n){return "¥"+Number(n||0).toLocaleString();};var g=document.getElementById("totGoods");if(g)g.textContent=fmt(goods);var f=document.getElementById("totFee");if(f)f.textContent=fmt(fee);var t=document.getElementById("totFinal");if(t)t.textContent=fmt(goods+fee);}
+    productsBox.addEventListener("input", function(e){var t=e.target;if(t.classList&&t.classList.contains("oq-price"))formatPrice(t);if(t.classList&&t.classList.contains("oq-qty"))t.value=t.value.replace(/[^0-9]/g,"");recompute();});
+
+    function addOption(prod, focus) {
+      var row = optionTpl.cloneNode(true);
+      prod.querySelector(".oq-options").appendChild(row);
+      var added = prod.querySelectorAll(".oq-options .oq-optrow");
+      var last = added[added.length - 1];
+      last.querySelector(".oq-optx").addEventListener("click", function () { last.remove(); refreshOptX(prod); recompute(); });
+      refreshOptX(prod);
+      icons();
+      recompute();
+      if (focus) last.querySelector(".oq-opt").focus();
+    }
+    function refreshOptX(prod) {
+      var rows = prod.querySelectorAll(".oq-options .oq-optrow");
+      rows.forEach(function (r, i) { r.querySelector(".oq-optx").hidden = (i === 0); });
+    }
+
+    function wireProduct(prod) {
+      // 번역
+      prod.querySelector(".oq-translate").addEventListener("click", function () { translateName(prod, this); });
+      // 옵션 추가
+      prod.querySelector(".oq-addopt").addEventListener("click", function () { addOption(prod, true); });
+      // 사진
+      var file = prod.querySelector(".oq-photo-file");
+      prod.querySelector(".oq-photo-btn").addEventListener("click", function () { file.click(); });
+      file.addEventListener("change", function () { uploadPhoto(prod, file); });
+      // 복사
+      prod.querySelector(".oq-copy").addEventListener("click", function () { copyProduct(prod); });
+      // 삭제
+      prod.querySelector(".oq-remove").addEventListener("click", function () { prod.remove(); renumber(); recompute(); });
+    }
+
+    function addProduct() {
+      var frag = productTpl.cloneNode(true);
+      productsBox.appendChild(frag);
+      var prod = productsBox.lastElementChild;
+      wireProduct(prod);
+      addOption(prod, false); // 기본 옵션 1줄
+      renumber();
+      icons();
+      recompute();
+      return prod;
+    }
+
+    function renumber() {
+      var prods = productsBox.querySelectorAll(".oq-product");
+      prods.forEach(function (p, i) {
+        p.querySelector(".oq-plabel").textContent = i === 0 ? "상품" : "상품 " + (i + 1);
+        p.querySelector(".oq-remove").hidden = (i === 0); // 첫 상품은 삭제 없음
+      });
+    }
+
+    function copyProduct(src) {
+      var prod = addProduct();
+      prod.querySelector(".oq-name").value = src.querySelector(".oq-name").value;
+      prod.querySelector(".oq-url").value = src.querySelector(".oq-url").value;
+      prod.querySelector(".oq-price").value = src.querySelector(".oq-price").value;
+      var st = src.querySelector(".oq-trans");
+      if (!st.hidden) {
+        var dt = prod.querySelector(".oq-trans");
+        dt.querySelector(".txt").textContent = st.querySelector(".txt").textContent;
+        dt.hidden = false;
+        prod.dataset.nameKo = src.dataset.nameKo || "";
+      }
+      if (src.dataset.image) { prod.dataset.image = src.dataset.image; showThumb(prod, src.dataset.image); }
+      // 옵션 복사
+      prod.querySelectorAll(".oq-options .oq-optrow").forEach(function (r) { r.remove(); });
+      src.querySelectorAll(".oq-options .oq-optrow").forEach(function (r, i) {
+        addOption(prod, false);
+        var rows = prod.querySelectorAll(".oq-options .oq-optrow");
+        var nr = rows[rows.length - 1];
+        nr.querySelector(".oq-opt").value = r.querySelector(".oq-opt").value;
+        nr.querySelector(".oq-qty").value = r.querySelector(".oq-qty").value;
+      });
+      recompute();
+      window.scrollTo({ top: prod.offsetTop - 60, behavior: "smooth" });
+    }
+
+    // ----- 일본어 → 한국어 번역 (무료 MyMemory, 키 없음) -----
+    function translateName(prod, btn) {
+      var name = prod.querySelector(".oq-name").value.trim();
+      var box = prod.querySelector(".oq-trans");
+      var txt = box.querySelector(".txt");
+      if (!name) { return; }
+      var old = btn.innerHTML; btn.disabled = true; btn.textContent = "번역중";
+      fetch("https://api.mymemory.translated.net/get?q=" + encodeURIComponent(name) + "&langpair=ja|ko")
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          var ko = d && d.responseData && d.responseData.translatedText;
+          if (ko) { txt.textContent = ko; box.hidden = false; prod.dataset.nameKo = ko; box.querySelector(".tag").textContent = "한국어"; box.style.borderColor = "var(--o-line2)"; }
+          else throw 0;
+        })
+        .catch(function () { txt.textContent = "번역을 못 했어요 — 한국어로 직접 적어주셔도 돼요."; box.hidden = false; })
+        .then(function () { btn.disabled = false; btn.innerHTML = old; icons(); });
+    }
+
+    // ----- 사진 업로드 -----
+    function uploadPhoto(prod, file) {
+      var f = file.files && file.files[0];
+      var thumb = prod.querySelector(".oq-photo-thumb");
+      if (!f) return;
+      if (f.size > 8 * 1024 * 1024) { thumb.textContent = "사진은 8MB 이하만 가능해요."; file.value = ""; return; }
+      if (!(window.OSS && OSS.uploadProductImage)) { thumb.textContent = "(사진 업로드 준비 중)"; return; }
+      thumb.textContent = "업로드 중...";
+      OSS.uploadProductImage(f).then(function (url) {
+        prod.dataset.image = url; showThumb(prod, url);
+      }).catch(function (e) { thumb.textContent = "업로드 실패: " + (e.message || e); });
+    }
+    function showThumb(prod, url) {
+      var thumb = prod.querySelector(".oq-photo-thumb");
+      thumb.innerHTML = '<img src="' + url + '" alt="상품사진" /><button type="button" class="rm">✕ 사진 삭제</button>';
+      thumb.querySelector(".rm").addEventListener("click", function () { delete prod.dataset.image; thumb.innerHTML = ""; prod.querySelector(".oq-photo-file").value = ""; });
+    }
+
+    $("#addProductBtn").addEventListener("click", function () { var p = addProduct(); window.scrollTo({ top: p.offsetTop - 60, behavior: "smooth" }); });
+    addProduct(); // 시작 시 상품 1개
+
+    // ----- 주소 검색 (다음 우편번호, 무료) -----
+    $("#addrBtn").addEventListener("click", function () {
+      if (!window.daum || !daum.Postcode) { alert("주소검색을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."); return; }
+      new daum.Postcode({ oncomplete: function (data) {
+        $("#fZip").value = data.zonecode;
+        $("#fAddr").value = (data.roadAddress || data.address) + " ";
+        $("#fAddr").focus();
+      } }).open();
+    });
+
+    // 입력 제한: 수취인명 한글만 / 휴대폰 숫자→자동 하이픈
+    $("#fName").addEventListener("input", function () { this.value = this.value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣ\s]/g, ""); });
+    $("#fPhone").addEventListener("input", function () { formatPhone(this); });
+
+    // ----- 1단계 검증 → 2단계 -----
+    $("#toStep2").addEventListener("click", function () {
+      var prods = productsBox.querySelectorAll(".oq-product");
+      var ok = false;
+      prods.forEach(function (p) { if (p.querySelector(".oq-name").value.trim() || p.querySelector(".oq-url").value.trim()) ok = true; });
+      if (!ok) { $("#err1").textContent = "상품명 또는 상품 링크를 하나 이상 입력해 주세요."; return; }
+      $("#err1").textContent = "";
+      showStep(2);
+    });
+
+    // ----- 제출 -----
+    function genOrderNo() {
+      var d = new Date();
+      var p = function (n) { return ("0" + n).slice(-2); };
+      var r = Math.random().toString(36).slice(2, 6).toUpperCase();
+      return "OSS-" + String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate()) + "-" + r;
+    }
+    function numOnly(s) { return Number(String(s || "").replace(/[^0-9.]/g, "")) || 0; }
+
+    function buildProducts() {
+      var out = [], subtotal = 0;
+      productsBox.querySelectorAll(".oq-product").forEach(function (p) {
+        var nameJp = p.querySelector(".oq-name").value.trim();
+        var nameKo = p.dataset.nameKo || "";
+        var url = p.querySelector(".oq-url").value.trim();
+        var price = numOnly(p.querySelector(".oq-price").value);
+        var opts = [], qtyTotal = 0;
+        p.querySelectorAll(".oq-options .oq-optrow").forEach(function (r) {
+          var o = r.querySelector(".oq-opt").value.trim();
+          var q = numOnly(r.querySelector(".oq-qty").value) || 1;
+          qtyTotal += q;
+          if (o || q) opts.push({ option: o, qty: q });
+        });
+        if (!qtyTotal) qtyTotal = 1;
+        subtotal += price * qtyTotal;
+        out.push({
+          name: nameKo || nameJp, name_jp: nameJp, name_ko: nameKo,
+          url: url, price: price, qty: qtyTotal, options: opts,
+          memo: opts.map(function (o) { return o.option + (o.qty > 1 ? " x" + o.qty : ""); }).filter(Boolean).join(", "),
+          image: p.dataset.image || ""
+        });
+      });
+      return { products: out, subtotal: subtotal };
+    }
+
+    $("#submitBtn").addEventListener("click", function () {
+      var name = $("#fName").value.trim();
+      var phone = $("#fPhone").value.trim();
+      var customs = $("#fCustoms").value.trim();
+      var zip = $("#fZip").value.trim();
+      var addr = $("#fAddr").value.trim();
+      var err = $("#err2");
+      if (!name) { err.textContent = "수취인명을 입력해 주세요."; return; }
+      if (!phone) { err.textContent = "휴대폰번호를 입력해 주세요."; return; }
+      if (!customs) { err.textContent = "개인통관고유부호를 입력해 주세요 (통관에 꼭 필요해요)."; return; }
+      if (!addr) { err.textContent = "주소를 입력해 주세요."; return; }
+      err.textContent = "";
+      if (!(window.OSS && OSS.submitApplication)) { err.textContent = "연결 오류 — 잠시 후 다시 시도해 주세요."; return; }
+
+      var btn = this; btn.disabled = true; btn.textContent = "접수 중...";
+      var bp = buildProducts();
+      var orderNo = genOrderNo();
+      var payload = {
+        order_no: orderNo, type: "purchase", status: "신규접수",
+        source: SOURCE, channel: CHANNEL,
+        applicant_name: name, applicant_phone: phone,
+        receiver_name: name, receiver_phone: phone,
+        customs_code: customs, zipcode: zip, address: addr,
+        products: bp.products, subtotal: bp.subtotal
+      };
+      OSS.submitApplication(payload).then(function () {
+        $("#panel2").classList.remove("active");
+        $("#oqSteps").hidden = true;
+        $("#doneNo").textContent = orderNo;
+        $("#panelDone").style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        icons();
+      }).catch(function (e) {
+        err.textContent = "접수 실패: " + (e.message || e) + " (관리자에게 문의해 주세요)";
+        btn.disabled = false; btn.innerHTML = '<i data-lucide="check"></i> 주문하기'; icons();
+      });
+    });
+
+    // 주문번호 복사
+    $("#copyNoBtn").addEventListener("click", function () {
+      var t = $("#doneNo").textContent;
+      var done = function () { var b = $("#copyNoBtn"); b.innerHTML = '<i data-lucide="check"></i> 복사됐어요!'; icons(); };
+      if (navigator.clipboard) navigator.clipboard.writeText(t).then(done).catch(done);
+      else { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
+    });
+
+    icons();
+  })();
+  </script>
+</body>
+</html>
