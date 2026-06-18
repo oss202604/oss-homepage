@@ -240,6 +240,7 @@
     <!-- ===== 2단계: 배송지정보 ===== -->
     <section class="oq-panel" id="panel2">
       <div class="oq-body oq-row">
+        <div id="myAddrPick" style="display:none;grid-column:1/-1;"><label class="oq-label">내 주소지 사용</label><select class="oq-input" id="fSavedAddr"><option value="">저장된 배송지에서 불러오기</option></select></div>
         <div><label class="oq-label">수취인명</label><input class="oq-input" id="fName" placeholder="받으실 분 성함" autocomplete="name" /></div>
         <div><label class="oq-label">휴대폰번호</label><input class="oq-input" id="fPhone" type="tel" placeholder="010-0000-0000" autocomplete="tel" /></div>
         <div>
@@ -255,6 +256,7 @@
           </div>
         </div>
         <div><label class="oq-label">주소 (도로명 + 상세)</label><input class="oq-input" id="fAddr" placeholder="주소 검색 후 상세주소를 이어서 입력" /></div>
+        <div id="fSaveAddrWrap" style="display:none;grid-column:1/-1;"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);cursor:pointer;"><input type="checkbox" id="fSaveAddr" style="width:auto;" /> 이 배송지를 내 주소지로 저장 (최대 3개)</label></div>
       </div>
       <p class="oq-err" id="err2"></p>
       <div class="oq-foot">
@@ -330,7 +332,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=7"></script>
+  <script src="supabase.js?v=11"></script>
   <script>
   (function () {
     var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -346,6 +348,7 @@
     var NOTICE = [
       { icon: "shopping-bag", title: "신청 정보 · 공식 판매처", body: "상품 URL·옵션·수량을 정확히 적어주세요. 공식 판매처 여부는 직접 확인 부탁드려요 — 비공식 사이트로 인한 가품·미발송은 책임지기 어려워요. (재고 사정으로 품절될 수 있어요.)" },
       { icon: "credit-card", title: "수수료 · 결제 · 취소", body: "구매대행 수수료는 상품가의 3%예요. 현지 구매가 시작되면 취소·수정이 어렵고(미주문 건만 예외), 신청 후 24시간 내 미결제 시 자동 취소돼요." },
+      { icon: "wallet", title: "배송비 · 예치금 · 출고", body: "배송비는 입고·검수·무게 측정 후 확정되며, 배송비 결제가 완료되어야 출고됩니다. 예치금을 충전해두시면 배송비가 예치금에서 자동 차감되어 바로 출고돼요. 예치금이 없으면 배송비를 결제하시기 전까지 출고되지 않습니다." },
       { icon: "eye", title: "검수 · 상품 상태", body: "기본 검수는 사이즈·색상·수량·심한 파손이에요. 봉제·오염 정밀검수는 메모로 요청해 주세요(전자제품 작동·대형상품은 어려워요). 공식매장 바잉 특성상 미세 스크래치·패키지 구겨짐이 있을 수 있어요." },
       { icon: "calendar-clock", title: "예약 · 수주 생산 상품", body: "예약·수주생산 상품은 도착까지 시간이 걸려요. 발매일을 꼭 확인해 주시고, 판매처 사정으로 인한 발매일 지연·변경은 책임지기 어려워요." },
       { icon: "truck", title: "배송 기간", body: "출고일 기준 3~5일, CJ대한통운으로 보내 주말에도 받아보실 수 있어요. (현지·통관 사정에 따라 지연될 수 있어요.)" },
@@ -612,6 +615,8 @@
         $("#panel2").classList.remove("active");
         $("#oqSteps").hidden = true;
         $("#doneNo").textContent = orderNo;
+        var _sa = document.getElementById("fSaveAddr");
+        if (_sa && _sa.checked && OSS.saveAddress) { OSS.saveAddress({ receiver_name: name, receiver_phone: phone, zipcode: zip, address: addr, customs_code: customs }).then(function () {}, function () {}); }
         var _finalYen = bp.subtotal + Math.round(bp.subtotal * 0.03);
         var _dp = $("#donePay"); if (_dp) _dp.textContent = "₩" + Number(_finalYen * YEN_KRW).toLocaleString();
         $("#panelDone").style.display = "block";
@@ -640,6 +645,21 @@
       else { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
     });
 
+    // 내 주소지 사용 (로그인 회원) — 저장된 배송지 불러오기 / 저장 옵션 노출
+    if (window.OSS && OSS.getMyProfile) {
+      OSS.getMyProfile().then(function (p) {
+        if (!p) return;
+        var sw = $("#fSaveAddrWrap"); if (sw) sw.style.display = "";
+        if (!OSS.listMyAddresses) return;
+        OSS.listMyAddresses().then(function (list) {
+          if (!list || !list.length) return;
+          var pick = $("#myAddrPick"), sel = $("#fSavedAddr");
+          list.forEach(function (a, i) { var o = document.createElement("option"); o.value = i; o.textContent = (a.label ? "[" + a.label + "] " : "") + (a.receiver_name || "") + " · " + (a.address || "").slice(0, 16); sel.appendChild(o); });
+          pick.style.display = "";
+          sel.addEventListener("change", function () { var a = list[this.value]; if (!a) return; $("#fName").value = a.receiver_name || ""; $("#fPhone").value = a.receiver_phone || ""; $("#fCustoms").value = a.customs_code || ""; $("#fZip").value = a.zipcode || ""; $("#fAddr").value = a.address || ""; });
+        }).catch(function () {});
+      }).catch(function () {});
+    }
     icons();
   })();
   </script>

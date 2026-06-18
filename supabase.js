@@ -336,6 +336,49 @@ async function deleteReview(id) {
   if (error) throw error;
 }
 
+// ---- 저장 배송지 (회원당 최대 3개) ----
+async function listMyAddresses() {
+  const { data, error } = await sb.from("saved_addresses").select("*").order("is_default", { ascending: false }).order("created_at", { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+async function saveAddress(addr) {
+  const { data: s } = await sb.auth.getSession();
+  if (!s || !s.session) throw new Error("로그인 후 저장할 수 있어요.");
+  const list = await listMyAddresses();
+  if (list.length >= 3) throw new Error("배송지는 최대 3개까지 저장할 수 있어요.");
+  const makeDefault = !!addr.is_default || list.length === 0;
+  const row = {
+    user_id: s.session.user.id,
+    label: addr.label || "",
+    receiver_name: addr.receiver_name || "",
+    receiver_phone: addr.receiver_phone || "",
+    zipcode: addr.zipcode || "",
+    address: addr.address || "",
+    customs_code: addr.customs_code || "",
+    is_default: makeDefault,
+  };
+  const { data, error } = await sb.from("saved_addresses").insert([row]).select().maybeSingle();
+  if (error) throw error;
+  if (makeDefault && data) await setDefaultAddress(data.id);
+  return data;
+}
+async function updateAddress(id, fields) {
+  const { error } = await sb.from("saved_addresses").update(fields).eq("id", id);
+  if (error) throw error;
+}
+async function deleteAddress(id) {
+  const { error } = await sb.from("saved_addresses").delete().eq("id", id);
+  if (error) throw error;
+}
+async function setDefaultAddress(id) {
+  const { data: s } = await sb.auth.getSession();
+  if (!s || !s.session) throw new Error("로그인이 필요해요.");
+  await sb.from("saved_addresses").update({ is_default: false }).eq("user_id", s.session.user.id);
+  const { error } = await sb.from("saved_addresses").update({ is_default: true }).eq("id", id);
+  if (error) throw error;
+}
+
 window.OSS = {
   sb,
   submitApplication,
@@ -390,4 +433,10 @@ window.OSS = {
   listReviews,
   setReviewStatus,
   deleteReview,
+  // 저장 배송지
+  listMyAddresses,
+  saveAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
 };

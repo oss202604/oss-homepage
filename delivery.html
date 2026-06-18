@@ -105,10 +105,12 @@
           <li>통관 불가 품목·금지 성분으로 인한 반송·폐기·벌금은 OSS가 책임지지 않습니다.</li>
         </ul>
 
-        <h4>5. 보관 · 발송</h4>
+        <h4>5. 보관 · 배송비 · 예치금 · 발송</h4>
         <ul>
           <li>입고 후 30일까지 무료 보관, 이후 보관료가 부과될 수 있습니다.</li>
-          <li>발송비 결제 완료 후 출고 절차가 시작됩니다.</li>
+          <li>배송비는 입고·검수·무게 측정 후 확정되며, <b>배송비 결제가 완료되어야 출고</b>됩니다.</li>
+          <li>예치금을 충전해두시면 배송비가 <b>예치금에서 자동 차감</b>되어 바로 출고돼요.</li>
+          <li><b>예치금이 없으면 배송비를 결제하시기 전까지 출고되지 않습니다.</b></li>
         </ul>
       </div>
 
@@ -250,6 +252,7 @@
 
         <fieldset class="form-block">
           <legend>4. 한국 배송지 정보</legend>
+          <label class="full" id="orderAddrPickWrap" style="display:none;">내 주소지 사용<select id="orderSavedAddr"><option value="">저장된 배송지에서 불러오기</option></select></label>
           <div class="form-row">
             <label>수취인명 <span class="req">*</span><input type="text" name="receiver" required placeholder="받는 분 성함" /></label>
             <label>휴대폰번호 <span class="req">*</span><input type="tel" name="receiverPhone" required placeholder="010-1234-5678" /></label>
@@ -272,6 +275,7 @@
           </div>
           <label class="full">한국 주소 <span class="req">*</span><input type="text" name="address" required placeholder="도로명 주소 + 상세주소" /></label>
           <label class="full">택배사 전달메세지<input type="text" name="courierMemo" maxlength="20" placeholder="20자 이내 (선택)" /></label>
+          <label class="checkbox full" id="orderSaveAddrWrap" style="display:none;"><input type="checkbox" id="orderSaveAddr" /><span>이 배송지를 내 주소지로 저장 (최대 3개)</span></label>
         </fieldset>
 
         <fieldset class="form-block">
@@ -326,7 +330,29 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=7"></script>
+  <script src="supabase.js?v=11"></script>
   <script src="script.js?v=11"></script>
+  <script>
+    (function () {
+      if (!(window.OSS && OSS.getMyProfile)) return;
+      var pickWrap = document.getElementById('orderAddrPickWrap'), sel = document.getElementById('orderSavedAddr');
+      var saveWrap = document.getElementById('orderSaveAddrWrap'), saveChk = document.getElementById('orderSaveAddr');
+      function q(n) { return document.querySelector('[name="' + n + '"]'); }
+      OSS.getMyProfile().then(function (p) {
+        if (!p) return;
+        if (saveWrap) saveWrap.style.display = '';
+        if (OSS.listMyAddresses) OSS.listMyAddresses().then(function (list) {
+          if (!list || !list.length) return;
+          list.forEach(function (a, i) { var o = document.createElement('option'); o.value = i; o.textContent = (a.label ? '[' + a.label + '] ' : '') + (a.receiver_name || '') + ' · ' + (a.address || '').slice(0, 16); sel.appendChild(o); });
+          if (pickWrap) pickWrap.style.display = '';
+          sel.addEventListener('change', function () { var a = list[this.value]; if (!a) return; if (q('receiver')) q('receiver').value = a.receiver_name || ''; if (q('receiverPhone')) q('receiverPhone').value = a.receiver_phone || ''; if (q('ccode')) q('ccode').value = a.customs_code || ''; if (q('zipcode')) q('zipcode').value = a.zipcode || ''; if (q('address')) q('address').value = a.address || ''; });
+        }).catch(function () {});
+        var f = q('receiver') && q('receiver').closest('form');
+        if (f) f.addEventListener('submit', function () {
+          if (saveChk && saveChk.checked && OSS.saveAddress) OSS.saveAddress({ receiver_name: (q('receiver') || {}).value || '', receiver_phone: (q('receiverPhone') || {}).value || '', zipcode: (q('zipcode') || {}).value || '', address: (q('address') || {}).value || '', customs_code: (q('ccode') || {}).value || '' }).then(function () {}, function () {});
+        });
+      }).catch(function () {});
+    })();
+  </script>
 </body>
 </html>
