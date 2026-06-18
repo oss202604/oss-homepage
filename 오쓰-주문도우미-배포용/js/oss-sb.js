@@ -13,12 +13,38 @@
 
   var POLL_MS = 60000, pollTimer = null, loggedIn = false, rtChannel = null;
 
-  /* 실시간 구독 — 주문이 들어오는 즉시 수신 (웹소켓). 폴링은 백업으로 유지 */
+  function rerender() {
+    if (typeof renderOrders === 'function') renderOrders();
+    if (typeof renderHome === 'function' && typeof state !== 'undefined' && state.mode === 'home') renderHome();
+    if (typeof renderSales === 'function') renderSales();
+  }
+  /* 컴퓨터(관리자) 등 다른 기기에서 바뀐 주문을 폰 장부에 병합 — 폰 전용 입력값(사입처·판매가 등)은 보존 */
+  function applyWebUpdate(row) {
+    if (!row || !row.id) return;
+    var idx = -1;
+    for (var i = 0; i < orders.length; i++) { if (orders[i].dbId === row.id) { idx = i; break; } }
+    if (row.deleted_at) { if (idx >= 0) { orders.splice(idx, 1); saveOrders(); rerender(); } return; }
+    if (idx < 0) { if (row.owner_status == null && (row.source === 'web' || row.source === 'sns')) syncDown(false); return; }
+    var o = orders[idx];
+    if (row.status) o.status = WEB2APP[row.status] || o.status;     // 진행상태(서버가 소스)
+    if (row.tracking_no != null) o.trackingNo = row.tracking_no;    // 송장
+    if (row.memo != null && row.memo !== '') o.memo = row.memo;
+    o._webUpdatedAt = row.updated_at || '';
+    saveOrders(); rerender();                                       // 로컬·시트만 갱신 (Supabase로 되쏘지 않음 → 루프 방지)
+  }
+  function applyWebDelete(old) {
+    var id = old && old.id; if (!id) return;
+    for (var i = 0; i < orders.length; i++) { if (orders[i].dbId === id) { orders.splice(i, 1); saveOrders(); rerender(); break; } }
+  }
+
+  /* 실시간 구독 — 주문 들어옴(INSERT)·변경(UPDATE)·삭제(DELETE) 즉시 양방향 반영. 폴링은 백업 */
   function subscribeRealtime() {
     if (rtChannel || !loggedIn) return;
     try {
       rtChannel = sb.channel('oss-orders-rt')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'applications' }, function () { syncDown(false); })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'applications' }, function (p) { applyWebUpdate(p.new); })
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'applications' }, function (p) { applyWebDelete(p.old); })
         .subscribe(function (status) { if (status === 'SUBSCRIBED') updateBar(); });
     } catch (e) { console.warn('[OSS] realtime 구독 실패', e); }
   }

@@ -120,6 +120,28 @@ async function init() {
   renderDashboard();
   loadNotices();
   loadMembers();
+  subscribeAdminRealtime();
+}
+
+// 실시간 동기화 — 폰/다른 기기에서 바뀐 주문을 자동 반영 (충돌·누락 방지)
+let _adminReloadTimer = null;
+async function reloadOrders() {
+  if (modal && !modal.hidden) return; // 주문 상세 편집 중엔 보류(깜빡임·덮어쓰기 방지)
+  try {
+    const rows = await window.OSS.fetchApplications();
+    ORDERS = rows.map(mapRow);
+    renderKanban(); renderDashboard();
+  } catch (e) { console.warn("[admin] reload", e); }
+}
+function scheduleReload() { clearTimeout(_adminReloadTimer); _adminReloadTimer = setTimeout(reloadOrders, 400); }
+function subscribeAdminRealtime() {
+  try {
+    window.OSS.sb.channel("admin-apps-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "applications" }, scheduleReload)
+      .subscribe();
+  } catch (e) { console.warn("[admin] realtime", e); }
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) scheduleReload(); });
+  window.addEventListener("focus", scheduleReload);
 }
 
 // ----- 회원관리 (마스터: 등급·역할·권한 편집 / 매니저: 마스터 전용이라 진입 불가) -----
