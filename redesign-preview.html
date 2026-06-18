@@ -97,7 +97,9 @@
   /* 쇼핑몰 로고 (2줄, 로고 슬롯) */
   .malls{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
   .mall{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center;}
-  .mall .lph{height:42px;margin-bottom:8px;}
+  .logobox{position:relative;height:44px;margin-bottom:8px;border-radius:10px;overflow:hidden;}
+  .logobox .lc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#B07A57;font-size:11px;font-weight:500;background:repeating-linear-gradient(45deg,#FBEEE6,#FBEEE6 8px,#F6E5DA 8px,#F6E5DA 16px);border:1.5px dashed #E8C8B4;border-radius:10px;}
+  .logobox img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;}
   .mall p{font-size:12px;font-weight:700;}
   .mall span{font-size:10.5px;color:var(--mute);font-weight:500;}
 
@@ -130,7 +132,8 @@
   .foot b{color:#fff;font-size:18px;font-weight:900;}
   .sns{display:flex;gap:8px;margin-top:14px;}
   .sns a{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:999px;font-size:12.5px;font-weight:700;text-decoration:none;color:#fff;}
-  .sns a .ico{width:18px;height:18px;border-radius:5px;background:#ffffff35;display:inline-flex;align-items:center;justify-content:center;font-size:9px;}
+  .sns a .ico{position:relative;width:18px;height:18px;border-radius:5px;background:#ffffff35;display:inline-flex;align-items:center;justify-content:center;font-size:9px;overflow:hidden;}
+  .sns a .ico img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;border-radius:5px;}
   .sns a.ig{background:#E1306C;}.sns a.th{background:#000;border:1px solid #4a4a4a;}.sns a.kk{background:#FAE100;color:#3A1D1D;}
   .sns a.kk .ico{background:#3a1d1d22;}
   .note{background:#FFF8E6;border:1px solid #F3E2B0;border-radius:14px;padding:13px 18px;font-size:12.5px;color:#8A6D2A;margin:22px 0 0;font-weight:500;}
@@ -218,18 +221,18 @@
     <section class="sec">
       <div class="sec-h"><h2>인기 일본 쇼핑몰 <small>어디든 대신 사드려요 · 로고 자리에 공식 로고를 넣으면 완성</small></h2><a>전체보기 ›</a></div>
       <div class="malls">
-        <div class="mall"><div class="lph">로고</div><p>메루카리</p><span>중고·한정</span></div>
-        <div class="mall"><div class="lph">로고</div><p>라쿠텐</p><span>종합몰</span></div>
-        <div class="mall"><div class="lph">로고</div><p>야후옥션</p><span>경매</span></div>
-        <div class="mall"><div class="lph">로고</div><p>아마존JP</p><span>빠른배송</span></div>
-        <div class="mall"><div class="lph">로고</div><p>ZOZOTOWN</p><span>패션</span></div>
-        <div class="mall"><div class="lph">로고</div><p>큐텐</p><span>해외직구</span></div>
-        <div class="mall"><div class="lph">로고</div><p>유니클로</p><span>의류</span></div>
-        <div class="mall"><div class="lph">로고</div><p>몽벨</p><span>아웃도어</span></div>
-        <div class="mall"><div class="lph">로고</div><p>지유(GU)</p><span>의류</span></div>
-        <div class="mall"><div class="lph">로고</div><p>빔즈</p><span>셀렉트샵</span></div>
-        <div class="mall"><div class="lph">로고</div><p>데이토나</p><span>셀렉트샵</span></div>
-        <div class="mall"><div class="lph">로고</div><p>무지(MUJI)</p><span>생활용품</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-mercari.png" alt="메루카리" loading="lazy" onerror="this.remove()"></div><p>메루카리</p><span>중고·한정</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-rakuten.png" alt="라쿠텐" loading="lazy" onerror="this.remove()"></div><p>라쿠텐</p><span>종합몰</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-yahuoku.png" alt="야후옥션" loading="lazy" onerror="this.remove()"></div><p>야후옥션</p><span>경매</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-amazonjp.png" alt="아마존JP" loading="lazy" onerror="this.remove()"></div><p>아마존JP</p><span>빠른배송</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-zozo.png" alt="ZOZOTOWN" loading="lazy" onerror="this.remove()"></div><p>ZOZOTOWN</p><span>패션</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-qoo10.png" alt="큐텐" loading="lazy" onerror="this.remove()"></div><p>큐텐</p><span>해외직구</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-uniqlo.png" alt="유니클로" loading="lazy" onerror="this.remove()"></div><p>유니클로</p><span>의류</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-montbell.png" alt="몽벨" loading="lazy" onerror="this.remove()"></div><p>몽벨</p><span>아웃도어</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-gu.png" alt="지유 GU" loading="lazy" onerror="this.remove()"></div><p>지유(GU)</p><span>의류</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-beams.png" alt="빔즈" loading="lazy" onerror="this.remove()"></div><p>빔즈</p><span>셀렉트샵</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-daytona.png" alt="데이토나" loading="lazy" onerror="this.remove()"></div><p>데이토나</p><span>셀렉트샵</span></div>
+        <div class="mall"><div class="logobox"><span class="lc">로고</span><img src="img/mall-muji.png" alt="무지 MUJI" loading="lazy" onerror="this.remove()"></div><p>무지(MUJI)</p><span>생활용품</span></div>
       </div>
     </section>
 
@@ -261,7 +264,7 @@
       <div class="kkbar"><div><b>더 궁금한 점이 있으세요?</b><small>카카오톡으로 1:1 상담해 드려요. 편하게 물어보세요!</small></div><a class="btn">카카오톡 문의 →</a></div>
     </section>
 
-    <div class="note">로고 자리(점선 박스)에는 각 브랜드 <b>공식 로고</b>를 넣어야 해요 — 상표라 제가 임의로 그려 넣을 수 없어요. 공식 로고 파일 주시면 슬롯에 바로 끼워 넣을게요. SNS 버튼도 링크 주시면 연결돼요. 숫자(누적주문·평점)는 예시예요.</div>
+    <div class="note">로고 자리는 <b>img 폴더</b>에 공식 로고 파일(예: <code>mall-uniqlo.png</code>)을 넣으면 <b>자동으로 채워지고 크기도 맞춰져요</b>. 상표라 제가 가져오거나 그려 넣진 못하지만, 파일만 폴더에 넣어 주시면(또는 저에게 주시면) 그대로 올라가요. SNS도 링크·아이콘 주시면 연결돼요. 숫자(누적주문·평점)는 예시예요.</div>
 
   </div>
 
@@ -270,9 +273,9 @@
       <b>OSS <span style="font-size:12px;font-weight:400;">オッス</span></b>
       <p style="margin-top:8px;">일본 현지인이 직접 운영하는 구매대행 · 배송대행지</p>
       <div class="sns">
-        <a class="ig" href="#"><span class="ico">IG</span>인스타그램</a>
-        <a class="th" href="#"><span class="ico">@</span>스레드</a>
-        <a class="kk" href="#"><span class="ico">톡</span>카카오톡</a>
+        <a class="ig" href="#"><span class="ico"><img src="img/sns-instagram.svg" alt="" onerror="this.remove()">IG</span>인스타그램</a>
+        <a class="th" href="#"><span class="ico"><img src="img/sns-threads.svg" alt="" onerror="this.remove()">@</span>스레드</a>
+        <a class="kk" href="#"><span class="ico"><img src="img/sns-kakao.svg" alt="" onerror="this.remove()">톡</span>카카오톡</a>
       </div>
     </div>
     <div>상호 OSS · 대표 송상익 · 사업자등록번호 000-00-00000<br />통신판매업신고 0000-지역-0000 · 입금 농협 302-2154-8330-21</div>
