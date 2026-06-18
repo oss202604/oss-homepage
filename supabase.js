@@ -81,6 +81,13 @@ async function fetchActivityLog(limit) {
   if (error) throw error;
   return data || [];
 }
+// 한 주문건의 작업 이력 (처음 → 끝, 오래된 순)
+async function fetchActivityLogByOrder(orderNo) {
+  if (!orderNo) return [];
+  const { data, error } = await sb.from("activity_log").select("*").eq("order_no", orderNo).order("created_at", { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
 
 // ---- 1:1 문의 ----
 async function submitInquiry(payload) {
@@ -267,6 +274,7 @@ window.OSS = {
   uploadProductImage,
   logActivity,
   fetchActivityLog,
+  fetchActivityLogByOrder,
   submitInquiry,
   fetchInquiries,
   answerInquiry,

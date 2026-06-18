@@ -121,7 +121,6 @@ async function init() {
   loadNotices();
   loadMembers();
   subscribeAdminRealtime();
-  renderActivityLog();
 }
 
 // 실시간 동기화 — 폰/다른 기기에서 바뀐 주문을 자동 반영 (충돌·누락 방지)
@@ -139,10 +138,13 @@ function subscribeAdminRealtime() {
   try {
     window.OSS.sb.channel("admin-apps-rt")
       .on("postgres_changes", { event: "*", schema: "public", table: "applications" }, scheduleReload)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_log" }, scheduleLog)
+      // 새 작업 기록이 들어오면, 지금 열어 둔 주문건이면 그 주문 로그를 새로고침(폰↔컴퓨터 실시간)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_log" }, function (p) {
+        if (modal && !modal.hidden && p && p.new && p.new.order_no && p.new.order_no === modalOrderNo) renderOrderLog(modalOrderNo);
+      })
       .subscribe();
   } catch (e) { console.warn("[admin] realtime", e); }
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) { scheduleReload(); scheduleLog(); } });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) scheduleReload(); });
   window.addEventListener("focus", scheduleReload);
 }
 
@@ -157,20 +159,20 @@ function logAction(o, action, detail) {
     });
   } catch (e) {}
 }
-let _logTimer = null;
-function scheduleLog() { clearTimeout(_logTimer); _logTimer = setTimeout(renderActivityLog, 400); }
-async function renderActivityLog() {
-  const box = document.getElementById("activityLog");
+// 주문 상세창에 그 주문건의 전체 작업 이력(처음→끝) 표시
+async function renderOrderLog(orderNo) {
+  const box = document.getElementById("modalOrderLog");
   if (!box) return;
   const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  box.innerHTML = '<div class="empty">불러오는 중...</div>';
   try {
-    const list = await window.OSS.fetchActivityLog(120);
+    const list = await window.OSS.fetchActivityLogByOrder(orderNo);
     box.innerHTML = list.length ? list.map(function (e) {
       const dev = e.device === "phone" ? "📱 휴대폰" : "💻 데스크톱";
       const t = (e.created_at || "").replace("T", " ").slice(0, 16);
-      return '<div class="log-row"><span class="log-time">' + t + '</span><span class="log-dev">' + dev + '</span><span class="log-act">' + (e.order_no ? "[" + esc(e.order_no) + "] " : "") + esc(e.action || "") + (e.detail ? " · " + esc(e.detail) : "") + "</span></div>";
-    }).join("") : '<div class="empty">아직 활동 기록이 없습니다.</div>';
-  } catch (e) { box.innerHTML = '<div class="empty">로그 불러오기 실패: ' + (e.message || e) + "</div>"; }
+      return '<div class="log-row"><span class="log-time">' + t + '</span><span class="log-dev">' + dev + '</span><span class="log-act">' + esc(e.action || "") + (e.detail ? " · " + esc(e.detail) : "") + "</span></div>";
+    }).join("") : '<div class="empty">아직 작업 기록이 없어요. (이 주문부터 기록됩니다)</div>';
+  } catch (e) { box.innerHTML = '<div class="empty">기록 불러오기 실패: ' + esc(e.message || e) + "</div>"; }
 }
 
 // ----- 회원관리 (마스터: 등급·역할·권한 편집 / 매니저: 마스터 전용이라 진입 불가) -----
@@ -405,6 +407,7 @@ function bindDnd() {
 // ----- 카드 클릭 → 상세 모달 -----
 const modal = document.getElementById("orderModal");
 let modalOrderId = null;
+let modalOrderNo = null;
 function bindCardClick() {
   document.querySelectorAll(".kanban-card").forEach((card) => {
     card.addEventListener("click", () => openModal(card.dataset.id));
@@ -414,6 +417,7 @@ function openModal(id) {
   const o = ORDERS.find((x) => x.id === id);
   if (!o) return;
   modalOrderId = id;
+  modalOrderNo = o.no;
   const r = o.raw;
   const products = Array.isArray(r.products) ? r.products : [];
   const prodHtml = products.map((p, i) =>
@@ -456,6 +460,7 @@ function openModal(id) {
       ? keys.map((k) => `<span class="tl-item">${labelOf(k)} <b>${(sd[k] || "").slice(0, 16).replace("T", " ")}</b></span>`).join("")
       : '<span class="tl-empty">상태 변경 기록이 아직 없어요.</span>';
   }
+  renderOrderLog(o.no);
   modal.hidden = false;
 }
 document.getElementById("modalClose").addEventListener("click", () => { modal.hidden = true; });

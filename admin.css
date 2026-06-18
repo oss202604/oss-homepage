@@ -95,8 +95,8 @@ body.admin-body { background: #eef1f6; }
 .set-grid input:focus { outline: none; border-color: var(--blue); background: #fff; }
 .review-edit-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
 .review-edit-row input, .review-edit-row select { padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 13px; background: #fbfcfe; }
-/* 활동 로그창 */
-.activity-log { max-height: 340px; overflow-y: auto; }
+/* 작업 로그창 (주문 상세창 안 — 주문건별 처음→끝 이력) */
+.order-log { max-height: 220px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; padding: 2px 10px; background: #fbfcfe; }
 .log-row { display: flex; gap: 10px; padding: 8px 4px; border-bottom: 1px solid var(--line); align-items: baseline; font-size: 13px; }
 .log-row:last-child { border-bottom: none; }
 .log-time { color: var(--muted); white-space: nowrap; font-size: 12px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
