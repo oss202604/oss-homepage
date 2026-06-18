@@ -229,16 +229,16 @@ function renderOrders(){
     card.appendChild(det);
     card.addEventListener('click',function(e){
       var st=e.target.getAttribute('data-st');
-      if(st){o.status=st;saveOrders();renderOrders();renderSales();doSync(o,true);return;}
+      if(st){o.status=st;saveOrders();renderOrders();renderSales();doSync(o,true);if(window.OSSWeb&&window.OSSWeb.logActivity)window.OSSWeb.logActivity(o.orderNo||o.customer||'',(STATUS_LABEL[st]||st)+'(으)로 변경');return;}
       var sv=e.target.getAttribute('data-settled');
-      if(sv){o.settled=sv;saveOrders();renderOrders();doSync(o,true);return;}
+      if(sv){o.settled=sv;saveOrders();renderOrders();doSync(o,true);if(window.OSSWeb&&window.OSSWeb.logActivity)window.OSSWeb.logActivity(o.orderNo||o.customer||'',sv);return;}
       var act=e.target.getAttribute('data-act');
       if(act==='copy-ship'){copyText(shippingBlock(o));return;}
       if(act==='ship-notice'){copyText(shipNotice(o));return;}
       if(act==='copy-customs'){copyText(o.customsCode||'');toast('📋 통관부호 복사!');return;}
       if(act==='copy-addr'){copyText(joinAddress(o.zip,o.address)||o.address||'');toast('📋 주소 복사!');return;}
       if(act==='sync'){doSync(o,false);return;}
-      if(act==='del'){if(confirm('이 주문을 휴지통으로 보낼까요? (나중에 되돌릴 수 있어요)')){if(o.synced)deleteFromSheet(o);o.deletedAt=nowIso();trash.unshift(o);saveTrash();orders=orders.filter(function(x){return x.id!==o.id;});saveOrders();renderOrders();renderSales();toast('🗑 휴지통으로 옮겼어요 (되돌릴 수 있어요)');}return;}
+      if(act==='del'){if(confirm('이 주문을 휴지통으로 보낼까요? (나중에 되돌릴 수 있어요)')){if(o.synced)deleteFromSheet(o);if(o.dbId&&window.OSSWeb){if(window.OSSWeb.softDelete)window.OSSWeb.softDelete(o);if(window.OSSWeb.logActivity)window.OSSWeb.logActivity(o.orderNo||o.customer||'','휴지통으로 이동(보관)');}o.deletedAt=nowIso();trash.unshift(o);saveTrash();orders=orders.filter(function(x){return x.id!==o.id;});saveOrders();renderOrders();renderSales();toast('🗑 휴지통으로 옮겼어요 (되돌릴 수 있어요)');}return;}
       if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
       state.expandedOrd=state.expandedOrd===o.id?null:o.id;renderOrders();
     });

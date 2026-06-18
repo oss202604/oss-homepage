@@ -121,6 +121,7 @@ async function init() {
   loadNotices();
   loadMembers();
   subscribeAdminRealtime();
+  renderActivityLog();
 }
 
 // 실시간 동기화 — 폰/다른 기기에서 바뀐 주문을 자동 반영 (충돌·누락 방지)
@@ -138,10 +139,38 @@ function subscribeAdminRealtime() {
   try {
     window.OSS.sb.channel("admin-apps-rt")
       .on("postgres_changes", { event: "*", schema: "public", table: "applications" }, scheduleReload)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_log" }, scheduleLog)
       .subscribe();
   } catch (e) { console.warn("[admin] realtime", e); }
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) scheduleReload(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) { scheduleReload(); scheduleLog(); } });
   window.addEventListener("focus", scheduleReload);
+}
+
+// 활동 로그 (세무·감사용) — 기록 + 맨 아래 로그창 렌더
+function logAction(o, action, detail) {
+  try {
+    window.OSS.logActivity({
+      device: "desktop",
+      actor: (MY && (MY.username || MY.email)) || "",
+      order_no: (o && (o.no || o.order_no)) || "",
+      action: action, detail: detail || "",
+    });
+  } catch (e) {}
+}
+let _logTimer = null;
+function scheduleLog() { clearTimeout(_logTimer); _logTimer = setTimeout(renderActivityLog, 400); }
+async function renderActivityLog() {
+  const box = document.getElementById("activityLog");
+  if (!box) return;
+  const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  try {
+    const list = await window.OSS.fetchActivityLog(120);
+    box.innerHTML = list.length ? list.map(function (e) {
+      const dev = e.device === "phone" ? "📱 휴대폰" : "💻 데스크톱";
+      const t = (e.created_at || "").replace("T", " ").slice(0, 16);
+      return '<div class="log-row"><span class="log-time">' + t + '</span><span class="log-dev">' + dev + '</span><span class="log-act">' + (e.order_no ? "[" + esc(e.order_no) + "] " : "") + esc(e.action || "") + (e.detail ? " · " + esc(e.detail) : "") + "</span></div>";
+    }).join("") : '<div class="empty">아직 활동 기록이 없습니다.</div>';
+  } catch (e) { box.innerHTML = '<div class="empty">로그 불러오기 실패: ' + (e.message || e) + "</div>"; }
 }
 
 // ----- 회원관리 (마스터: 등급·역할·권한 편집 / 매니저: 마스터 전용이라 진입 불가) -----
@@ -274,21 +303,16 @@ function renderTrash() {
   tb.innerHTML = items.length
     ? items.map((o) => `<tr>
         <td>${o.no}</td><td>${o.customer}</td><td>${o.name}</td>
-        <td>
-          <button class="btn btn-small" data-restore="${o.id}">복원</button>
-          <button class="btn btn-small remove-product" data-perm="${o.id}">영구삭제</button>
-        </td></tr>`).join("")
+        <td><button class="btn btn-small" data-restore="${o.id}">복원</button></td></tr>`).join("")
     : `<tr><td colspan="4" class="empty">휴지통이 비어 있습니다.</td></tr>`;
+  // ※ 세무·감사를 위해 주문 기록은 영구삭제하지 않고 보관만 합니다(복원 가능).
   tb.querySelectorAll("[data-restore]").forEach((b) => b.addEventListener("click", async () => {
     const o = ORDERS.find((x) => x.id === b.dataset.restore);
-    try { await window.OSS.updateApplication(o.id, { deleted_at: null }); o.deleted = false; o.raw.deleted_at = null; renderKanban(); renderDashboard(); }
-    catch (e) { alert("복원 실패: " + (e.message || e)); }
-  }));
-  tb.querySelectorAll("[data-perm]").forEach((b) => b.addEventListener("click", async () => {
-    if (!confirm("정말 영구 삭제할까요? 되돌릴 수 없습니다.")) return;
-    const id = b.dataset.perm;
-    try { await window.OSS.deleteApplication(id); ORDERS = ORDERS.filter((x) => x.id !== id); renderKanban(); renderDashboard(); }
-    catch (e) { alert("영구삭제 실패: " + (e.message || e) + "\n(권한 정책이 없으면 복원만 사용하세요)"); }
+    try {
+      await window.OSS.updateApplication(o.id, { deleted_at: null });
+      o.deleted = false; o.raw.deleted_at = null; renderKanban(); renderDashboard();
+      logAction(o, "주문 복원");
+    } catch (e) { alert("복원 실패: " + (e.message || e)); }
   }));
 }
 
@@ -368,6 +392,7 @@ function bindDnd() {
         renderDashboard();
         try {
           await window.OSS.updateApplicationStatus(order.id, newStatus);
+          logAction(order, newStatus + "(으)로 변경");
         } catch (err) {
           alert("상태 저장 실패: " + (err.message || err));
           order.status = prev; renderKanban(); renderDashboard();
@@ -446,6 +471,7 @@ if (modalDeleteBtn) modalDeleteBtn.addEventListener("click", async () => {
     await window.OSS.updateApplication(o.id, { deleted_at: new Date().toISOString() });
     o.deleted = true; o.raw.deleted_at = new Date().toISOString();
     modal.hidden = true; renderKanban(); renderDashboard();
+    logAction(o, "휴지통으로 이동(보관)");
   } catch (e) { alert("삭제 실패: " + (e.message || e)); }
 });
 
@@ -496,6 +522,11 @@ document.getElementById("modalSave").addEventListener("click", async () => {
     renderKanban(); renderDashboard();
     try {
       await window.OSS.updateApplication(o.id, fields);
+      var _acts = [];
+      if (newStatus !== prev.status) _acts.push(newStatus + "(으)로 변경");
+      if (fields.tracking_no && fields.tracking_no !== (prev.raw.tracking_no || "")) _acts.push("송장 " + fields.tracking_no);
+      if (!_acts.length) _acts.push("주문 정보 수정");
+      logAction(o, _acts.join(", "));
     } catch (err) {
       // 새 컬럼(flag/메모/송장 등)이 아직 DB에 없으면 핵심 항목만 다시 저장
       try {

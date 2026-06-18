@@ -32,6 +32,12 @@
     o._webUpdatedAt = row.updated_at || '';
     saveOrders(); rerender();                                       // 로컬·시트만 갱신 (Supabase로 되쏘지 않음 → 루프 방지)
   }
+  /* 폰에서 한 작업을 활동 로그에 기록 (세무·감사용, 데스크톱 로그창에 표시) */
+  function logActivity(order_no, action, detail) {
+    if (!loggedIn) return;
+    try { sb.from('activity_log').insert([{ device: 'phone', order_no: order_no || '', action: action || '', detail: detail || '' }]).then(function () { }, function () { }); } catch (e) {}
+  }
+
   function applyWebDelete(old) {
     var id = old && old.id; if (!id) return;
     for (var i = 0; i < orders.length; i++) { if (orders[i].dbId === id) { orders.splice(i, 1); saveOrders(); rerender(); break; } }
@@ -63,6 +69,13 @@
     if (o.settleKrw) fields.settle_krw = o.settleKrw;
     if (o.settled) fields.settled = o.settled;
     return sb.from('applications').update(fields).eq('id', o.dbId)
+      .then(function (res) { return !res.error; }, function () { return false; });
+  }
+
+  /* 폰에서 휴지통으로 보낼 때: 영구삭제 대신 deleted_at만 찍음 (세무·감사용으로 기록 보존) */
+  function softDelete(o) {
+    if (!loggedIn || !o || !o.dbId) return Promise.resolve(false);
+    return sb.from('applications').update({ deleted_at: new Date().toISOString() }).eq('id', o.dbId)
       .then(function (res) { return !res.error; }, function () { return false; });
   }
 
@@ -182,5 +195,5 @@
   if (document.readyState === 'complete' || document.readyState === 'interactive') init();
   else document.addEventListener('DOMContentLoaded', init);
 
-  window.OSSWeb = { syncDown: syncDown, login: showLogin, rowToOrder: rowToOrder, pushUp: pushUp };
+  window.OSSWeb = { syncDown: syncDown, login: showLogin, rowToOrder: rowToOrder, pushUp: pushUp, logActivity: logActivity, softDelete: softDelete };
 })();

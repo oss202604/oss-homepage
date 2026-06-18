@@ -72,6 +72,16 @@ async function uploadProductImage(file) {
   return data.publicUrl;
 }
 
+// ---- 활동 로그 (세무·감사용, 누적만) ----
+async function logActivity(entry) {
+  try { await sb.from("activity_log").insert([entry]); } catch (e) { /* 로그 실패는 본작업 막지 않음 */ }
+}
+async function fetchActivityLog(limit) {
+  const { data, error } = await sb.from("activity_log").select("*").order("created_at", { ascending: false }).limit(limit || 100);
+  if (error) throw error;
+  return data || [];
+}
+
 // ---- 1:1 문의 ----
 async function submitInquiry(payload) {
   const { error } = await sb.from("inquiries").insert([payload]);
@@ -255,6 +265,8 @@ window.OSS = {
   updateApplication,
   deleteApplication,
   uploadProductImage,
+  logActivity,
+  fetchActivityLog,
   submitInquiry,
   fetchInquiries,
   answerInquiry,

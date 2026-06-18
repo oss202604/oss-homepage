@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=17" />
-  <link rel="stylesheet" href="admin.css?v=11" />
+  <link rel="stylesheet" href="admin.css?v=12" />
 </head>
 <body class="admin-body">
   <!-- 상단 바 -->
@@ -60,6 +60,10 @@
               </table>
             </div>
           </div>
+        </div>
+        <div class="dash-panel" style="margin-top:18px;">
+          <h3>🧾 활동 로그 <span style="font-size:13px;font-weight:400;color:var(--muted);">(휴대폰·데스크톱 작업 기록 · 세무용으로 보관됩니다)</span></h3>
+          <div class="activity-log" id="activityLog"><div class="empty">불러오는 중...</div></div>
         </div>
       </section>
 
@@ -319,8 +323,8 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=7"></script>
-  <script src="admin.js?v=10"></script>
+  <script src="supabase.js?v=8"></script>
+  <script src="admin.js?v=11"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>
