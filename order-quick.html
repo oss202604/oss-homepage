@@ -124,16 +124,26 @@
     .oq-btn-primary:disabled{background:#F4C8B2;cursor:not-allowed;}
     .oq-btn-ghost{width:92px;background:#fff;border:1px solid #E0D5CC;color:#7A6E63;font-weight:500;}
     .oq-err{color:#B83232;font-size:13px;text-align:center;padding:0 18px;min-height:18px;word-break:keep-all;}
-    /* 완료 */
-    .oq-done{display:none;text-align:center;padding:40px 24px 48px;}
-    .oq-done .check{width:64px;height:64px;border-radius:50%;background:var(--o-soft);color:var(--o);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;}
-    .oq-done .check i{width:34px;height:34px;}
-    .oq-done h2{margin:0 0 6px;font-size:21px;font-weight:700;}
-    .oq-done p{margin:0;font-size:13.5px;color:var(--mute);line-height:1.6;word-break:keep-all;}
-    .oq-ordno{margin:18px auto;background:var(--o-tint);border:1px solid var(--o-line2);border-radius:14px;padding:14px;max-width:280px;}
-    .oq-ordno .lab{font-size:11.5px;color:var(--o-dark);}
-    .oq-ordno .num{font-size:22px;font-weight:700;letter-spacing:1px;margin-top:2px;}
-    .oq-copybtn{margin-top:10px;height:46px;width:100%;max-width:280px;border:none;border-radius:13px;background:var(--o);color:#fff;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-family:inherit;}
+    /* 완료 (20~30대 여성 셀러 감성) */
+    .oq-done{display:none;position:relative;overflow:hidden;text-align:center;padding:40px 24px 52px;
+      background:radial-gradient(120% 58% at 50% 0%,#FFEFF2 0%,#FFF5EE 44%,#fff 80%);}
+    .oq-done::before,.oq-done::after{content:"";position:absolute;border-radius:50%;opacity:.55;z-index:0;}
+    .oq-done::before{width:96px;height:96px;background:#FFDAC4;top:14px;left:-26px;}
+    .oq-done::after{width:74px;height:74px;background:#FFD7E0;top:54px;right:-20px;}
+    .oq-done>*{position:relative;z-index:1;}
+    .oq-done .check{width:86px;height:86px;border-radius:50%;
+      background:linear-gradient(145deg,#FF8048 0%,#F15E1C 52%,#FF6F8B 132%);color:#fff;
+      display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;
+      box-shadow:0 12px 28px rgba(241,94,28,.30),0 0 0 9px rgba(255,141,160,.15);}
+    .oq-done .check i{width:40px;height:40px;}
+    .oq-done h2{margin:0 0 9px;font-size:23px;font-weight:800;letter-spacing:-.3px;}
+    .oq-done h2 .hi{color:var(--o);}
+    .oq-done p{margin:0 auto;max-width:300px;font-size:13.5px;color:var(--mute);line-height:1.7;word-break:keep-all;}
+    .oq-ordno{margin:20px auto 0;background:#fff;border:1.5px solid var(--o-line2);border-radius:18px;padding:15px;max-width:300px;box-shadow:0 8px 20px rgba(241,94,28,.08);}
+    .oq-ordno .lab{font-size:11.5px;color:var(--o-dark);font-weight:600;letter-spacing:.3px;}
+    .oq-ordno .num{font-size:22px;font-weight:800;letter-spacing:1.5px;margin-top:3px;}
+    .oq-copybtn{margin-top:11px;height:48px;width:100%;max-width:300px;border:none;border-radius:15px;background:var(--o);color:#fff;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-family:inherit;box-shadow:0 8px 18px rgba(241,94,28,.22);transition:transform .12s ease;}
+    .oq-copybtn:active{transform:scale(.97);}
     .oq-copybtn i{width:17px;height:17px;}
     .oq-foot-links{display:flex;align-items:center;justify-content:center;gap:10px;font-size:11.5px;color:var(--hint);padding:6px 0 22px;}
     .oq-foot-links a{color:var(--hint);text-decoration:none;}
@@ -153,22 +163,22 @@
     .oq-zip .oq-addrbtn svg{width:15px;height:15px;}
     .oq-help svg{width:13px;height:13px;}
     .oq-btn svg{width:18px;height:18px;}
-    .oq-done .check svg{width:34px;height:34px;}
+    .oq-done .check svg{width:40px;height:40px;}
     .oq-copybtn svg{width:17px;height:17px;}
     .oq-total-row.krw{margin-top:2px;}
     .oq-total-row.krw span:first-child{color:var(--mute);}
     .oq-total-row.krw span:first-child small{color:var(--hint);font-size:11px;font-weight:400;}
     .oq-total-row.krw span:last-child{color:var(--ink);font-weight:700;}
-    .oq-paybox{margin:16px auto 4px;max-width:320px;background:#fff;border:1px solid var(--o-line2);border-radius:14px;padding:16px;text-align:left;}
-    .oq-paybox .pay-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink);font-weight:600;}
-    .oq-paybox .pay-row b{font-size:20px;color:var(--o);}
-    .oq-paybox .pay-note{margin:8px 0 0;font-size:11.5px;color:var(--mute);line-height:1.55;}
+    .oq-paybox{margin:18px auto 4px;max-width:300px;background:#fff;border:1.5px solid var(--o-line2);border-radius:18px;padding:17px;text-align:left;box-shadow:0 8px 20px rgba(241,94,28,.06);}
+    .oq-paybox .pay-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink);font-weight:700;}
+    .oq-paybox .pay-row b{font-size:22px;color:var(--o);}
+    .oq-paybox .pay-note{margin:9px 0 0;font-size:11.5px;color:var(--mute);line-height:1.6;}
     .oq-paybox .pay-note b{color:var(--ink);}
-    .pay-acct{margin-top:13px;padding-top:13px;border-top:1px dashed var(--line);}
-    .pay-acct-lab{font-size:11.5px;color:var(--o-dark);margin-bottom:4px;}
-    .pay-acct-num{font-size:17px;font-weight:700;color:var(--ink);display:flex;flex-direction:column;gap:1px;}
+    .pay-acct{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);}
+    .pay-acct-lab{font-size:11.5px;color:var(--o-dark);margin-bottom:5px;font-weight:600;}
+    .pay-acct-num{font-size:18px;font-weight:800;color:var(--ink);display:flex;flex-direction:column;gap:1px;}
     .pay-acct-num span{font-size:12.5px;font-weight:500;color:var(--mute);}
-    .pay-acct .oq-copybtn{margin-top:10px;height:42px;font-size:14px;}
+    .pay-acct .oq-copybtn{margin-top:11px;height:44px;font-size:14px;background:#fff;color:var(--o);border:1.5px solid var(--o-line2);box-shadow:none;}
   </style>
 </head>
 <body>
@@ -256,8 +266,8 @@
     <!-- ===== 완료 ===== -->
     <section class="oq-done" id="panelDone">
       <span class="check"><i data-lucide="check"></i></span>
-      <h2>주문이 접수됐어요!</h2>
-      <p>아래 <b>주문번호</b>를 카톡/DM으로 보내주시면<br />더 빠르게 도와드릴 수 있어요.</p>
+      <h2>주문 <span class="hi">접수 완료</span>! 🎉</h2>
+      <p>소중한 주문 감사해요 💛<br />아래 <b>주문번호</b>를 카톡·DM으로 보내주시면 더 빠르게 도와드릴게요.</p>
       <div class="oq-ordno">
         <div class="lab">주문번호</div>
         <div class="num" id="doneNo">OSS-000000-XXXX</div>
