@@ -11,7 +11,17 @@
   var sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
   window.OSS_SB = sb;
 
-  var POLL_MS = 60000, pollTimer = null, loggedIn = false;
+  var POLL_MS = 60000, pollTimer = null, loggedIn = false, rtChannel = null;
+
+  /* 실시간 구독 — 주문이 들어오는 즉시 수신 (웹소켓). 폴링은 백업으로 유지 */
+  function subscribeRealtime() {
+    if (rtChannel || !loggedIn) return;
+    try {
+      rtChannel = sb.channel('oss-orders-rt')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'applications' }, function () { syncDown(false); })
+        .subscribe(function (status) { if (status === 'SUBSCRIBED') updateBar(); });
+    } catch (e) { console.warn('[OSS] realtime 구독 실패', e); }
+  }
 
   /* 사이트 상태(한국어) → 폰앱 상태 키 */
   var WEB2APP = { '신규접수': 'req', '결제대기': 'reserve', '구매중': 'bought', '입고완료': 'office', '포장/측정': 'office', '배송중': 'shipped', '배송완료': 'tracking', '완료': 'tracking', '취소': 'cancel', '보류': 'reserve', '반품/교환': 'cancel' };
@@ -97,7 +107,7 @@
     var bar = ensureBar(); if (!bar) return;
     if (loggedIn) {
       bar.style.background = '#e8f7ef'; bar.style.color = '#0f7a4d';
-      bar.innerHTML = '<span>🟢 온라인 주문 연결됨 (자동 수신)</span><button id="web-sync-now" type="button" style="border:none;background:#0f7a4d;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;">🔄 지금 불러오기</button>';
+      bar.innerHTML = '<span>🟢 온라인 주문 ' + (rtChannel ? '실시간' : '자동') + ' 연결됨</span><button id="web-sync-now" type="button" style="border:none;background:#0f7a4d;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;">🔄 지금 불러오기</button>';
       var b = $('web-sync-now'); if (b) b.onclick = function () { syncDown(true); };
     } else {
       bar.style.background = '#fff4e6'; bar.style.color = '#b5470f';
@@ -129,7 +139,7 @@
       sb.auth.signInWithPassword({ email: email, password: pw }).then(function (res) {
         btn.disabled = false; btn.textContent = '로그인';
         if (res.error) { err.textContent = '로그인 실패 — 이메일/비밀번호를 확인해주세요'; return; }
-        ov.style.display = 'none'; loggedIn = true; updateBar(); startPoll(); syncDown(true);
+        ov.style.display = 'none'; loggedIn = true; updateBar(); startPoll(); subscribeRealtime(); syncDown(true);
       });
     };
   }
@@ -139,7 +149,7 @@
   function init() {
     ensureBar(); updateBar();
     sb.auth.getSession().then(function (res) {
-      if (res && res.data && res.data.session) { loggedIn = true; updateBar(); startPoll(); syncDown(false); }
+      if (res && res.data && res.data.session) { loggedIn = true; updateBar(); startPoll(); subscribeRealtime(); syncDown(false); }
     });
     window.addEventListener('online', function () { if (loggedIn) syncDown(false); });
   }
