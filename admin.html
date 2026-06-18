@@ -116,6 +116,19 @@
             </table>
           </div>
         </div>
+        <div class="dash-panel" style="margin-top:18px;">
+          <h3>🎟️ 쿠폰 관리 <span style="font-size:13px;font-weight:400;color:var(--muted);">(회원 검색 → 정산 시 사용 처리)</span></h3>
+          <div style="display:flex;gap:8px;margin-bottom:12px;max-width:420px;">
+            <input id="couponSearch" placeholder="회원 아이디 또는 이름" style="flex:1;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;" />
+            <button class="btn btn-small btn-primary" id="couponSearchBtn" type="button">검색</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>회원</th><th>금액</th><th>상태</th><th>유효기간</th><th>사용주문</th><th>관리</th></tr></thead>
+              <tbody id="couponRows"><tr><td colspan="6" class="empty">회원 아이디/이름으로 검색하세요.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <!-- ===== 공지·문의 ===== -->
@@ -137,12 +150,21 @@
             </table>
           </div>
         </div>
-        <div class="dash-panel">
+        <div class="dash-panel" style="margin-bottom:24px;">
           <h3>1:1 문의 목록 <span style="font-size:13px;font-weight:400;color:var(--muted);">(제목을 클릭하면 내용·답변)</span></h3>
           <div class="table-wrap">
             <table class="data-table">
               <thead><tr><th>유형</th><th>제목</th><th>작성자</th><th>등록일</th><th>상태</th></tr></thead>
               <tbody id="inquiryRows"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="dash-panel">
+          <h3>⭐ 구매후기 관리 <span style="font-size:13px;font-weight:400;color:var(--muted);">(승인하면 홈페이지 후기 섹션에 노출돼요)</span></h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>작성자</th><th>별점</th><th>내용</th><th>주문번호</th><th>작성일</th><th>상태</th><th>관리</th></tr></thead>
+              <tbody id="reviewRows"><tr><td colspan="7" class="empty">불러오는 중…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -324,8 +346,8 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=9"></script>
-  <script src="admin.js?v=12"></script>
+  <script src="supabase.js?v=10"></script>
+  <script src="admin.js?v=13"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

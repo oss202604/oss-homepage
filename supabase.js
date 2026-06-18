@@ -262,6 +262,80 @@ async function setMemberPermissions(id, permissions) {
   if (error) throw error;
 }
 
+// ---- 쿠폰 (회원가입 배송비 할인쿠폰) ----
+// 내 쿠폰 (마이페이지). RLS로 본인 것만 조회됨
+async function fetchMyCoupons() {
+  const { data, error } = await sb.from("coupons").select("*").order("status").order("expires_at", { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+// 관리자: 특정 회원의 쿠폰
+async function listMemberCoupons(userId) {
+  const { data, error } = await sb.from("coupons").select("*").eq("user_id", userId).order("issued_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+// 관리자: 쿠폰 사용 처리(정산 시 배송비에서 차감) / 되돌리기
+async function useCoupon(id, orderNo) {
+  const { error } = await sb.from("coupons").update({ status: "used", used_at: new Date().toISOString(), used_order_no: orderNo || null }).eq("id", id);
+  if (error) throw error;
+}
+async function unuseCoupon(id) {
+  const { error } = await sb.from("coupons").update({ status: "active", used_at: null, used_order_no: null }).eq("id", id);
+  if (error) throw error;
+}
+
+// ---- 구매후기 (회원만 작성, 사장님 승인 후 게시) ----
+async function submitReview(fields) {
+  const { data: s } = await sb.auth.getSession();
+  if (!s || !s.session) throw new Error("로그인 후 작성할 수 있어요.");
+  const u = s.session.user;
+  const name = (u.user_metadata && (u.user_metadata.name || u.user_metadata.username)) || "회원";
+  const payload = {
+    user_id: u.id,
+    author_name: name,
+    rating: Math.max(1, Math.min(5, Number(fields.rating) || 5)),
+    body: String(fields.body || "").trim(),
+    order_no: fields.order_no || null,
+    status: "pending",
+  };
+  const { error } = await sb.from("reviews").insert([payload]);
+  if (error) throw error;
+  return true;
+}
+// 사이트 노출용 (승인된 후기)
+async function fetchApprovedReviews(limit) {
+  const { data, error } = await sb.from("reviews").select("author_name,rating,body,created_at,approved_at").eq("status", "approved").order("approved_at", { ascending: false }).limit(limit || 12);
+  if (error) throw error;
+  return data || [];
+}
+// 내가 쓴 후기 (마이페이지 — 상태 확인)
+async function fetchMyReviews() {
+  const { data: s } = await sb.auth.getSession();
+  if (!s || !s.session) return [];
+  const { data, error } = await sb.from("reviews").select("*").eq("user_id", s.session.user.id).order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+// 관리자: 후기 목록/승인/삭제
+async function listReviews(status) {
+  let q = sb.from("reviews").select("*").order("created_at", { ascending: false });
+  if (status) q = q.eq("status", status);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data || [];
+}
+async function setReviewStatus(id, status) {
+  const patch = { status };
+  if (status === "approved") patch.approved_at = new Date().toISOString();
+  const { error } = await sb.from("reviews").update(patch).eq("id", id);
+  if (error) throw error;
+}
+async function deleteReview(id) {
+  const { error } = await sb.from("reviews").delete().eq("id", id);
+  if (error) throw error;
+}
+
 window.OSS = {
   sb,
   submitApplication,
@@ -304,4 +378,16 @@ window.OSS = {
   setMemberRole,
   setMemberGrade,
   setMemberPermissions,
+  // 쿠폰
+  fetchMyCoupons,
+  listMemberCoupons,
+  useCoupon,
+  unuseCoupon,
+  // 구매후기
+  submitReview,
+  fetchApprovedReviews,
+  fetchMyReviews,
+  listReviews,
+  setReviewStatus,
+  deleteReview,
 };

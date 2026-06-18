@@ -8,6 +8,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=17" />
+  <style>
+    .coupon-list{display:grid;gap:10px;}
+    .coupon{display:flex;justify-content:space-between;align-items:center;border:1.5px dashed #FBE0CF;border-radius:14px;padding:14px 16px;background:linear-gradient(135deg,#FFF6EF,#FFEFF2);}
+    .coupon.used,.coupon.expired{opacity:.5;filter:grayscale(.4);}
+    .coupon-amt{font-size:20px;font-weight:800;color:#F15E1C;display:flex;flex-direction:column;line-height:1.2;}
+    .coupon-amt span{font-size:12px;font-weight:600;color:#8C8178;margin-top:3px;}
+    .coupon-meta{text-align:right;display:flex;flex-direction:column;gap:4px;}
+    .coupon-state{font-size:13px;font-weight:700;color:#171310;}
+    .coupon-exp{font-size:11.5px;color:#A99B91;}
+    .rv-item{border:1px solid #EFE3DA;border-radius:12px;padding:12px 14px;margin-bottom:8px;}
+    .rv-top{font-size:14px;color:#F1A23A;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+    .rv-item p{margin:0 0 4px;font-size:13.5px;color:#171310;line-height:1.6;word-break:break-word;}
+    .rv-date{font-size:11.5px;color:#A99B91;}
+    .rv-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;}
+    .rv-badge.ok{background:#E6F8F0;color:#1F9D6B;}
+    .rv-badge.wait{background:#FFF3E0;color:#C77A12;}
+    .rv-badge.no{background:#FBECEC;color:#C0392B;}
+  </style>
 </head>
 <body>
   <div class="utility-bar">
@@ -73,6 +91,8 @@
         </div>
         <ul class="mypage-menu">
           <li><a href="#orders" class="active">📦 주문 내역</a></li>
+          <li><a href="#coupons">🎟️ 쿠폰함</a></li>
+          <li><a href="#reviews">⭐ 구매후기</a></li>
           <li><a href="#shipping">🚚 배송 조회</a></li>
           <li><a href="#address">🏠 나의 배대지 주소</a></li>
           <li><a href="#info">⚙️ 회원 정보 수정</a></li>
@@ -102,6 +122,36 @@
               </tbody>
             </table>
           </div>
+        </div>
+
+        <!-- 쿠폰함 -->
+        <div class="mypage-block" id="coupons">
+          <h2 class="mypage-title">🎟️ 내 쿠폰함</h2>
+          <p class="form-note">회원가입 축하 <b>배송비 할인쿠폰</b>이에요. 주문하실 때 "쿠폰 쓸게요"라고 알려주시면 사장님이 정산할 때 배송비에서 차감해드려요. (한 주문에 1장 · 발급일로부터 한 달)</p>
+          <div id="couponList" class="coupon-list"><p class="empty">불러오는 중...</p></div>
+        </div>
+
+        <!-- 구매후기 -->
+        <div class="mypage-block" id="reviews">
+          <h2 class="mypage-title">⭐ 구매후기 작성</h2>
+          <form class="order-form" id="reviewForm">
+            <div class="form-row">
+              <label>별점
+                <select id="rvRating">
+                  <option value="5">★★★★★ 매우 만족</option>
+                  <option value="4">★★★★☆ 만족</option>
+                  <option value="3">★★★☆☆ 보통</option>
+                  <option value="2">★★☆☆☆ 아쉬움</option>
+                  <option value="1">★☆☆☆☆ 별로</option>
+                </select>
+              </label>
+              <label>주문번호 (선택)<input type="text" id="rvOrder" placeholder="OSS-..." /></label>
+            </div>
+            <label>후기 내용<textarea id="rvBody" rows="4" placeholder="상품·배송·응대 등 솔직한 후기를 남겨주세요. 사장님 확인 후 사이트에 게시됩니다 😊"></textarea></label>
+            <button type="submit" class="btn btn-primary">후기 등록</button>
+          </form>
+          <h3 style="margin:20px 0 8px;font-size:15px;">내가 쓴 후기</h3>
+          <div id="myReviewList"><p class="empty">아직 작성한 후기가 없어요.</p></div>
         </div>
 
         <!-- 배송 조회 -->
@@ -171,7 +221,7 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=7"></script>
+  <script src="supabase.js?v=10"></script>
   <script src="script.js?v=11"></script>
   <script>
     (function () {
@@ -227,6 +277,50 @@
             </tr>`;
           }).join("");
         }
+
+        // 쿠폰함
+        try {
+          const coupons = await window.OSS.fetchMyCoupons();
+          const cl = document.getElementById("couponList");
+          const now = Date.now();
+          if (cl) cl.innerHTML = coupons.length ? coupons.map((c) => {
+            const exp = c.expires_at ? new Date(c.expires_at) : null;
+            const expired = exp && exp.getTime() < now;
+            const used = c.status === "used";
+            const state = used ? "사용완료" : (expired ? "기간만료" : "사용가능");
+            const cls = used ? "used" : (expired ? "expired" : "ok");
+            return `<div class="coupon ${cls}">
+              <div class="coupon-amt">₩${Number(c.amount || 0).toLocaleString()}<span>배송비 할인</span></div>
+              <div class="coupon-meta"><span class="coupon-state">${state}</span><span class="coupon-exp">~ ${fmtDate(c.expires_at)}</span></div>
+            </div>`;
+          }).join("") : '<p class="empty">보유한 쿠폰이 없어요.</p>';
+        } catch (e) {}
+
+        // 내가 쓴 후기 + 작성
+        async function loadMyReviews() {
+          try {
+            const rv = await window.OSS.fetchMyReviews();
+            const box = document.getElementById("myReviewList");
+            if (!box) return;
+            box.innerHTML = rv.length ? rv.map((r) => {
+              const st = r.status === "approved" ? '<span class="rv-badge ok">게시중</span>' : (r.status === "rejected" ? '<span class="rv-badge no">미게시</span>' : '<span class="rv-badge wait">승인대기</span>');
+              return `<div class="rv-item"><div class="rv-top">${"★".repeat(r.rating || 5)} ${st}</div><p>${esc(r.body)}</p><span class="rv-date">${fmtDate(r.created_at)}</span></div>`;
+            }).join("") : '<p class="empty">아직 작성한 후기가 없어요.</p>';
+          } catch (e) {}
+        }
+        await loadMyReviews();
+        const rf = document.getElementById("reviewForm");
+        if (rf) rf.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const body = document.getElementById("rvBody").value.trim();
+          if (body.length < 5) { alert("후기 내용을 5자 이상 적어주세요."); return; }
+          try {
+            await window.OSS.submitReview({ rating: document.getElementById("rvRating").value, body, order_no: document.getElementById("rvOrder").value.trim() });
+            alert("후기가 등록됐어요. 사장님 확인 후 사이트에 게시됩니다 😊");
+            rf.reset();
+            loadMyReviews();
+          } catch (err) { alert("등록 실패: " + (err.message || err)); }
+        });
 
         // 회원정보 수정
         const pf = document.getElementById("profileForm");

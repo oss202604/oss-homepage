@@ -120,6 +120,8 @@ async function init() {
   renderDashboard();
   loadNotices();
   loadMembers();
+  loadReviews();
+  initCoupons();
   subscribeAdminRealtime();
 }
 
@@ -173,6 +175,79 @@ async function renderOrderLog(orderNo) {
       return '<div class="log-row"><span class="log-time">' + t + '</span><span class="log-dev">' + dev + '</span><span class="log-act">' + esc(e.action || "") + (e.detail ? " · " + esc(e.detail) : "") + "</span></div>";
     }).join("") : '<div class="empty">아직 작업 기록이 없어요. (이 주문부터 기록됩니다)</div>';
   } catch (e) { box.innerHTML = '<div class="empty">기록 불러오기 실패: ' + esc(e.message || e) + "</div>"; }
+}
+
+// ===== 구매후기 관리 (승인하면 홈페이지 후기 섹션에 노출) =====
+async function loadReviews() {
+  const tb = document.getElementById("reviewRows");
+  if (!tb) return;
+  const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  try {
+    const list = await window.OSS.listReviews();
+    if (!list.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">등록된 후기가 없어요.</td></tr>'; return; }
+    tb.innerHTML = list.map(function (r) {
+      const st = r.status === "approved" ? '<span style="color:#1F9D6B;font-weight:700;">게시중</span>' : (r.status === "rejected" ? '<span style="color:#C0392B;">숨김</span>' : '<span style="color:#C77A12;font-weight:700;">대기</span>');
+      const btn = (r.status === "approved")
+        ? '<button class="btn btn-small" data-rv-hide="' + r.id + '">숨김</button>'
+        : '<button class="btn btn-small btn-primary" data-rv-ok="' + r.id + '">승인</button>';
+      return '<tr><td>' + esc(r.author_name || "회원") + '</td><td style="white-space:nowrap;color:#F1A23A;">' + "★".repeat(r.rating || 5) + '</td><td style="max-width:280px;white-space:normal;word-break:break-word;">' + esc(r.body || "") + '</td><td>' + esc(r.order_no || "-") + '</td><td>' + (r.created_at || "").slice(0, 10) + '</td><td>' + st + '</td><td style="white-space:nowrap;">' + btn + ' <button class="btn btn-small" data-rv-del="' + r.id + '" style="color:var(--red);">삭제</button></td></tr>';
+    }).join("");
+  } catch (e) { tb.innerHTML = '<tr><td colspan="7" class="empty">불러오기 실패: ' + esc(e.message || e) + '</td></tr>'; }
+}
+document.addEventListener("click", async function (e) {
+  const t = e.target; if (!t || !t.getAttribute) return;
+  const ok = t.getAttribute("data-rv-ok"), hide = t.getAttribute("data-rv-hide"), del = t.getAttribute("data-rv-del");
+  if (!ok && !hide && !del) return;
+  try {
+    if (ok) { await window.OSS.setReviewStatus(ok, "approved"); loadReviews(); }
+    else if (hide) { await window.OSS.setReviewStatus(hide, "rejected"); loadReviews(); }
+    else if (del) { if (confirm("이 후기를 삭제할까요?")) { await window.OSS.deleteReview(del); loadReviews(); } }
+  } catch (err) { alert("처리 실패: " + (err.message || err)); }
+});
+
+// ===== 쿠폰 관리 (회원 검색 → 정산 시 사용 처리) =====
+function initCoupons() {
+  const btn = document.getElementById("couponSearchBtn");
+  const inp = document.getElementById("couponSearch");
+  const tb = document.getElementById("couponRows");
+  if (!btn || !tb) return;
+  const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  async function search() {
+    const q = (inp.value || "").trim().toLowerCase();
+    if (!q) { tb.innerHTML = '<tr><td colspan="6" class="empty">회원 아이디/이름으로 검색하세요.</td></tr>'; return; }
+    tb.innerHTML = '<tr><td colspan="6" class="empty">검색 중…</td></tr>';
+    try {
+      const members = await window.OSS.listMembers();
+      const hit = members.filter(function (m) { return (m.username || "").toLowerCase().includes(q) || (m.name || "").toLowerCase().includes(q); });
+      if (!hit.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">일치하는 회원이 없어요.</td></tr>'; return; }
+      const now = Date.now();
+      let rows = "";
+      for (const m of hit) {
+        const coupons = await window.OSS.listMemberCoupons(m.id);
+        if (!coupons.length) { rows += '<tr><td>' + esc(m.name || m.username) + '</td><td colspan="5" class="empty">쿠폰 없음</td></tr>'; continue; }
+        rows += coupons.map(function (c) {
+          const expired = c.expires_at && new Date(c.expires_at).getTime() < now;
+          const used = c.status === "used";
+          const state = used ? '<span style="color:#999;">사용완료</span>' : (expired ? '<span style="color:#C0392B;">만료</span>' : '<span style="color:#1F9D6B;font-weight:700;">사용가능</span>');
+          const act = used
+            ? '<button class="btn btn-small" data-cp-undo="' + c.id + '">되돌리기</button>'
+            : (expired ? "-" : '<button class="btn btn-small btn-primary" data-cp-use="' + c.id + '">사용처리</button>');
+          return '<tr><td>' + esc(m.name || m.username) + '</td><td>₩' + Number(c.amount || 0).toLocaleString() + '</td><td>' + state + '</td><td>' + (c.expires_at || "").slice(0, 10) + '</td><td>' + esc(c.used_order_no || "-") + '</td><td>' + act + '</td></tr>';
+        }).join("");
+      }
+      tb.innerHTML = rows;
+    } catch (e) { tb.innerHTML = '<tr><td colspan="6" class="empty">검색 실패: ' + esc(e.message || e) + '</td></tr>'; }
+  }
+  btn.addEventListener("click", search);
+  inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); search(); } });
+  tb.addEventListener("click", async function (e) {
+    const t = e.target; if (!t || !t.getAttribute) return;
+    const use = t.getAttribute("data-cp-use"), undo = t.getAttribute("data-cp-undo");
+    try {
+      if (use) { const ord = prompt("이 쿠폰을 사용한 주문번호 (선택):", ""); await window.OSS.useCoupon(use, ord || null); search(); }
+      else if (undo) { await window.OSS.unuseCoupon(undo); search(); }
+    } catch (err) { alert("처리 실패: " + (err.message || err)); }
+  });
 }
 
 // ----- 회원관리 (마스터: 등급·역할·권한 편집 / 매니저: 마스터 전용이라 진입 불가) -----

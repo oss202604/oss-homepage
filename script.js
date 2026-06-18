@@ -612,10 +612,23 @@ if (form && modal) {
     </div>`).join("");
   }
   render(SAMPLE);
-  if (window.OSS && window.OSS.getSetting) {
-    window.OSS.getSetting("reviews").then((r) => {
-      if (Array.isArray(r) && r.length) render(r);
-    }).catch(() => {});
+  // 승인된 고객 후기 우선 → 없으면 설정(reviews) → 없으면 샘플
+  function loadFromSetting() {
+    if (window.OSS && window.OSS.getSetting) window.OSS.getSetting("reviews").then((r) => { if (Array.isArray(r) && r.length) render(r); }).catch(() => {});
+  }
+  if (window.OSS && window.OSS.fetchApprovedReviews) {
+    window.OSS.fetchApprovedReviews(12).then((rows) => {
+      if (Array.isArray(rows) && rows.length) render(rows.map((r) => ({ author: r.author_name, rating: r.rating, text: r.body })));
+      else loadFromSetting();
+    }).catch(loadFromSetting);
+  } else { loadFromSetting(); }
+  // 후기 작성 CTA (회원만 — 마이페이지에서 작성, 비로그인 시 로그인으로 안내)
+  if (grid.parentNode && !document.getElementById("reviewWriteCta")) {
+    const cta = document.createElement("div");
+    cta.id = "reviewWriteCta";
+    cta.style.cssText = "text-align:center;margin-top:20px;";
+    cta.innerHTML = '<a href="mypage.html#reviews" class="btn btn-primary">✍️ 구매후기 작성하기</a>';
+    grid.parentNode.appendChild(cta);
   }
 })();
 
