@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>OSS 리디자인 시안 v2</title>
+<title>OSS 리디자인 시안 v3</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
 <style>
   :root{
@@ -14,6 +14,7 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--cream);font-family:"Noto Sans KR",sans-serif;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;}
   .wrap{max-width:1040px;margin:0 auto;padding:0 18px;}
+  .lph{background:repeating-linear-gradient(45deg,#FBEEE6,#FBEEE6 8px,#F6E5DA 8px,#F6E5DA 16px);border:1.5px dashed #E8C8B4;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#B07A57;font-size:11px;font-weight:500;}
   .ph{background:repeating-linear-gradient(45deg,#FBEEE6,#FBEEE6 10px,#F6E5DA 10px,#F6E5DA 20px);border:1.5px dashed #E8C8B4;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#B07A57;font-size:12.5px;font-weight:500;gap:3px;padding:12px;}
   .ph b{font-size:13px;color:#9A5E3C;}.ph span{font-size:11px;color:#C09277;}
   .btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:999px;padding:11px 22px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;text-decoration:none;}
@@ -25,7 +26,16 @@
   .sec-h h2 small{display:block;font-size:12px;font-weight:500;color:var(--mute);margin-top:4px;letter-spacing:0;}
   .sec-h a{font-size:12.5px;color:var(--mute);text-decoration:none;font-weight:700;}
 
-  /* 상단 */
+  /* 상단 검은 공지 띠 (롤링) */
+  .topnotice{background:#23201D;color:#EDE6DF;}
+  .topnotice .wrap{display:flex;align-items:center;height:38px;gap:12px;}
+  .topnotice .lab{background:var(--o);color:#fff;font-weight:700;font-size:11px;padding:4px 10px;border-radius:6px;flex:none;}
+  .topnotice .tk{overflow:hidden;white-space:nowrap;font-size:12.5px;}
+  .topnotice .tk span{display:inline-block;transition:opacity .35s;}
+  .topnotice .snsmini{margin-left:auto;display:flex;gap:8px;flex:none;}
+  .topnotice .snsmini a{color:#BBB1A8;text-decoration:none;font-size:11.5px;font-weight:700;}
+
+  /* 헤더 */
   .util{background:#fff;border-bottom:1px solid var(--line);font-size:12px;color:var(--mute);}
   .util .wrap{display:flex;justify-content:space-between;align-items:center;height:34px;}
   .util nav a{color:var(--mute);text-decoration:none;margin-left:16px;font-weight:500;}
@@ -45,7 +55,6 @@
   .gnb .wrap{display:flex;gap:6px;align-items:center;height:54px;overflow-x:auto;}
   .gnb a{white-space:nowrap;text-decoration:none;color:var(--ink);font-weight:700;font-size:14.5px;padding:8px 16px;border-radius:999px;}
   .gnb a.on{background:var(--peach);color:var(--o-dark);}
-  .gnb a .hot{font-size:9px;color:#fff;background:var(--coral);border-radius:8px;padding:1px 5px;margin-left:3px;vertical-align:top;font-weight:700;}
 
   /* 히어로 */
   .hero{display:grid;grid-template-columns:1.9fr 1fr;gap:14px;margin-top:22px;}
@@ -54,26 +63,23 @@
   .hero-main h1{font-size:31px;font-weight:900;letter-spacing:-1.2px;line-height:1.25;color:#3A2A22;}
   .hero-main h1 em{font-style:normal;color:var(--o);}
   .hero-main p{margin:12px 0 20px;font-size:14.5px;color:#8A6F60;font-weight:500;}
-  .hero-side{display:grid;grid-template-rows:1fr 1fr;gap:14px;}
-  .hero-side .ph{min-height:0;}
+  .hero-side{display:grid;grid-template-rows:1fr 1fr;gap:14px;}.hero-side .ph{min-height:0;}
   .dots{display:flex;gap:6px;margin-top:18px;}.dots i{width:8px;height:8px;border-radius:50%;background:#fff9;}.dots i.on{background:#fff;width:20px;border-radius:5px;}
 
-  /* 신뢰 통계 띠 (신규) */
+  /* 통계 띠 */
   .stats{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border:1px solid var(--line);border-radius:18px;margin-top:16px;overflow:hidden;}
-  .stats div{text-align:center;padding:16px 8px;border-right:1px solid var(--line);}
-  .stats div:last-child{border-right:none;}
+  .stats div{text-align:center;padding:16px 8px;border-right:1px solid var(--line);}.stats div:last-child{border-right:none;}
   .stats b{display:block;font-size:22px;font-weight:900;color:var(--o);letter-spacing:-.5px;}
   .stats small{font-size:12px;color:var(--mute);font-weight:500;}
 
-  /* 이렇게 이용해요 (콤팩트 가로 띠) */
+  /* 이용 3스텝 */
   .howbar{display:flex;align-items:stretch;background:#fff;border:1px solid var(--line);border-radius:18px;padding:6px;}
   .howstep{flex:1;display:flex;align-items:center;gap:12px;padding:14px 18px;}
   .howstep .hn{width:34px;height:34px;flex:none;border-radius:50%;background:var(--peach);color:var(--o);font-weight:900;font-size:16px;display:flex;align-items:center;justify-content:center;}
-  .howstep b{font-size:15px;font-weight:700;display:block;}
-  .howstep small{font-size:12px;color:var(--mute);}
+  .howstep b{font-size:15px;font-weight:700;display:block;}.howstep small{font-size:12px;color:var(--mute);}
   .harrow{display:flex;align-items:center;color:#E7C9B7;font-size:20px;font-weight:900;}
 
-  /* 서비스 2카드 */
+  /* 서비스 */
   .svc{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   .svc-card{border-radius:22px;overflow:hidden;border:1px solid var(--line);background:#fff;}
   .svc-card .body{padding:22px;}
@@ -83,18 +89,17 @@
   .tag{font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:999px;background:var(--mint);color:var(--mint-ink);}
   .tag.p{background:var(--pink);color:var(--pink-ink);}.tag.l{background:var(--lav);color:var(--lav-ink);}
 
-  /* 예상비용 (콤팩트 띠) */
+  /* 예상비용 띠 */
   .feebar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--peach2);border:1.5px solid #FBE2D2;border-radius:18px;padding:18px 24px;}
   .feebar b{font-size:16px;font-weight:900;letter-spacing:-.4px;}
   .feebar small{display:block;font-size:12.5px;color:var(--mute);font-weight:500;margin-top:3px;}
 
-  /* 쇼핑몰 (타이포 워드마크) */
-  .malls{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
-  .mall{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 10px;text-align:center;}
-  .mall .wm{font-size:18px;font-weight:900;letter-spacing:-.5px;margin-bottom:7px;}
-  .mall .wm.mer{color:#E5342B;}.mall .wm.rak{color:#BF0000;}.mall .wm.yah{color:#E50012;}.mall .wm.amz{color:#222;}.mall .wm.zozo{color:#111;letter-spacing:0;}
-  .mall .wm .smile{color:var(--o);}
-  .mall p{font-size:11.5px;color:var(--mute);font-weight:500;}
+  /* 쇼핑몰 로고 (2줄, 로고 슬롯) */
+  .malls{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+  .mall{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center;}
+  .mall .lph{height:42px;margin-bottom:8px;}
+  .mall p{font-size:12px;font-weight:700;}
+  .mall span{font-size:10.5px;color:var(--mute);font-weight:500;}
 
   /* 후기 */
   .reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
@@ -103,33 +108,44 @@
   .rv p{font-size:13px;color:#5C5048;line-height:1.6;margin:10px 0;}
   .rv .who{font-size:12px;color:var(--mute);font-weight:500;}
 
-  /* 안심 (콤팩트 타이포) */
+  /* 안심 */
   .trust{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
   .tr{background:var(--peach2);border-radius:16px;padding:18px 20px;}
   .tr b{font-size:15px;font-weight:900;letter-spacing:-.3px;}
   .tr small{display:block;font-size:12.5px;color:var(--mute);font-weight:500;margin-top:5px;line-height:1.5;}
 
-  /* FAQ 미니 (신규) */
+  /* FAQ */
   .faq{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .qa{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 18px;}
   .qa .q{font-size:14px;font-weight:700;}.qa .q em{font-style:normal;color:var(--o);margin-right:6px;}
   .qa .a{font-size:12.5px;color:var(--mute);margin-top:5px;line-height:1.55;}
-
-  /* 카톡 상담 띠 (신규) */
   .kkbar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(115deg,#FFE08A,#FFD45E);border-radius:18px;padding:20px 26px;margin-top:14px;}
   .kkbar b{font-size:17px;font-weight:900;color:#5A4413;letter-spacing:-.4px;}
   .kkbar small{display:block;font-size:12.5px;color:#8A6F2E;font-weight:500;margin-top:3px;}
   .kkbar .btn{background:#3A1D1D;color:#fff;}
 
+  /* 푸터 + SNS */
   .foot{background:#2E251F;color:#C9BDB4;margin-top:34px;padding:30px 0;font-size:12.5px;}
   .foot .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;}
   .foot b{color:#fff;font-size:18px;font-weight:900;}
+  .sns{display:flex;gap:8px;margin-top:14px;}
+  .sns a{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:999px;font-size:12.5px;font-weight:700;text-decoration:none;color:#fff;}
+  .sns a .ico{width:18px;height:18px;border-radius:5px;background:#ffffff35;display:inline-flex;align-items:center;justify-content:center;font-size:9px;}
+  .sns a.ig{background:#E1306C;}.sns a.th{background:#000;border:1px solid #4a4a4a;}.sns a.kk{background:#FAE100;color:#3A1D1D;}
+  .sns a.kk .ico{background:#3a1d1d22;}
   .note{background:#FFF8E6;border:1px solid #F3E2B0;border-radius:14px;padding:13px 18px;font-size:12.5px;color:#8A6D2A;margin:22px 0 0;font-weight:500;}
 </style>
 </head>
 <body>
 
-  <div class="util"><div class="wrap"><span>일본 현지인이 직접 운영하는 구매대행 · 배송대행</span><nav><a>로그인</a><a>회원가입</a><a>고객센터</a><a>카카오톡 문의</a></nav></div></div>
+  <!-- 상단 검은 공지 띠 (자동 롤링) -->
+  <div class="topnotice"><div class="wrap">
+    <span class="lab">공지</span>
+    <div class="tk"><span id="tkr">한국 공휴일 배송 일정을 확인해 주세요</span></div>
+    <div class="snsmini"><a href="#">인스타그램</a><a href="#">스레드</a><a href="#">카카오톡</a></div>
+  </div></div>
+
+  <div class="util"><div class="wrap"><span>일본 현지인이 직접 운영하는 구매대행 · 배송대행</span><nav><a>로그인</a><a>회원가입</a><a>고객센터</a></nav></div></div>
 
   <header class="head"><div class="wrap">
     <div class="logo"><span class="tag">SIMPLY TRUSTED</span><span class="nm">OSS<i>.</i></span></div>
@@ -138,16 +154,15 @@
   </div></header>
 
   <nav class="gnb"><div class="wrap">
-    <a class="on">홈</a><a>구매대행 신청<span class="hot">HOT</span></a><a>배송대행 신청<span class="hot">HOT</span></a><a>이용가이드</a><a>예상비용</a><a>공지사항</a><a>주문조회</a>
+    <a class="on">홈</a><a>구매대행 신청</a><a>배송대행 신청</a><a>이용가이드</a><a>예상비용</a><a>공지사항</a><a>주문조회</a>
   </div></nav>
 
   <div class="wrap">
 
-    <!-- 히어로 -->
     <section class="hero">
       <div class="hero-main">
         <h1>일본 쇼핑,<br /><em>링크만 보내면</em> 끝!</h1>
-        <p>메루카리·라쿠텐·야후옥션… 어디든 OK<br />주문부터 검수·배송까지 한 번에 도와드려요</p>
+        <p>메루카리·라쿠텐·유니클로… 어디든 OK<br />주문부터 검수·배송까지 한 번에 도와드려요</p>
         <div><a class="btn btn-o">지금 주문하기 →</a></div>
         <div class="dots"><i class="on"></i><i></i><i></i></div>
         <div class="ph kk"><b>마스코트 PNG</b><span>투명배경 600×600</span><span>택배상자 캐릭터</span></div>
@@ -158,7 +173,6 @@
       </div>
     </section>
 
-    <!-- 신뢰 통계 띠 (신규) -->
     <div class="stats">
       <div><b>3,200+</b><small>누적 주문</small></div>
       <div><b>4.9/5</b><small>고객 평점</small></div>
@@ -166,7 +180,6 @@
       <div><b>3%</b><small>최저 수수료</small></div>
     </div>
 
-    <!-- 이렇게 이용해요 (콤팩트) -->
     <section class="sec">
       <div class="howbar">
         <div class="howstep"><span class="hn">1</span><div><b>링크 보내기</b><small>상품 URL 붙여넣기</small></div></div>
@@ -177,7 +190,6 @@
       </div>
     </section>
 
-    <!-- 서비스 2카드 -->
     <section class="sec" style="padding-top:4px;">
       <div class="svc">
         <div class="svc-card">
@@ -195,7 +207,6 @@
       </div>
     </section>
 
-    <!-- 예상비용 (콤팩트 띠) -->
     <section class="sec" style="padding-top:4px;">
       <div class="feebar">
         <div><b>예상비용이 궁금하세요?</b><small>상품가·무게만 넣으면 수수료·배송비까지 바로 견적이 나와요</small></div>
@@ -203,19 +214,25 @@
       </div>
     </section>
 
-    <!-- 인기 일본 쇼핑몰 (타이포 워드마크) -->
+    <!-- 인기 쇼핑몰 (2줄 · 로고 슬롯) -->
     <section class="sec">
-      <div class="sec-h"><h2>인기 일본 쇼핑몰 <small>어디든 대신 사드려요</small></h2><a>전체보기 ›</a></div>
+      <div class="sec-h"><h2>인기 일본 쇼핑몰 <small>어디든 대신 사드려요 · 로고 자리에 공식 로고를 넣으면 완성</small></h2><a>전체보기 ›</a></div>
       <div class="malls">
-        <div class="mall"><div class="wm mer">メルカリ</div><p>중고·한정판</p></div>
-        <div class="mall"><div class="wm rak">Rakuten</div><p>종합몰</p></div>
-        <div class="mall"><div class="wm yah">ヤフオク!</div><p>경매</p></div>
-        <div class="mall"><div class="wm amz">amazon<span class="smile">.jp</span></div><p>빠른배송</p></div>
-        <div class="mall"><div class="wm zozo">ZOZO</div><p>패션</p></div>
+        <div class="mall"><div class="lph">로고</div><p>메루카리</p><span>중고·한정</span></div>
+        <div class="mall"><div class="lph">로고</div><p>라쿠텐</p><span>종합몰</span></div>
+        <div class="mall"><div class="lph">로고</div><p>야후옥션</p><span>경매</span></div>
+        <div class="mall"><div class="lph">로고</div><p>아마존JP</p><span>빠른배송</span></div>
+        <div class="mall"><div class="lph">로고</div><p>ZOZOTOWN</p><span>패션</span></div>
+        <div class="mall"><div class="lph">로고</div><p>큐텐</p><span>해외직구</span></div>
+        <div class="mall"><div class="lph">로고</div><p>유니클로</p><span>의류</span></div>
+        <div class="mall"><div class="lph">로고</div><p>몽벨</p><span>아웃도어</span></div>
+        <div class="mall"><div class="lph">로고</div><p>지유(GU)</p><span>의류</span></div>
+        <div class="mall"><div class="lph">로고</div><p>빔즈</p><span>셀렉트샵</span></div>
+        <div class="mall"><div class="lph">로고</div><p>데이토나</p><span>셀렉트샵</span></div>
+        <div class="mall"><div class="lph">로고</div><p>무지(MUJI)</p><span>생활용품</span></div>
       </div>
     </section>
 
-    <!-- 고객 후기 (쇼핑몰 밑으로 이동) -->
     <section class="sec" style="padding-top:4px;">
       <div class="sec-h"><h2>고객 후기 <small>실제 이용 후기예요</small></h2><a>후기 작성하기 ›</a></div>
       <div class="reviews">
@@ -225,7 +242,6 @@
       </div>
     </section>
 
-    <!-- 안심 포인트 (콤팩트) -->
     <section class="sec" style="padding-top:4px;">
       <div class="trust">
         <div class="tr"><b>검수사진 제공</b><small>받기 전에 사진으로 먼저 확인해요</small></div>
@@ -234,7 +250,6 @@
       </div>
     </section>
 
-    <!-- FAQ 미니 (신규) -->
     <section class="sec" style="padding-top:4px;">
       <div class="sec-h"><h2>자주 묻는 질문 <small>가장 많이 물어보세요</small></h2><a>전체 FAQ ›</a></div>
       <div class="faq">
@@ -246,14 +261,30 @@
       <div class="kkbar"><div><b>더 궁금한 점이 있으세요?</b><small>카카오톡으로 1:1 상담해 드려요. 편하게 물어보세요!</small></div><a class="btn">카카오톡 문의 →</a></div>
     </section>
 
-    <div class="note">점선 박스 = 사장님이 만들 이미지 자리예요(크기·내용 적어둠). 쇼핑몰 로고는 제가 글자 로고로 넣었어요. 숫자(누적주문·평점 등)는 예시라 실제 값으로 바꿀 수 있어요.</div>
+    <div class="note">로고 자리(점선 박스)에는 각 브랜드 <b>공식 로고</b>를 넣어야 해요 — 상표라 제가 임의로 그려 넣을 수 없어요. 공식 로고 파일 주시면 슬롯에 바로 끼워 넣을게요. SNS 버튼도 링크 주시면 연결돼요. 숫자(누적주문·평점)는 예시예요.</div>
 
   </div>
 
   <footer class="foot"><div class="wrap">
-    <div><b>OSS <span style="font-size:12px;font-weight:400;">オッス</span></b><p style="margin-top:8px;">일본 현지인이 직접 운영하는 구매대행 · 배송대행지</p></div>
+    <div>
+      <b>OSS <span style="font-size:12px;font-weight:400;">オッス</span></b>
+      <p style="margin-top:8px;">일본 현지인이 직접 운영하는 구매대행 · 배송대행지</p>
+      <div class="sns">
+        <a class="ig" href="#"><span class="ico">IG</span>인스타그램</a>
+        <a class="th" href="#"><span class="ico">@</span>스레드</a>
+        <a class="kk" href="#"><span class="ico">톡</span>카카오톡</a>
+      </div>
+    </div>
     <div>상호 OSS · 대표 송상익 · 사업자등록번호 000-00-00000<br />통신판매업신고 0000-지역-0000 · 입금 농협 302-2154-8330-21</div>
   </div></footer>
+
+  <script>
+    (function(){
+      var n=["한국 공휴일 배송 일정을 확인해 주세요","신규 회원가입 시 배송비 할인 혜택 진행 중","엔화 환율 변동 적용 안내 (1엔=10원)"];
+      var i=0, el=document.getElementById('tkr'); if(!el) return;
+      setInterval(function(){ i=(i+1)%n.length; el.style.opacity=0; setTimeout(function(){ el.textContent=n[i]; el.style.opacity=1; },350); }, 3000);
+    })();
+  </script>
 
 </body>
 </html>
