@@ -155,6 +155,20 @@
     .oq-btn svg{width:18px;height:18px;}
     .oq-done .check svg{width:34px;height:34px;}
     .oq-copybtn svg{width:17px;height:17px;}
+    .oq-total-row.krw{margin-top:2px;}
+    .oq-total-row.krw span:first-child{color:var(--mute);}
+    .oq-total-row.krw span:first-child small{color:var(--hint);font-size:11px;font-weight:400;}
+    .oq-total-row.krw span:last-child{color:var(--ink);font-weight:700;}
+    .oq-paybox{margin:16px auto 4px;max-width:320px;background:#fff;border:1px solid var(--o-line2);border-radius:14px;padding:16px;text-align:left;}
+    .oq-paybox .pay-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink);font-weight:600;}
+    .oq-paybox .pay-row b{font-size:20px;color:var(--o);}
+    .oq-paybox .pay-note{margin:8px 0 0;font-size:11.5px;color:var(--mute);line-height:1.55;}
+    .oq-paybox .pay-note b{color:var(--ink);}
+    .pay-acct{margin-top:13px;padding-top:13px;border-top:1px dashed var(--line);}
+    .pay-acct-lab{font-size:11.5px;color:var(--o-dark);margin-bottom:4px;}
+    .pay-acct-num{font-size:17px;font-weight:700;color:var(--ink);display:flex;flex-direction:column;gap:1px;}
+    .pay-acct-num span{font-size:12.5px;font-weight:500;color:var(--mute);}
+    .pay-acct .oq-copybtn{margin-top:10px;height:42px;font-size:14px;}
   </style>
 </head>
 <body>
@@ -204,6 +218,7 @@
           <div class="oq-total-row"><span>상품 합계</span><span id="totGoods">¥0</span></div>
           <div class="oq-total-row"><span>구매대행 수수료 (3%)</span><span id="totFee">¥0</span></div>
           <div class="oq-total-row total"><span>예상 합계 <small>· 배송비·관부가세 별도</small></span><span id="totFinal">¥0</span></div>
+          <div class="oq-total-row krw"><span>원화 환산 <small>· 1엔=10원</small></span><span id="totFinalKrw">₩0</span></div>
         </div>
         <div class="oq-foot">
           <button class="oq-btn oq-btn-ghost" data-back="0"><i data-lucide="arrow-left"></i> 이전</button>
@@ -248,6 +263,15 @@
         <div class="num" id="doneNo">OSS-000000-XXXX</div>
       </div>
       <button class="oq-copybtn" id="copyNoBtn"><i data-lucide="copy"></i> 주문번호 복사하기</button>
+      <div class="oq-paybox">
+        <div class="pay-row"><span>예상 결제금액</span><b id="donePay">₩0</b></div>
+        <p class="pay-note">상품가 + 구매대행 수수료(3%) · <b>국제배송비·관부가세 별도</b><br />정확한 최종 금액은 입고·무게 측정 후 카톡/문자로 안내드려요.</p>
+        <div class="pay-acct">
+          <div class="pay-acct-lab">입금 계좌 · 입금자명은 주문하신 분 성함으로</div>
+          <div class="pay-acct-num"><b>농협 302-2154-8330-21</b><span>예금주 송상익</span></div>
+          <button type="button" class="oq-copybtn" id="copyAcctBtn"><i data-lucide="copy"></i> 계좌번호 복사하기</button>
+        </div>
+      </div>
       <div class="oq-foot-links">
         <a href="index.html">홈으로</a><span>·</span>
         <a href="order-lookup.html">주문조회</a><span>·</span>
@@ -370,7 +394,8 @@
 
     function formatPrice(el){var d=el.value.replace(/[^0-9]/g,"");el.value=d?Number(d).toLocaleString():"";}
     function formatPhone(el){var d=el.value.replace(/[^0-9]/g,"").slice(0,11);var o=d;if(d.length>=8)o=d.slice(0,3)+"-"+d.slice(3,7)+"-"+d.slice(7);else if(d.length>=4)o=d.slice(0,3)+"-"+d.slice(3);el.value=o;}
-    function recompute(){var goods=0;productsBox.querySelectorAll(".oq-product").forEach(function(p){var price=numOnly(p.querySelector(".oq-price").value);var q=0;p.querySelectorAll(".oq-options .oq-optrow").forEach(function(r){q+=numOnly(r.querySelector(".oq-qty").value);});if(!q)q=1;goods+=price*q;});var fee=Math.round(goods*0.03);var fmt=function(n){return "¥"+Number(n||0).toLocaleString();};var g=document.getElementById("totGoods");if(g)g.textContent=fmt(goods);var f=document.getElementById("totFee");if(f)f.textContent=fmt(fee);var t=document.getElementById("totFinal");if(t)t.textContent=fmt(goods+fee);}
+    var YEN_KRW=10; // 1엔=10원 (고정 환율)
+    function recompute(){var goods=0;productsBox.querySelectorAll(".oq-product").forEach(function(p){var price=numOnly(p.querySelector(".oq-price").value);var q=0;p.querySelectorAll(".oq-options .oq-optrow").forEach(function(r){q+=numOnly(r.querySelector(".oq-qty").value);});if(!q)q=1;goods+=price*q;});var fee=Math.round(goods*0.03);var fmt=function(n){return "¥"+Number(n||0).toLocaleString();};var g=document.getElementById("totGoods");if(g)g.textContent=fmt(goods);var f=document.getElementById("totFee");if(f)f.textContent=fmt(fee);var fin=goods+fee;var t=document.getElementById("totFinal");if(t)t.textContent=fmt(fin);var k=document.getElementById("totFinalKrw");if(k)k.textContent="₩"+Number(fin*YEN_KRW).toLocaleString();}
     productsBox.addEventListener("input", function(e){var t=e.target;if(t.classList&&t.classList.contains("oq-price"))formatPrice(t);if(t.classList&&t.classList.contains("oq-qty"))t.value=t.value.replace(/[^0-9]/g,"");recompute();});
 
     function addOption(prod, focus) {
@@ -577,6 +602,8 @@
         $("#panel2").classList.remove("active");
         $("#oqSteps").hidden = true;
         $("#doneNo").textContent = orderNo;
+        var _finalYen = bp.subtotal + Math.round(bp.subtotal * 0.03);
+        var _dp = $("#donePay"); if (_dp) _dp.textContent = "₩" + Number(_finalYen * YEN_KRW).toLocaleString();
         $("#panelDone").style.display = "block";
         window.scrollTo({ top: 0, behavior: "smooth" });
         icons();
@@ -590,6 +617,15 @@
     $("#copyNoBtn").addEventListener("click", function () {
       var t = $("#doneNo").textContent;
       var done = function () { var b = $("#copyNoBtn"); b.innerHTML = '<i data-lucide="check"></i> 복사됐어요!'; icons(); };
+      if (navigator.clipboard) navigator.clipboard.writeText(t).then(done).catch(done);
+      else { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
+    });
+
+    // 계좌번호 복사
+    var copyAcctBtn = $("#copyAcctBtn");
+    if (copyAcctBtn) copyAcctBtn.addEventListener("click", function () {
+      var t = "농협 302-2154-8330-21 송상익";
+      var done = function () { copyAcctBtn.innerHTML = '<i data-lucide="check"></i> 복사됐어요!'; icons(); };
       if (navigator.clipboard) navigator.clipboard.writeText(t).then(done).catch(done);
       else { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
     });
