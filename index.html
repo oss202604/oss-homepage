@@ -3,188 +3,204 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OSS(オッス) | 일본 현지인 구매대행 · 배송대행지</title>
-  <meta name="description" content="일본 현지인이 직접 운영하는 구매대행 및 배송대행지(배대지) 서비스. 일본 상품을 한국까지 안전하게." />
+  <title>OSSohayo | 일본 구매대행 · 배송대행지</title>
+  <meta name="description" content="일본 현지인이 직접 운영하는 구매대행 및 배송대행지(배대지) 서비스. 링크만 보내면 일본 상품을 한국까지 안전하게." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=20" />
+  <style>
+    .oh-wrap{max-width:1280px;margin:0 auto;padding:0 28px;color:#140F0B;}
+    .oh-wrap a{color:inherit;}
+    .oh-sec{padding:30px 0;}
+    .oh-sec-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;}
+    .oh-sec-h h2{font-size:24px;font-weight:900;letter-spacing:-.6px;}
+    .oh-sec-h h2 small{display:block;font-size:12px;font-weight:500;color:#8A7F76;margin-top:4px;letter-spacing:0;}
+    .oh-sec-h a{font-size:12.5px;color:#8A7F76;text-decoration:none;font-weight:700;}
+    .oh-btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:999px;padding:12px 24px;font-family:inherit;font-weight:700;font-size:14.5px;cursor:pointer;text-decoration:none;}
+    .oh-btn-o{background:#F46A2C;color:#fff;box-shadow:0 8px 18px rgba(244,106,44,.22);}
+    .oh-btn-ghost{background:#fff;color:#F46A2C;border:1.5px solid #F6D8C6;}
+    .oh-ph{background:repeating-linear-gradient(45deg,#FBEEE6,#FBEEE6 10px,#F6E5DA 10px,#F6E5DA 20px);border:1.5px dashed #E8C8B4;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#9A5E3C;font-size:12.5px;font-weight:600;gap:3px;padding:12px;}
+    .oh-ph span{font-size:11px;color:#C09277;font-weight:500;}
+    .oh-hero{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:24px;}
+    .oh-hero-main{position:relative;overflow:hidden;border-radius:24px;background:linear-gradient(135deg,#FFE7D9,#FFD9E2 70%,#FFE7F0);min-height:300px;padding:42px;display:flex;flex-direction:column;justify-content:center;}
+    .oh-heroimg{position:relative;border-radius:16px;overflow:hidden;min-height:130px;max-width:62%;margin-bottom:20px;}
+    .oh-heroimg .lc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:repeating-linear-gradient(45deg,#ffffffcc,#ffffffcc 10px,#FFF1E8cc 10px,#FFF1E8cc 20px);border:1.5px dashed #E0B79E;border-radius:16px;color:#9A5E3C;font-size:13px;font-weight:700;text-align:center;padding:8px;}
+    .oh-heroimg .lc small{font-size:11px;font-weight:500;color:#B07A57;}
+    .oh-heroimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
+    .oh-mascot{position:absolute;right:24px;bottom:16px;width:170px;height:auto;}
+    .oh-hero-side{display:grid;grid-template-rows:1fr 1fr;gap:16px;}
+    .oh-hero-side .oh-ph{border-radius:18px;}
+    .oh-quicks{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px;}
+    .oh-quick{display:flex;flex-direction:column;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:24px 12px;text-decoration:none;box-shadow:0 8px 30px rgba(40,26,16,.07);transition:transform .12s;}
+    .oh-quick:hover{transform:translateY(-3px);}
+    .oh-quick .ic{width:56px;height:56px;border-radius:50%;background:#FFEADF;color:#F46A2C;display:inline-flex;align-items:center;justify-content:center;}
+    .oh-quick b{font-size:14.5px;font-weight:700;text-align:center;}
+    .oh-how{display:flex;flex-wrap:wrap;align-items:center;gap:10px 8px;background:#fff;box-shadow:0 8px 30px rgba(40,26,16,.07);border-radius:20px;padding:20px 22px;}
+    .oh-step{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;white-space:nowrap;}
+    .oh-step .n{width:26px;height:26px;border-radius:50%;background:#FFEADF;color:#F46A2C;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+    .oh-step.pay{color:#C24E18;}.oh-step.pay .n{background:#F46A2C;color:#fff;}
+    .oh-sep{color:#E7C9B7;font-weight:900;font-size:15px;}
+    .oh-svc{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .oh-card{border-radius:22px;overflow:hidden;background:#fff;box-shadow:0 8px 30px rgba(40,26,16,.07);}
+    .oh-card .b{padding:24px;}
+    .oh-card h3{font-size:21px;font-weight:900;}
+    .oh-card p{font-size:13.5px;color:#463C35;margin:8px 0 16px;line-height:1.6;}
+    .oh-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+    .oh-tag{font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:999px;background:#D7F0E7;color:#178A5E;}
+    .oh-tag.p{background:#FFDDE6;color:#D85A82;}.oh-tag.l{background:#EAE6FB;color:#5F52C2;}
+    .oh-feebar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;box-shadow:0 8px 30px rgba(40,26,16,.07);border-radius:20px;padding:20px 26px;}
+    .oh-feebar b{font-size:16px;font-weight:900;}
+    .oh-feebar small{display:block;font-size:12.5px;color:#8A7F76;font-weight:500;margin-top:3px;}
+    .oh-malls{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+    .oh-mall{background:#fff;border-radius:16px;padding:16px 10px;text-align:center;text-decoration:none;box-shadow:0 8px 30px rgba(40,26,16,.07);transition:transform .12s;}
+    .oh-mall:hover{transform:translateY(-3px);}
+    .oh-logo{position:relative;height:44px;margin-bottom:8px;border-radius:10px;overflow:hidden;}
+    .oh-logo .lc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#B07A57;font-size:11px;font-weight:500;background:repeating-linear-gradient(45deg,#FBEEE6,#FBEEE6 8px,#F6E5DA 8px,#F6E5DA 16px);border:1.5px dashed #E8C8B4;border-radius:10px;}
+    .oh-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;}
+    .oh-mall p{font-size:12px;font-weight:700;}.oh-mall span{font-size:10.5px;color:#8A7F76;font-weight:500;}
+    .oh-trust{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+    .oh-tr{background:#fff;box-shadow:0 8px 30px rgba(40,26,16,.07);border-radius:16px;padding:18px 20px;text-decoration:none;display:block;}
+    .oh-tr b{font-size:15px;font-weight:900;}.oh-tr small{display:block;font-size:12.5px;color:#8A7F76;font-weight:500;margin-top:5px;line-height:1.5;}
+    .oh-faq{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .oh-qa{background:#fff;box-shadow:0 8px 30px rgba(40,26,16,.07);border-radius:14px;padding:16px 20px;}
+    .oh-qa .q{font-size:14px;font-weight:700;}.oh-qa .q em{font-style:normal;color:#F46A2C;margin-right:6px;}
+    .oh-qa .a{font-size:12.5px;color:#463C35;margin-top:5px;line-height:1.55;}
+    .oh-kk{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(115deg,#FFE08A,#FFD45E);border-radius:18px;padding:20px 26px;margin-top:14px;}
+    .oh-kk b{font-size:17px;font-weight:900;color:#5A4413;}.oh-kk small{display:block;font-size:12.5px;color:#8A6F2E;font-weight:500;margin-top:3px;}
+    .oh-kk .oh-btn{background:#3A1D1D;color:#fff;}
+    .oh-note{background:#FFF8E6;border:1px solid #F3E2B0;border-radius:14px;padding:13px 18px;font-size:12.5px;color:#8A6D2A;margin:22px 0 0;font-weight:500;}
+    #reviewGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    @media(max-width:860px){
+      .oh-wrap{padding:0 16px;}
+      .oh-hero{grid-template-columns:1fr;}
+      .oh-hero-main{min-height:0;padding:26px 22px;}
+      .oh-mascot{position:static;width:110px;margin:14px auto 0;display:block;}
+      .oh-heroimg{max-width:none;}
+      .oh-quicks{grid-template-columns:repeat(2,1fr);}
+      .oh-svc{grid-template-columns:1fr;}
+      .oh-malls{grid-template-columns:repeat(3,1fr);}
+      .oh-trust,.oh-faq,#reviewGrid{grid-template-columns:1fr;}
+      .oh-feebar,.oh-kk{flex-direction:column;align-items:flex-start;}
+    }
+    @media(max-width:480px){ .oh-malls{grid-template-columns:repeat(2,1fr);} }
+  </style>
 </head>
 <body>
-  <!-- ===== 상단 유틸 바 ===== -->
-  <div class="utility-bar">
-    <div class="container utility-inner">
-      <span class="utility-left">일본 현지인이 직접 운영하는 구매대행 · 배송대행지</span>
-      <nav class="utility-right">
-        <span class="utility-sns">
-          <a href="https://www.instagram.com/ossosaka" class="usns" data-sns="instagram" target="_blank" rel="noopener" aria-label="인스타그램" title="인스타그램 @ossosaka"><i data-lucide="instagram"></i></a>
-          <a href="#" class="usns" data-sns="kakao" target="_blank" rel="noopener" aria-label="카카오톡 채널" title="카카오톡 채널 (연결 예정)"><i data-lucide="message-circle"></i></a>
-          <a href="https://www.threads.net/@ossosaka" class="usns" data-sns="threads" target="_blank" rel="noopener" aria-label="Threads" title="Threads @ossosaka"><i data-lucide="at-sign"></i></a>
-        </span>
-        <span class="divider">|</span>
-        <a href="login.html">로그인</a>
-        <span class="divider">|</span>
-        <a href="signup.html">회원가입</a>
-        <span class="divider">|</span>
-        <a href="order-lookup.html">주문조회</a>
-        <span class="divider">|</span>
-        <a href="notice.html">고객센터</a>
-      </nav>
-    </div>
-  </div>
 
-  <!-- ===== 노란 헤더 (로고 + 검색) ===== -->
-  <header class="site-header" id="top">
-    <div class="container header-inner">
-      <a href="index.html" class="logo">
-        <span class="logo-tag">Simply Trusted!</span>
-        <span class="logo-name">OSS<span class="logo-dot">.</span></span>
-        <span class="logo-jp">オッス</span>
-      </a>
-      <form class="search-box" onsubmit="return false;">
-        <select class="search-cat">
-          <option>전체 검색</option>
-          <option>메루카리</option>
-          <option>라쿠텐</option>
-          <option>야후옥션</option>
-          <option>아마존JP</option>
-        </select>
-        <input type="text" placeholder="상품명 또는 상품 링크를 입력하세요." />
-        <button type="submit" aria-label="검색"><i data-lucide="search"></i></button>
-      </form>
-    </div>
-  </header>
+  <main class="oh-wrap">
 
-  <!-- ===== 오렌지 메뉴바 ===== -->
-  <nav class="main-nav">
-    <div class="container main-nav-inner">
-      <button class="cat-btn"><i data-lucide="menu" class="ico-inline"></i> 전체 서비스</button>
-      <ul class="main-menu" id="mainMenu">
-        <li><a href="order.html">구매대행 신청 <span class="nav-hot">HOT</span></a></li>
-        <li><a href="delivery.html">배송대행 신청 <span class="nav-hot">HOT</span></a></li>
-        <li><a href="guide.html">이용가이드</a></li>
-        <li><a href="#fee">예상비용</a></li>
-        <li><a href="notice.html">공지사항</a></li>
-        <li><a href="order-lookup.html">주문조회</a></li>
-      </ul>
-      <button class="menu-toggle" id="menuToggle" aria-label="메뉴"><i data-lucide="menu"></i></button>
-    </div>
-  </nav>
+    <!-- 히어로 -->
+    <section class="oh-hero">
+      <div class="oh-hero-main">
+        <div class="oh-heroimg"><span class="lc">히어로 문구 이미지<small>"일본 쇼핑, 링크만 보내면 끝!" · img/hero-main.png</small></span><img src="img/hero-main.png" alt="일본 쇼핑, 링크만 보내면 끝!" onerror="this.remove()"></div>
+        <div><a class="oh-btn oh-btn-o" href="order-quick.html">지금 주문하기 →</a></div>
+        <svg class="oh-mascot" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="OSS 마스코트"><ellipse cx="110" cy="198" rx="64" ry="10" fill="rgba(0,0,0,.10)"/><rect x="48" y="80" width="124" height="104" rx="18" fill="#fff" stroke="#2E251F" stroke-width="5"/><rect x="40" y="60" width="140" height="30" rx="11" fill="#fff" stroke="#2E251F" stroke-width="5"/><rect x="98" y="62" width="24" height="26" rx="2" fill="#F46A2C"/><circle cx="92" cy="122" r="7.5" fill="#2E251F"/><circle cx="128" cy="122" r="7.5" fill="#2E251F"/><circle cx="79" cy="137" r="6" fill="#ffb3c1"/><circle cx="141" cy="137" r="6" fill="#ffb3c1"/><path d="M100 136 Q110 148 120 136" stroke="#2E251F" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M150 44 l22 -8 -8 22 -5 -9 -9 -5z" fill="#F46A2C"/></svg>
+      </div>
+      <div class="oh-hero-side">
+        <a class="oh-ph" href="notice.html" style="text-decoration:none;border-radius:18px;"><b>이벤트 서브배너 ①</b><span>460×135</span></a>
+        <a class="oh-ph" href="notice.html" style="text-decoration:none;border-radius:18px;"><b>이벤트 서브배너 ②</b><span>460×135</span></a>
+      </div>
+    </section>
 
-  <!-- ===== 히어로 슬라이더 ===== -->
-  <section class="hero">
-    <div class="container">
-      <div class="slider" id="slider">
-        <div class="slide active" style="--c1:#ffd400;--c2:#ffb300;">
-          <div class="slide-text">
-            <p class="slide-eyebrow">원스톱 일본 쇼핑</p>
-            <h1>편리한 일본직구, <span>OSS</span></h1>
-            <p class="slide-desc">메루카리·라쿠텐·야후옥션 등 모든 일본 상품의 구매대행부터 안전한 배송까지 한 번에.</p>
-            <a href="order.html" class="btn btn-dark">구매대행 신청하기 <i data-lucide="arrow-right"></i></a>
-          </div>
-          <div class="slide-art">
-            <svg class="hero-mascot" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="OSS 마스코트">
-              <ellipse cx="110" cy="198" rx="64" ry="10" fill="rgba(0,0,0,.10)"/>
-              <rect x="48" y="80" width="124" height="104" rx="18" fill="#ffffff" stroke="#191f28" stroke-width="5"/>
-              <rect x="40" y="60" width="140" height="30" rx="11" fill="#ffffff" stroke="#191f28" stroke-width="5"/>
-              <rect x="98" y="62" width="24" height="26" rx="2" fill="#ffd400"/>
-              <circle cx="92" cy="122" r="7.5" fill="#191f28"/>
-              <circle cx="128" cy="122" r="7.5" fill="#191f28"/>
-              <circle cx="79" cy="137" r="6" fill="#ffb3c1"/>
-              <circle cx="141" cy="137" r="6" fill="#ffb3c1"/>
-              <path d="M100 136 Q110 148 120 136" stroke="#191f28" stroke-width="4" fill="none" stroke-linecap="round"/>
-              <path d="M150 44 l22 -8 -8 22 -5 -9 -9 -5z" fill="#ff6b2c"/>
-            </svg>
-          </div>
+    <!-- 빠른메뉴 -->
+    <div class="oh-quicks">
+      <a class="oh-quick" href="guide.html"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></span><b>국제배송 요금안내</b></a>
+      <a class="oh-quick" href="signup.html"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><polyline points="8.2 13 7 22 12 19 17 22 15.8 13"></polyline></svg></span><b>회원등급 및 혜택</b></a>
+      <a class="oh-quick" href="#fee"><span class="ic"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"></rect><line x1="8" y1="7" x2="16" y2="7"></line><line x1="8" y1="11" x2="8.01" y2="11"></line><line x1="12" y1="11" x2="12.01" y2="11"></line><line x1="16" y1="11" x2="16.01" y2="11"></line><line x1="8" y1="15" x2="8.01" y2="15"></line></svg></span><b>예상비용 계산</b></a>
+      <a class="oh-quick" href="guide.html"><span class="ic"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span><b>오쓰 이용안내</b></a>
+    </div>
+
+    <!-- 이용 7단계 -->
+    <section class="oh-sec">
+      <div class="oh-how">
+        <span class="oh-step"><span class="n">1</span>링크 보내기</span><span class="oh-sep">›</span>
+        <span class="oh-step"><span class="n">2</span>견적 확인·결제</span><span class="oh-sep">›</span>
+        <span class="oh-step"><span class="n">3</span>물건 사입</span><span class="oh-sep">›</span>
+        <span class="oh-step"><span class="n">4</span>검수·포장·측정</span><span class="oh-sep">›</span>
+        <span class="oh-step pay"><span class="n">5</span>배송비 결제</span><span class="oh-sep">›</span>
+        <span class="oh-step"><span class="n">6</span>통관</span><span class="oh-sep">›</span>
+        <span class="oh-step"><span class="n">7</span>집으로 배송</span>
+      </div>
+    </section>
+
+    <!-- 서비스 -->
+    <section class="oh-sec" style="padding-top:4px;">
+      <div class="oh-svc">
+        <div class="oh-card">
+          <div class="oh-ph" style="height:140px;"><b>구매대행 이미지</b><span>760×300 · img/svc-purchase.png</span></div>
+          <div class="b"><h3>구매대행</h3><p>일본 사이트에서 대신 구매해 한국까지. 링크만 주시면 끝!</p>
+            <div class="oh-tags"><span class="oh-tag">수수료 3%</span><span class="oh-tag p">빠른배송</span><span class="oh-tag l">합배송</span></div>
+            <a class="oh-btn oh-btn-o" href="order.html">구매대행 신청 →</a></div>
         </div>
-        <div class="slide" style="--c1:#2f6df6;--c2:#1c4fd0;">
-          <div class="slide-text">
-            <p class="slide-eyebrow">일본 현지인 직접 검수</p>
-            <h1>믿을 수 있는 <span>배송대행지</span></h1>
-            <p class="slide-desc">현지에서 상품을 받아 꼼꼼히 검수한 뒤, 한국까지 안전하게 합배송해 드립니다.</p>
-            <a href="delivery.html" class="btn btn-dark">배송대행 신청하기 <i data-lucide="arrow-right"></i></a>
-          </div>
-          <div class="slide-art"><i data-lucide="package-check"></i></div>
-        </div>
-        <div class="slide" style="--c1:#22c55e;--c2:#16a34a;">
-          <div class="slide-text">
-            <p class="slide-eyebrow">투명한 비용</p>
-            <h1>예상비용 <span>미리 확인</span></h1>
-            <p class="slide-desc">상품가·수수료·배송비를 주문 전에 안내드려 추가 부담이 없습니다.</p>
-            <a href="#fee" class="btn btn-dark">비용 안내 보기 <i data-lucide="arrow-right"></i></a>
-          </div>
-          <div class="slide-art"><i data-lucide="receipt-text"></i></div>
+        <div class="oh-card">
+          <div class="oh-ph" style="height:140px;"><b>배송대행 이미지</b><span>760×300 · img/svc-delivery.png</span></div>
+          <div class="b"><h3>배송대행</h3><p>일본에서 직접 산 물건, 우리 배대지로 받아 한국까지 안전하게.</p>
+            <div class="oh-tags"><span class="oh-tag">무게 실측</span><span class="oh-tag p">묶음배송</span><span class="oh-tag l">실시간 추적</span></div>
+            <a class="oh-btn oh-btn-ghost" href="delivery.html">배송대행 신청 →</a></div>
         </div>
       </div>
-      <button class="slider-arrow prev" id="prevSlide" aria-label="이전"><i data-lucide="chevron-left"></i></button>
-      <button class="slider-arrow next" id="nextSlide" aria-label="다음"><i data-lucide="chevron-right"></i></button>
-      <div class="slider-dots" id="sliderDots"></div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ===== 퀵서비스 패널 ===== -->
-  <section class="quick-panel-sec">
-    <div class="container">
-      <div class="quick-panel">
-        <a href="#fee" class="qp-item">
-          <span class="qp-ic"><i data-lucide="calculator"></i></span>
-          <span>예상비용 계산</span>
-        </a>
-        <a href="#fee" class="qp-item">
-          <span class="qp-ic"><i data-lucide="truck"></i></span>
-          <span>국제배송 요금</span>
-        </a>
-        <a href="guide.html" class="qp-item">
-          <span class="qp-ic"><i data-lucide="book-open"></i></span>
-          <span>이용가이드</span>
-        </a>
-        <a href="order-lookup.html" class="qp-item">
-          <span class="qp-ic"><i data-lucide="search-check"></i></span>
-          <span>주문조회</span>
-        </a>
-        <a href="order.html" class="qp-item qp-cta">
-          <i data-lucide="shopping-bag"></i>
-          <span>구매대행 바로 신청</span>
-        </a>
+    <!-- 예상비용 -->
+    <section class="oh-sec" style="padding-top:4px;">
+      <div class="oh-feebar">
+        <div><b>예상비용이 궁금하세요?</b><small>상품가·무게만 넣으면 수수료·배송비까지 바로 견적이 나와요</small></div>
+        <a class="oh-btn oh-btn-o" href="#fee">계산해보기 →</a>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ===== 회사소개 ===== -->
-  <section class="section" id="about">
-    <div class="container">
-      <p class="section-eyebrow">ABOUT OSS</p>
-      <h2 class="section-title">회사 소개</h2>
-      <p class="section-lead">
-        OSS(オッス)는 일본 현지인이 직접 운영하는 구매대행 · 배송대행지(배대지) 서비스입니다.
-        언어와 결제, 배송의 번거로움 없이 원하는 일본 상품을 가장 안전하고 합리적으로 받아보실 수 있습니다.
-      </p>
-      <div class="feature-grid">
-        <div class="feature"><div class="feature-icon"><i data-lucide="store"></i></div><h3>현지인 직접 운영</h3><p>일본 현지에서 직접 구매·검수하여 오배송·불량 위험을 줄입니다.</p></div>
-        <div class="feature"><div class="feature-icon"><i data-lucide="message-circle"></i></div><h3>한국어 상담</h3><p>주문부터 배송까지 전 과정을 한국어로 편하게 문의하세요.</p></div>
-        <div class="feature"><div class="feature-icon"><i data-lucide="package"></i></div><h3>합배송 배대지</h3><p>여러 쇼핑몰 상품을 모아 한 번에 합배송해 비용을 절약합니다.</p></div>
-        <div class="feature"><div class="feature-icon"><i data-lucide="wallet"></i></div><h3>투명한 비용</h3><p>상품가·수수료·배송비를 미리 안내해 추가 비용 걱정이 없습니다.</p></div>
+    <!-- 인기 쇼핑몰 -->
+    <section class="oh-sec">
+      <div class="oh-sec-h"><h2>인기 일본 쇼핑몰 <small>어디든 대신 사드려요</small></h2><a href="guide.html">전체보기 ›</a></div>
+      <div class="oh-malls">
+        <a class="oh-mall" href="https://jp.mercari.com/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-mercari.png" alt="메루카리" loading="lazy" onerror="this.remove()"></div><p>메루카리</p><span>중고·한정</span></a>
+        <a class="oh-mall" href="https://www.rakuten.co.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-rakuten.png" alt="라쿠텐" loading="lazy" onerror="this.remove()"></div><p>라쿠텐</p><span>종합몰</span></a>
+        <a class="oh-mall" href="https://auctions.yahoo.co.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-yahuoku.png" alt="야후옥션" loading="lazy" onerror="this.remove()"></div><p>야후옥션</p><span>경매</span></a>
+        <a class="oh-mall" href="https://www.amazon.co.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-amazonjp.png" alt="아마존JP" loading="lazy" onerror="this.remove()"></div><p>아마존JP</p><span>빠른배송</span></a>
+        <a class="oh-mall" href="https://zozo.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-zozo.png" alt="ZOZOTOWN" loading="lazy" onerror="this.remove()"></div><p>ZOZOTOWN</p><span>패션</span></a>
+        <a class="oh-mall" href="https://www.qoo10.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-qoo10.png" alt="큐텐" loading="lazy" onerror="this.remove()"></div><p>큐텐</p><span>해외직구</span></a>
+        <a class="oh-mall" href="https://www.uniqlo.com/jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-uniqlo.png" alt="유니클로" loading="lazy" onerror="this.remove()"></div><p>유니클로</p><span>의류</span></a>
+        <a class="oh-mall" href="https://www.montbell.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-montbell.png" alt="몽벨" loading="lazy" onerror="this.remove()"></div><p>몽벨</p><span>아웃도어</span></a>
+        <a class="oh-mall" href="https://www.gu-global.com/jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-gu.png" alt="지유 GU" loading="lazy" onerror="this.remove()"></div><p>지유(GU)</p><span>의류</span></a>
+        <a class="oh-mall" href="https://www.beams.co.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-beams.png" alt="빔즈" loading="lazy" onerror="this.remove()"></div><p>빔즈</p><span>셀렉트샵</span></a>
+        <a class="oh-mall" href="https://www.daytona-park.com/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-daytona.png" alt="데이토나" loading="lazy" onerror="this.remove()"></div><p>데이토나</p><span>셀렉트샵</span></a>
+        <a class="oh-mall" href="https://www.muji.com/jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-muji.png" alt="무지 MUJI" loading="lazy" onerror="this.remove()"></div><p>무지(MUJI)</p><span>생활용품</span></a>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ===== 이용방법 ===== -->
-  <section class="section section-alt" id="how">
-    <div class="container">
-      <p class="section-eyebrow">HOW IT WORKS</p>
-      <h2 class="section-title">이용 가이드</h2>
-      <div class="steps">
-        <div class="step"><span class="step-num">1</span><h3>신청서 작성</h3><p>상품 링크·옵션·배송지를 신청서에 입력해 주세요.</p></div>
-        <div class="step"><span class="step-num">2</span><h3>견적 안내</h3><p>상품가·수수료·배송비 합산 견적을 안내드립니다.</p></div>
-        <div class="step"><span class="step-num">3</span><h3>결제 &amp; 구매</h3><p>결제 확인 후 현지에서 구매·검수합니다.</p></div>
-        <div class="step"><span class="step-num">4</span><h3>한국 배송</h3><p>안전 포장 후 발송하고 송장번호를 공유합니다.</p></div>
+    <!-- 고객 후기 (실제 후기 #reviewGrid — script.js 가 채움) -->
+    <section class="oh-sec" style="padding-top:4px;">
+      <div class="oh-sec-h"><h2>고객 후기 <small>실제 이용 후기예요</small></h2><a href="mypage.html#reviews">후기 작성하기 ›</a></div>
+      <div class="review-grid" id="reviewGrid"></div>
+    </section>
+
+    <!-- 안심 포인트 -->
+    <section class="oh-sec" style="padding-top:4px;">
+      <div class="oh-trust">
+        <a class="oh-tr" href="guide.html"><b>검수사진 제공</b><small>받기 전에 사진으로 먼저 확인해요</small></a>
+        <a class="oh-tr" href="https://trace.cjlogistics.com/" target="_blank" rel="noopener"><b>실시간 배송추적</b><small>CJ대한통운 운송장조회로 바로 확인</small></a>
+        <a class="oh-tr" href="contact.html"><b>카톡 1:1 상담</b><small>궁금하면 언제든 물어보세요</small></a>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ===== 예상비용 계산기 (팝업) =====
-       전 페이지의 '예상비용' 링크(#fee / index.html#fee)를 누르면
-       script.js 가 이 모달을 띄웁니다. -->
+    <!-- FAQ -->
+    <section class="oh-sec" style="padding-top:4px;">
+      <div class="oh-sec-h"><h2>자주 묻는 질문 <small>가장 많이 물어보세요</small></h2><a href="faq.html">전체 FAQ ›</a></div>
+      <div class="oh-faq">
+        <div class="oh-qa"><div class="q"><em>Q</em>수수료는 얼마인가요?</div><div class="a">구매대행 수수료는 상품가의 3%예요. 배송비는 무게로 따로 계산돼요.</div></div>
+        <div class="oh-qa"><div class="q"><em>Q</em>결제는 어떻게 하나요?</div><div class="a">상품값은 주문 시, 배송비는 입고·무게 측정 후 결제해요. 예치금을 충전해두면 자동 차감돼 바로 출고돼요.</div></div>
+        <div class="oh-qa"><div class="q"><em>Q</em>배송은 얼마나 걸려요?</div><div class="a">배송비 결제 후 보통 3~5일 내 출고돼요(현지·통관 사정에 따라 변동).</div></div>
+        <div class="oh-qa"><div class="q"><em>Q</em>통관부호가 꼭 필요한가요?</div><div class="a">네, 개인통관고유부호가 있어야 통관돼요. 관세청에서 무료로 발급받아요.</div></div>
+      </div>
+      <div class="oh-kk"><div><b>더 궁금한 점이 있으세요?</b><small>카카오톡으로 1:1 상담해 드려요. 편하게 물어보세요!</small></div><a class="oh-btn" href="contact.html">카카오톡 문의 →</a></div>
+    </section>
+
+    <div class="oh-note">로고·히어로·배너 이미지는 <b>img 폴더</b>에 파일을 넣으면 자동으로 채워져요(상표라 공식 파일 사용). "예상비용 계산"을 누르면 계산기가 열려요.</div>
+
+  </main>
+
+  <!-- ===== 예상비용 계산기 (모달) — '예상비용/계산' 링크(#fee)를 누르면 script.js 가 띄움 ===== -->
   <div class="modal" id="feeModal" hidden>
     <div class="modal-box calc-modal-box">
       <button class="modal-x" id="feeModalClose" type="button" aria-label="닫기">×</button>
@@ -220,82 +236,13 @@
     </div>
   </div>
 
-  <!-- ===== 신청 CTA ===== -->
-  <section class="section section-alt">
-    <div class="container cta-box">
-      <h2>지금 바로 신청해 보세요</h2>
-      <p>원하는 일본 상품, 링크만 보내주시면 OSS가 대신 구매해 한국까지 보내드립니다.</p>
-      <div class="cta-actions">
-        <a href="order.html" class="btn btn-primary"><i data-lucide="shopping-bag"></i> 구매대행 신청</a>
-        <a href="delivery.html" class="btn btn-dark"><i data-lucide="package"></i> 배송대행 신청</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== 이용후기 ===== -->
-  <section class="section" id="reviews">
-    <div class="container">
-      <p class="section-eyebrow" style="text-align:center;">REVIEWS</p>
-      <h2 class="section-title" style="text-align:center;">고객님들의 생생한 후기</h2>
-      <p class="section-lead" style="text-align:center;margin:0 auto 36px;">OSS를 이용해 주신 고객님들이 남겨주신 후기입니다.</p>
-      <div class="review-grid" id="reviewGrid"></div>
-    </div>
-  </section>
-
-  <!-- ===== SNS 팔로우 배너 ===== -->
-  <section class="section social-banner">
-    <div class="container">
-      <p class="section-eyebrow" style="text-align:center;">FOLLOW US</p>
-      <h2 class="section-title" style="text-align:center;">OSS 소식, SNS로 가장 먼저</h2>
-      <p class="section-lead" style="text-align:center;margin:0 auto 40px;">신상품·이벤트·할인 소식을 팔로우하고 가장 빠르게 받아보세요.</p>
-      <div class="social-links">
-        <a href="https://www.instagram.com/ossosaka" class="social-btn sns-insta" target="_blank" rel="noopener" data-sns="instagram">
-          <i data-lucide="instagram"></i> 인스타그램
-        </a>
-        <a href="#" class="social-btn sns-kakao" target="_blank" rel="noopener" data-sns="kakao">
-          <i data-lucide="message-circle"></i> 카카오톡 채널
-        </a>
-        <a href="https://www.threads.net/@ossosaka" class="social-btn sns-threads" target="_blank" rel="noopener" data-sns="threads">
-          <i data-lucide="at-sign"></i> Threads
-        </a>
-      </div>
-      <p class="form-note" style="text-align:center;">* 인스타그램·Threads는 연결됨. 카카오톡 채널은 채널 개설 후 연결 예정.</p>
-    </div>
-  </section>
-
-  <!-- ===== 푸터 ===== -->
-  <footer class="site-footer" id="contact">
-    <div class="container footer-inner">
-      <div>
-        <p class="footer-logo">OSS <small>オッス</small></p>
-        <p class="footer-desc">일본 현지인 구매대행 배대지</p>
-      </div>
-      <div class="footer-contact">
-        <p><i data-lucide="mail" class="ico-inline"></i> 이메일: oss202604@gmail.com</p>
-        <p><i data-lucide="message-circle" class="ico-inline"></i> 카카오톡: @OSS (등록 예정)</p>
-        <p><i data-lucide="clock" class="ico-inline"></i> 상담시간: 평일 10:00 ~ 18:00 (일본시간)</p>
-      </div>
-    </div>
-    <div class="footer-bottom"><div class="container">© 2026 OSS. All rights reserved.</div></div>
-  </footer>
-
-  <!-- ===== 오른쪽 고정 퀵메뉴 ===== -->
-  <aside class="quick-menu">
-    <a href="#contact" class="qm-item"><span class="qm-ico"><i data-lucide="headphones"></i></span>고객센터</a>
-    <a href="order.html" class="qm-item"><span class="qm-ico"><i data-lucide="shopping-bag"></i></span>구매대행</a>
-    <a href="delivery.html" class="qm-item"><span class="qm-ico"><i data-lucide="package"></i></span>배송대행</a>
-    <a href="#fee" class="qm-item"><span class="qm-ico"><i data-lucide="calculator"></i></span>예상비용</a>
-    <a href="#how" class="qm-item"><span class="qm-ico"><i data-lucide="book-open"></i></span>이용가이드</a>
-    <button class="qm-top" id="scrollTop" title="맨 위로"><i data-lucide="chevron-up" class="ico-inline"></i><br /><small>TOP</small></button>
-  </aside>
-
-  <!-- ===== 상담 채팅 버튼 ===== -->
-  <a href="order.html" class="chat-fab" title="문의하기"><i data-lucide="message-circle"></i></a>
+  <!-- 푸터 (script.js renderFooter 가 채움) -->
+  <footer class="site-footer" id="contact"></footer>
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=10"></script>
-  <script src="script.js?v=13"></script>
+  <script src="script.js?v=14"></script>
 </body>
 </html>

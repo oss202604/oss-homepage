@@ -43,7 +43,7 @@ if (menuToggle && mainMenu) {
 // ===== 공통 푸터 렌더 (전 페이지 통일) =====
 // 공통 헤더(OSSohayo · 본리식) — 모든 페이지의 옛 헤더를 새 헤더로 교체
 (function renderHeader() {
-  if (!document.querySelector(".site-header") && !document.querySelector(".utility-bar")) return;
+  if (document.querySelector(".osshead") || document.body.classList.contains("admin-body")) return;
   [".utility-bar", ".site-header", ".main-nav"].forEach(function (s) { var e = document.querySelector(s); if (e) e.remove(); });
   var path = (location.pathname.split("/").pop() || "index.html"); if (path === "") path = "index.html";
   var nav = [["index.html", "홈"], ["order.html", "구매대행 신청"], ["delivery.html", "배송대행 신청"], ["notice.html", "공지사항"], ["guide.html", "이용가이드"], ["order-lookup.html", "주문조회"]];
