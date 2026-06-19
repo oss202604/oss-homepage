@@ -573,3 +573,32 @@ p { word-break: keep-all; }
   .osshead-icons { margin-left: auto; }
   .osshead-nav { order: 3; flex-basis: 100%; }
 }
+
+/* ===== 본문 테마 정리 (새 헤더와 통일 · 웹디자이너 페이스리프트) ===== */
+/* 버튼: 알약형 + 따뜻한 그림자 통일 */
+.btn { border-radius: 999px; }
+.btn-primary { background: var(--orange); box-shadow: 0 8px 20px rgba(255,107,44,.25); }
+.btn-primary:hover { background: var(--blue-dark); }
+.btn-dark { border-radius: 999px; }
+.btn-small { background: var(--hero-bg); color: var(--blue-dark); border: 1px solid #f6d8c6; border-radius: 999px; }
+.btn-small:hover { background: #ffe9dd; }
+/* 입력 포커스: 파랑 잔재 → 주황, 라운드 통일 */
+.order-form input, .order-form select, .order-form textarea { border-radius: 12px; background: #fff; }
+.order-form input:focus, .order-form select:focus, .order-form textarea:focus,
+.search-box:focus-within { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,107,44,.14); }
+.form-block legend { border-bottom-color: var(--orange); }
+/* 서브페이지 상단 배너: 진한 주황 그라데이션 → 깔끔한 라이트 */
+.page-hero { background: var(--hero-bg); color: var(--text); padding: 42px 0; }
+.page-hero h1 { color: var(--text); }
+.page-hero p { color: var(--muted); opacity: 1; }
+/* 섹션 여백 정리 + 제목 크기 */
+.section { padding: 66px 0; }
+.section-title { font-size: 30px; }
+/* 히어로 제목 크기 정리 */
+.slide-text h1 { font-size: 42px; }
+/* 마이페이지: 네이비 프로필 → 따뜻한 톤, 포커스색 주황 */
+.mypage-profile { background: linear-gradient(135deg, #FF8E76, #FF6F8B); }
+.mypage-menu a:hover, .mypage-menu a.active { background: var(--hero-bg); color: var(--orange); }
+/* 카드 hover 살짝 들어올림 */
+.fee-card, .review-card { transition: transform .12s; }
+.fee-card:hover, .review-card:hover { transform: translateY(-3px); }
