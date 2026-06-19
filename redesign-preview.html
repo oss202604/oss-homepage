@@ -35,27 +35,20 @@
   .topnotice .snsmini{margin-left:auto;display:flex;gap:8px;flex:none;}
   .topnotice .snsmini a{color:#BBB1A8;text-decoration:none;font-size:11.5px;font-weight:700;}
 
-  .util{background:#fff;border-bottom:1px solid var(--line);font-size:12px;color:var(--mute);}
-  .util .wrap{display:flex;justify-content:space-between;align-items:center;height:34px;}
-  .util nav a{color:var(--mute);text-decoration:none;margin-left:16px;font-weight:500;}
-  .head{background:#fff;}
-  .head .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px 28px;}
-  .logo{display:flex;flex-direction:column;line-height:1.05;text-decoration:none;}
-  .logo .tag{font-size:10.5px;color:var(--coral);font-weight:700;letter-spacing:1px;}
-  .logo .nm{font-size:26px;font-weight:900;color:var(--ink);letter-spacing:-1px;margin-top:3px;}
-  .logo .nm i{color:var(--o);font-style:normal;}
-  .search{flex:1;display:flex;align-items:center;background:var(--peach2);border:2px solid #FBE2D2;border-radius:999px;padding:5px 6px 5px 22px;max-width:540px;}
-  .search input{flex:1;border:none;background:transparent;font-family:inherit;font-size:14px;outline:none;color:var(--ink);}
-  .search button{border:none;background:var(--o);color:#fff;border-radius:999px;padding:0 22px;height:42px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;}
-  .hutil{display:flex;align-items:center;gap:18px;}
-  .hutil a{text-decoration:none;color:var(--ink);font-size:14px;font-weight:700;letter-spacing:-.3px;}
-  .hutil a small{display:block;font-size:9.5px;font-weight:500;color:var(--hint);letter-spacing:1px;text-align:center;margin-bottom:2px;}
-  .hutil .hsearch{width:44px;height:44px;border-radius:50%;background:var(--peach);color:var(--o-dark);display:inline-flex;align-items:center;justify-content:center;}
-  .hutil .hsearch:hover{background:var(--o);color:#fff;}
-  .gnb{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
-  .gnb .wrap{display:flex;gap:6px;align-items:center;height:54px;overflow-x:auto;}
-  .gnb a{white-space:nowrap;text-decoration:none;color:var(--ink);font-weight:700;font-size:14.5px;padding:8px 16px;border-radius:999px;}
-  .gnb a.on{background:var(--peach);color:var(--o-dark);}
+  .head{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;}
+  .head .wrap{display:flex;align-items:center;gap:30px;padding:18px 28px;}
+  .logo{font-family:Georgia,"Times New Roman",serif;font-size:30px;font-weight:700;color:var(--ink);letter-spacing:-.3px;text-decoration:none;flex:none;}
+  .mainnav{display:flex;align-items:center;gap:26px;flex:1;}
+  .mainnav a{text-decoration:none;color:var(--ink);font-weight:700;font-size:15px;letter-spacing:-.3px;white-space:nowrap;}
+  .mainnav a.on,.mainnav a:hover{color:var(--o);}
+  .headicons{display:flex;align-items:center;gap:8px;flex:none;}
+  .headicons .hicon{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--ink);border:none;background:none;cursor:pointer;padding:0;}
+  .headicons .hicon:hover{background:var(--peach);color:var(--o-dark);}
+  .acctwrap{position:relative;}
+  .acctmenu{position:absolute;right:0;top:48px;min-width:152px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:8px;display:none;z-index:40;}
+  .acctwrap.open .acctmenu{display:block;}
+  .acctmenu a{display:block;padding:10px 14px;text-decoration:none;color:var(--ink);font-size:14px;font-weight:600;border-radius:9px;white-space:nowrap;}
+  .acctmenu a:hover{background:var(--peach);color:var(--o-dark);}
 
   .hero{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:24px;}
   .hero-main{position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(135deg,#FFE7D9,#FFD9E2 70%,#FFE7F0);min-height:320px;padding:42px;display:flex;flex-direction:column;justify-content:center;}
@@ -135,10 +128,10 @@
   /* ===== 모바일 반응형 ===== */
   @media (max-width:860px){
     .wrap{padding:0 16px;}
-    .util .wrap > span{display:none;}
-    .head .wrap{flex-wrap:wrap;gap:12px 16px;padding:14px 16px;}
-    .search{order:3;flex-basis:100%;max-width:none;}
-    .logo .nm{font-size:21px;}
+    .head .wrap{flex-wrap:wrap;gap:10px 16px;padding:14px 16px;}
+    .logo{font-size:23px;}
+    .headicons{margin-left:auto;}
+    .mainnav{order:3;flex-basis:100%;overflow-x:auto;gap:18px;padding-bottom:2px;}
     .sec{padding:20px 0;}
     .hero{grid-template-columns:1fr;}
     .hero-main{min-height:0;padding:24px 22px;}
@@ -158,7 +151,7 @@
   }
   @media (max-width:480px){
     .malls{grid-template-columns:repeat(2,1fr);}
-    .topnotice .snsmini{display:none;}
+    .topnotice .tk{display:none;}
     .hstep{font-size:12.5px;}
   }
 </style>
@@ -169,23 +162,32 @@
   <div class="topnotice"><div class="wrap">
     <span class="lab">공지</span>
     <div class="tk"><span id="tkr">한국 공휴일 배송 일정을 확인해 주세요</span></div>
-    <div class="snsmini"><a href="contact.html">인스타그램</a><a href="contact.html">스레드</a><a href="contact.html">카카오톡</a></div>
+    <div class="snsmini"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="notice.html">고객센터</a></div>
   </div></div>
 
-  <div class="util"><div class="wrap"><span>일본 현지인이 직접 운영하는 구매대행 · 배송대행</span><nav><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="notice.html">고객센터</a></nav></div></div>
-
   <header class="head"><div class="wrap">
-    <a class="logo" href="index.html"><span class="tag">일본 구매대행 · 배송대행</span><span class="nm">오쓰 오하요<i>.</i></span></a>
-    <nav class="hutil">
-      <a href="mypage.html"><small>MY</small>마이</a>
-      <a href="order-lookup.html"><small>ORDER</small>주문조회</a>
-      <a href="notice.html" class="hsearch" aria-label="검색"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></a>
+    <a class="logo" href="index.html">OSSohayo</a>
+    <nav class="mainnav">
+      <a href="index.html" class="on">홈</a>
+      <a href="order.html">구매대행 신청</a>
+      <a href="delivery.html">배송대행 신청</a>
+      <a href="notice.html">공지사항</a>
+      <a href="guide.html">이용가이드</a>
+      <a href="order-lookup.html">주문조회</a>
     </nav>
+    <div class="headicons">
+      <a href="notice.html" class="hicon" aria-label="검색"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></a>
+      <div class="acctwrap">
+        <button class="hicon" type="button" aria-label="계정 메뉴"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg></button>
+        <div class="acctmenu">
+          <a href="login.html">로그인</a>
+          <a href="signup.html">회원가입</a>
+          <a href="order-lookup.html">주문조회</a>
+          <a href="mypage.html">마이페이지</a>
+        </div>
+      </div>
+    </div>
   </div></header>
-
-  <nav class="gnb"><div class="wrap">
-    <a class="on" href="index.html">홈</a><a href="order.html">구매대행 신청</a><a href="delivery.html">배송대행 신청</a><a href="guide.html">이용가이드</a><a href="index.html#fee">예상비용</a><a href="notice.html">공지사항</a><a href="order-lookup.html">주문조회</a>
-  </div></nav>
 
   <div class="wrap">
 
@@ -314,6 +316,12 @@
       var n=["한국 공휴일 배송 일정을 확인해 주세요","신규 회원가입 시 배송비 할인 혜택 진행 중","엔화 환율 변동 적용 안내 (1엔=10원)"];
       var i=0, el=document.getElementById('tkr'); if(!el) return;
       setInterval(function(){ i=(i+1)%n.length; el.style.opacity=0; setTimeout(function(){ el.textContent=n[i]; el.style.opacity=1; },350); }, 3000);
+    })();
+    (function(){
+      var w=document.querySelector('.acctwrap'); if(!w) return;
+      var btn=w.querySelector('.hicon');
+      btn.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); w.classList.toggle('open'); });
+      document.addEventListener('click',function(){ w.classList.remove('open'); });
     })();
   </script>
 
