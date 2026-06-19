@@ -41,6 +41,23 @@ if (menuToggle && mainMenu) {
 }
 
 // ===== 공통 푸터 렌더 (전 페이지 통일) =====
+// 공통 헤더(OSSohayo · 본리식) — 모든 페이지의 옛 헤더를 새 헤더로 교체
+(function renderHeader() {
+  if (!document.querySelector(".site-header") && !document.querySelector(".utility-bar")) return;
+  [".utility-bar", ".site-header", ".main-nav"].forEach(function (s) { var e = document.querySelector(s); if (e) e.remove(); });
+  var path = (location.pathname.split("/").pop() || "index.html"); if (path === "") path = "index.html";
+  var nav = [["index.html", "홈"], ["order.html", "구매대행 신청"], ["delivery.html", "배송대행 신청"], ["notice.html", "공지사항"], ["guide.html", "이용가이드"], ["order-lookup.html", "주문조회"]];
+  var navHtml = nav.map(function (n) { return '<a href="' + n[0] + '"' + (n[0] === path ? ' class="on"' : "") + ">" + n[1] + "</a>"; }).join("");
+  var sIco = '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>';
+  var uIco = '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg>';
+  var h = document.createElement("header"); h.className = "osshead"; h.id = "top";
+  h.innerHTML = '<div class="osshead-in"><a class="osshead-logo" href="index.html">OSSohayo</a><nav class="osshead-nav">' + navHtml + '</nav><div class="osshead-icons"><a class="osshead-ic" href="notice.html" aria-label="검색">' + sIco + '</a><div class="osshead-acct"><button class="osshead-ic" type="button" aria-label="계정">' + uIco + '</button><div class="osshead-menu"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="order-lookup.html">주문조회</a><a href="mypage.html">마이페이지</a></div></div></div></div>';
+  document.body.insertBefore(h, document.body.firstChild);
+  var acct = h.querySelector(".osshead-acct");
+  acct.querySelector("button").addEventListener("click", function (e) { e.stopPropagation(); acct.classList.toggle("open"); });
+  document.addEventListener("click", function () { acct.classList.remove("open"); });
+})();
+
 (function renderFooter() {
   const f = document.querySelector(".site-footer");
   if (!f) return;
