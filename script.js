@@ -43,19 +43,26 @@ if (menuToggle && mainMenu) {
 // ===== 공통 푸터 렌더 (전 페이지 통일) =====
 // 공통 헤더(OSSohayo · 본리식) — 모든 페이지의 옛 헤더를 새 헤더로 교체
 (function renderHeader() {
-  if (document.querySelector(".osshead") || document.body.classList.contains("admin-body")) return;
-  [".utility-bar", ".site-header", ".main-nav"].forEach(function (s) { var e = document.querySelector(s); if (e) e.remove(); });
-  var path = (location.pathname.split("/").pop() || "index.html"); if (path === "") path = "index.html";
-  var nav = [["index.html", "홈"], ["order.html", "구매대행 신청"], ["delivery.html", "배송대행 신청"], ["notice.html", "공지사항"], ["guide.html", "이용가이드"], ["order-lookup.html", "주문조회"]];
-  var navHtml = nav.map(function (n) { return '<a href="' + n[0] + '"' + (n[0] === path ? ' class="on"' : "") + ">" + n[1] + "</a>"; }).join("");
-  var sIco = '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>';
-  var uIco = '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg>';
-  var h = document.createElement("header"); h.className = "osshead"; h.id = "top";
-  h.innerHTML = '<div class="osshead-in"><a class="osshead-logo" href="index.html">OSSohayo</a><nav class="osshead-nav">' + navHtml + '</nav><div class="osshead-icons"><a class="osshead-ic" href="notice.html" aria-label="검색">' + sIco + '</a><div class="osshead-acct"><button class="osshead-ic" type="button" aria-label="계정">' + uIco + '</button><div class="osshead-menu"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="order-lookup.html">주문조회</a><a href="mypage.html">마이페이지</a></div></div></div></div>';
-  document.body.insertBefore(h, document.body.firstChild);
-  var acct = h.querySelector(".osshead-acct");
-  acct.querySelector("button").addEventListener("click", function (e) { e.stopPropagation(); acct.classList.toggle("open"); });
-  document.addEventListener("click", function () { acct.classList.remove("open"); });
+  // 헤더가 HTML에 하드코딩돼 있으면 주입 생략(깜빡임 방지). 없는 페이지에만 주입.
+  if (!document.body.classList.contains("admin-body") && !document.querySelector(".osshead")) {
+    [".utility-bar", ".site-header", ".main-nav"].forEach(function (s) { var e = document.querySelector(s); if (e) e.remove(); });
+    var path = (location.pathname.split("/").pop() || "index.html"); if (path === "") path = "index.html";
+    var nav = [["index.html", "홈"], ["order.html", "구매대행 신청"], ["delivery.html", "배송대행 신청"], ["notice.html", "공지사항"], ["guide.html", "이용가이드"], ["order-lookup.html", "주문조회"]];
+    var navHtml = nav.map(function (n) { return '<a href="' + n[0] + '"' + (n[0] === path ? ' class="on"' : "") + ">" + n[1] + "</a>"; }).join("");
+    var sIco = '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>';
+    var uIco = '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg>';
+    var h = document.createElement("header"); h.className = "osshead"; h.id = "top";
+    h.innerHTML = '<div class="osshead-in"><a class="osshead-logo" href="index.html">OSSohayo</a><nav class="osshead-nav">' + navHtml + '</nav><div class="osshead-icons"><a class="osshead-ic" href="notice.html" aria-label="검색">' + sIco + '</a><div class="osshead-acct"><button class="osshead-ic" type="button" aria-label="계정">' + uIco + '</button><div class="osshead-menu"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="order-lookup.html">주문조회</a><a href="mypage.html">마이페이지</a></div></div></div></div>';
+    document.body.insertBefore(h, document.body.firstChild);
+  }
+  // 계정 드롭다운 (하드코딩/주입 공통)
+  var acct = document.querySelector(".osshead-acct");
+  if (acct && !acct.getAttribute("data-wired")) {
+    acct.setAttribute("data-wired", "1");
+    var btn = acct.querySelector("button");
+    if (btn) btn.addEventListener("click", function (e) { e.stopPropagation(); acct.classList.toggle("open"); });
+    document.addEventListener("click", function () { acct.classList.remove("open"); });
+  }
 })();
 
 (function renderFooter() {
@@ -721,23 +728,29 @@ document.addEventListener("change", async (e) => {
 
 // ===== 상단 공지 띠배너 (전 페이지) =====
 (function renderTopBar() {
-  try { if (sessionStorage.getItem("oss_topbar_closed") === "1") return; } catch (e) {}
-  const bar = document.createElement("div");
-  bar.className = "top-noti";
-  bar.innerHTML = '<div class="container top-noti-in"><span class="top-noti-msg" id="topNotiMsg">📢 일본 직구, OSS와 함께 안전하게 — 구매대행 · 배송대행</span><button class="top-noti-x" type="button" aria-label="닫기">×</button></div>';
-  document.body.insertBefore(bar, document.body.firstChild);
-  bar.querySelector(".top-noti-x").addEventListener("click", () => { bar.remove(); try { sessionStorage.setItem("oss_topbar_closed", "1"); } catch (e) {} });
-  if (window.OSS && window.OSS.getSetting) {
-    window.OSS.getSetting("topbar").then((v) => {
-      const msg = document.getElementById("topNotiMsg");
-      const txt = typeof v === "string" ? v : (v && v.text);
-      if (msg && txt && txt.trim()) { msg.textContent = "📢 " + txt; return null; }
-      if (window.OSS.fetchNotices) return window.OSS.fetchNotices();
-      return null;
-    }).then((list) => {
-      const msg = document.getElementById("topNotiMsg");
-      if (list && list[0] && msg) msg.innerHTML = '📢 <a href="notice.html">' + (list[0].title || "") + "</a>";
-    }).catch(() => {});
+  var bar = document.querySelector(".top-noti");
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.className = "top-noti";
+    bar.innerHTML = '<div class="container top-noti-in"><span class="top-noti-msg" id="topNotiMsg"></span></div>';
+    document.body.insertBefore(bar, document.body.firstChild);
+  }
+  var el = document.getElementById("topNotiMsg") || bar.querySelector(".top-noti-msg");
+  // 글마다 색상 순환: 블랙 · 노랑 · 핑크 · 오렌지
+  var pal = [{ b: "#23201D", f: "#F4EDE6" }, { b: "#FFD45E", f: "#5A4413" }, { b: "#FF6F8B", f: "#fff" }, { b: "#F46A2C", f: "#fff" }];
+  var msgs = ["일본 직구, OSS와 함께 안전하게 — 구매대행 · 배송대행", "신규 회원가입 시 배송비 쿠폰 3장 증정", "검수사진 제공 · 실시간 배송추적 · 카톡 1:1 상담"];
+  bar.style.transition = "background .35s ease, color .35s ease";
+  var i = 0;
+  function show() { var c = pal[i % pal.length]; bar.style.background = c.b; bar.style.color = c.f; if (el) { el.style.color = c.f; el.textContent = "📢 " + msgs[i % msgs.length]; } }
+  show();
+  setInterval(function () { i++; show(); }, 3500);
+  if (window.OSS && window.OSS.fetchNotices) {
+    window.OSS.fetchNotices().then(function (list) {
+      if (list && list.length) {
+        var t = list.slice(0, 6).map(function (n) { return n.title || ""; }).filter(Boolean);
+        if (t.length) { msgs = t; i = 0; show(); }
+      }
+    }).catch(function () {});
   }
 })();
 

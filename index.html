@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20" />
+  <link rel="stylesheet" href="styles.css?v=23" />
   <style>
     .oh-wrap{max-width:1280px;margin:0 auto;padding:0 28px;color:#140F0B;}
     .oh-wrap a{color:inherit;}
@@ -36,7 +36,7 @@
     .oh-quick:hover{transform:translateY(-3px);}
     .oh-quick .ic{width:56px;height:56px;border-radius:50%;background:#FFEADF;color:#F46A2C;display:inline-flex;align-items:center;justify-content:center;}
     .oh-quick b{font-size:14.5px;font-weight:700;text-align:center;}
-    .oh-how{display:flex;flex-wrap:wrap;align-items:center;gap:10px 8px;background:#fff;box-shadow:0 8px 30px rgba(40,26,16,.07);border-radius:20px;padding:20px 22px;}
+    .oh-how{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 8px;background:#fff;box-shadow:0 8px 30px rgba(40,26,16,.07);border-radius:20px;padding:20px 26px;}
     .oh-step{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;white-space:nowrap;}
     .oh-step .n{width:26px;height:26px;border-radius:50%;background:#FFEADF;color:#F46A2C;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;}
     .oh-step.pay{color:#C24E18;}.oh-step.pay .n{background:#F46A2C;color:#fff;}
@@ -82,11 +82,13 @@
       .oh-malls{grid-template-columns:repeat(3,1fr);}
       .oh-trust,.oh-faq,#reviewGrid{grid-template-columns:1fr;}
       .oh-feebar,.oh-kk{flex-direction:column;align-items:flex-start;}
+      .oh-how{justify-content:flex-start;gap:10px 14px;}
     }
     @media(max-width:480px){ .oh-malls{grid-template-columns:repeat(2,1fr);} }
   </style>
 </head>
 <body>
+  <header class="osshead" id="top"><div class="osshead-in"><a class="osshead-logo" href="index.html">OSSohayo</a><nav class="osshead-nav"><a href="index.html" class="on">홈</a><a href="order.html">구매대행 신청</a><a href="delivery.html">배송대행 신청</a><a href="notice.html">공지사항</a><a href="guide.html">이용가이드</a><a href="order-lookup.html">주문조회</a></nav><div class="osshead-icons"><a class="osshead-ic" href="notice.html" aria-label="검색"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></a><div class="osshead-acct"><button class="osshead-ic" type="button" aria-label="계정"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg></button><div class="osshead-menu"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="order-lookup.html">주문조회</a><a href="mypage.html">마이페이지</a></div></div></div></div></header>
 
   <main class="oh-wrap">
 
@@ -243,6 +245,6 @@
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=10"></script>
-  <script src="script.js?v=14"></script>
+  <script src="script.js?v=15"></script>
 </body>
 </html>
