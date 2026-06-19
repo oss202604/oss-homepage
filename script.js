@@ -736,19 +736,19 @@ document.addEventListener("change", async (e) => {
     document.body.insertBefore(bar, document.body.firstChild);
   }
   var el = document.getElementById("topNotiMsg") || bar.querySelector(".top-noti-msg");
-  // 글마다 색상 순환: 블랙 · 노랑 · 핑크 · 오렌지
-  var pal = [{ b: "#23201D", f: "#F4EDE6" }, { b: "#FFD45E", f: "#5A4413" }, { b: "#FF6F8B", f: "#fff" }, { b: "#F46A2C", f: "#fff" }];
-  var msgs = ["일본 직구, OSS와 함께 안전하게 — 구매대행 · 배송대행", "신규 회원가입 시 배송비 쿠폰 3장 증정", "검수사진 제공 · 실시간 배송추적 · 카톡 1:1 상담"];
-  bar.style.transition = "background .35s ease, color .35s ease";
+  // 글마다 색상 순환(본리식 밝은 파스텔): 분홍 · 노랑 · 복숭아 · 민트
+  var pal = [{ b: "#F79AC1", f: "#412233" }, { b: "#FFE04A", f: "#5A4A10" }, { b: "#FFB58A", f: "#5A3018" }, { b: "#8FD9C8", f: "#184038" }];
+  var msgs = ["신규 가입하면 배송비 쿠폰 3장 드려요 🎁", "일본 직구, 링크만 보내면 OSS가 다 해드려요 ✨", "검수사진 제공 · 실시간 배송추적 · 카톡 상담 💬"];
+  bar.style.transition = "background .4s ease, color .4s ease";
   var i = 0;
-  function show() { var c = pal[i % pal.length]; bar.style.background = c.b; bar.style.color = c.f; if (el) { el.style.color = c.f; el.textContent = "📢 " + msgs[i % msgs.length]; } }
+  function show() { var c = pal[i % pal.length]; bar.style.background = c.b; bar.style.color = c.f; if (el) { el.style.color = c.f; el.textContent = msgs[i % msgs.length]; } }
   show();
-  setInterval(function () { i++; show(); }, 3500);
+  setInterval(function () { i++; show(); }, 4000);
   if (window.OSS && window.OSS.fetchNotices) {
     window.OSS.fetchNotices().then(function (list) {
       if (list && list.length) {
-        var t = list.slice(0, 6).map(function (n) { return n.title || ""; }).filter(Boolean);
-        if (t.length) { msgs = t; i = 0; show(); }
+        var t = list.slice(0, 6).map(function (n) { return n.title ? "🔔 " + n.title : ""; }).filter(Boolean);
+        if (t.length) { msgs = msgs.concat(t); i = 0; show(); }
       }
     }).catch(function () {});
   }
