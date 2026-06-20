@@ -26,6 +26,7 @@ const labelOf = (k) => (ALL_STATUS.find((s) => s.key === k) || {}).label || k;
 
 // 배송비 요율표 (관리자 설정에서 로드, 단위 엔). 행: {kg: 무게이하, air, sea}
 let RATES = [];
+let FX_APPLIED = 1000; // 적용환율(100엔당 원). exchange_rate.applied. ¥→₩ 변환(perJpy = applied/100). 계산기와 동일
 // 사토리 기본요율(항공 실측값, 해상은 동일값으로 두고 관리자가 조정) — "기본요율 불러오기"용
 const DEFAULT_RATES = [
   [0.5,1000,1000],[1,1150,1150],[1.5,1300,1300],[2,1450,1450],[2.5,1600,1600],
@@ -41,7 +42,8 @@ function calcShippingFee(weightKg, center) {
   if (RATES && RATES.length) {
     const sorted = [...RATES].sort((a, b) => a.kg - b.kg);
     const row = sorted.find((r) => w <= Number(r.kg)) || sorted[sorted.length - 1];
-    return Number(center === "sea" ? row.sea : row.air) || 0;
+    const yen = Number(center === "sea" ? row.sea : row.air) || 0;
+    return Math.round(yen * (FX_APPLIED / 100)); // ¥ → ₩ (계산기와 동일 환율)
   }
   return 0; // 요율 미설정
 }
@@ -772,7 +774,7 @@ document.getElementById("saveRate").addEventListener("click", async () => {
 });
 document.getElementById("rcCalc").addEventListener("click", () => {
   const fee = calcShippingFee(document.getElementById("rcWeight").value, document.getElementById("rcCenter").value);
-  document.getElementById("rcOut").textContent = fee ? "¥" + fee.toLocaleString() : "요율 없음";
+  document.getElementById("rcOut").textContent = fee ? "₩" + fee.toLocaleString() : "요율 없음";
 });
 
 // ----- 설정: 회원등급 (등업 조건 · 배송비 할인율) -----
@@ -857,6 +859,7 @@ document.getElementById("saveFx").addEventListener("click", async () => {
       applied: num("setFxApplied"), gosi: num("setFxGosi"), dutyFreeLimit: num("setFxDuty"),
       updatedAt: new Date().toISOString(),
     });
+    FX_APPLIED = num("setFxApplied") || FX_APPLIED;
     ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500);
   } catch (e) { alert("저장 실패: " + (e.message || e)); }
 });
@@ -985,6 +988,7 @@ async function loadInquiries() {
 init();
 loadCenter();
 loadRates();
+if (window.OSS && window.OSS.getSetting) window.OSS.getSetting("exchange_rate").then((fx) => { if (fx && fx.applied) FX_APPLIED = Number(fx.applied) || FX_APPLIED; }).catch(() => {});
 loadPageEditor();
 loadFx();
 loadReviews();
