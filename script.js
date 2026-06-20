@@ -554,6 +554,7 @@ if (form && modal) {
   ];
   let RATES = [];
   let FX = { applied: 0, gosi: 0, dutyFreeLimit: 23961 };
+  let GRADES_CFG = [];
 
   const won = (n) => "₩" + Math.round(n).toLocaleString();
   const yen = (n) => "¥" + Math.round(n).toLocaleString();
@@ -569,6 +570,11 @@ if (form && modal) {
   function fillCats() {
     const sel = document.getElementById("calcCat");
     sel.innerHTML = CATS.map((c, i) => `<option value="${i}">${c.name}</option>`).join("");
+  }
+  function fillGrades() {
+    const sel = document.getElementById("calcGrade");
+    if (!sel) return;
+    sel.innerHTML = '<option value="-1">비회원 / 일반</option>' + GRADES_CFG.map((g, i) => `<option value="${i}">${g.name}${Number(g.discountPct) > 0 ? " (배송비 " + g.discountPct + "% 할인)" : ""}</option>`).join("");
   }
   function showFx() {
     const el = document.getElementById("calcFx");
@@ -587,7 +593,10 @@ if (form && modal) {
     if (perJpy <= 0) { set("rJpy", "환율 미설정"); set("rShip", "-"); set("rTax", "-"); set("rTotal", "-"); return; }
 
     const productKrw = jpy * perJpy;
-    const shipKrw = shipFeeYen(kg, center) * perJpy;
+    const shipKrwBase = shipFeeYen(kg, center) * perJpy;
+    const grade = GRADES_CFG[Number((document.getElementById("calcGrade") || {}).value)] || null;
+    const gPct = grade ? (Number(grade.discountPct) || 0) : 0;
+    const shipKrw = shipKrwBase * (1 - gPct / 100);
     const base = productKrw + shipKrw; // 간이 과세표준
     const dutyFreeKrw = Number(FX.dutyFreeLimit || 0) * perJpy;
 
@@ -599,23 +608,25 @@ if (form && modal) {
       tax = duty + vat;
     }
     set("rJpy", `${won(productKrw)}  (${yen(jpy)})`);
-    set("rShip", shipKrw > 0 ? won(shipKrw) : (RATES.length ? "무게 입력" : "요율 미설정"));
+    set("rShip", shipKrwBase > 0 ? (won(shipKrw) + (gPct > 0 ? `  (${grade.name} ${gPct}% 할인)` : "")) : (RATES.length ? "무게 입력" : "요율 미설정"));
     set("rTax", exempt ? "면세 (목록통관)" : won(tax));
     set("rTotal", won(productKrw + shipKrw + tax));
   }
 
   btn.addEventListener("click", calc);
-  fillCats(); showFx();
+  fillCats(); fillGrades(); showFx();
 
   if (window.OSS && window.OSS.getSetting) {
     Promise.all([
       window.OSS.getSetting("exchange_rate").catch(() => null),
       window.OSS.getSetting("shipping_rates").catch(() => null),
       window.OSS.getSetting("customs_categories").catch(() => null),
-    ]).then(([fx, rates, cats]) => {
+      window.OSS.getSetting("member_grades").catch(() => null),
+    ]).then(([fx, rates, cats, grades]) => {
       if (fx && typeof fx === "object") FX = Object.assign(FX, fx);
       if (Array.isArray(rates) && rates.length) RATES = rates;
       if (Array.isArray(cats) && cats.length) { CATS = cats; fillCats(); }
+      if (Array.isArray(grades) && grades.length) { GRADES_CFG = grades; fillGrades(); }
       showFx();
     });
   }
