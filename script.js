@@ -628,6 +628,15 @@ if (form && modal) {
       if (Array.isArray(cats) && cats.length) { CATS = cats; fillCats(); }
       if (Array.isArray(grades) && grades.length) { GRADES_CFG = grades; fillGrades(); }
       showFx();
+      // 로그인 회원이면 본인 등급 자동 선택 (비회원은 그대로 0%)
+      if (window.OSS.getMyProfile) window.OSS.getMyProfile().then((p) => {
+        if (!p || !p.grade) return;
+        const map = { silver: "실버", gold: "골드", diamond: "다이아", red: "레드" };
+        const gn = map[p.grade] || p.grade;
+        const idx = GRADES_CFG.findIndex((g) => g.name === gn);
+        const sel = document.getElementById("calcGrade");
+        if (idx >= 0 && sel) { sel.value = String(idx); sel.title = "로그인 회원 등급이 자동 적용됐어요"; }
+      }).catch(() => {});
     });
   }
 })();
