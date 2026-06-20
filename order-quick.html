@@ -26,12 +26,12 @@
     body{margin:0;background:var(--page);font-family:"Noto Sans KR",system-ui,sans-serif;color:var(--ink);-webkit-text-size-adjust:100%;}
     .oq-wrap{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;}
     /* 상단 신뢰바 */
-    .oq-trust{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#fff;border-bottom:1px solid var(--cardline);}
+    .oq-trust{position:relative;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#fff;border-bottom:1px solid var(--cardline);}
     .oq-trust .l{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--mute);}
     .oq-trust .l i{color:#2BBF8A;width:15px;height:15px;}
     .oq-trust .home{display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--mute);text-decoration:none;}
     .oq-trust .home svg{width:15px;height:15px;}
-    .oq-logo{font-size:16px;font-weight:700;letter-spacing:2px;color:var(--ink);}
+    .oq-logo{position:absolute;left:50%;transform:translateX(-50%);font-size:16px;font-weight:800;letter-spacing:.5px;color:var(--ink);white-space:nowrap;pointer-events:none;}
     /* 단계 표시 */
     .oq-steps{padding:16px 20px 0;}
     .oq-bars{display:flex;gap:6px;margin-bottom:9px;}
@@ -45,15 +45,16 @@
     .oq-panel.active{display:block;}
     .oq-body{padding:14px 18px 0;}
     .oq-stickybar{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:480px;width:100%;background:#fff;border-top:1px solid var(--cardline);box-shadow:0 -4px 14px rgba(23,19,16,.07);z-index:10;}
-    .oq-total{padding:11px 18px 2px;}
-    .oq-total-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mute);margin-bottom:3px;}
+    .oq-total{padding:7px 18px 2px;}
+    .oq-total-row{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--mute);margin-bottom:1px;}
     .oq-total-row span:last-child{color:var(--ink);font-weight:500;}
-    .oq-total-row.total{margin:5px 0 0;padding-top:7px;border-top:1px dashed var(--line);font-size:15px;}
+    .oq-total-row.total{margin:3px 0 0;padding-top:5px;border-top:1px dashed var(--line);font-size:13px;}
     .oq-total-row.total span:first-child{color:var(--ink);}
     .oq-total-row.total span:first-child small{color:var(--hint);font-size:11px;font-weight:400;}
     .oq-total-row.total span:last-child{color:var(--o);font-weight:700;}
-    .oq-stickybar .oq-foot{padding:8px 18px 14px;}
-    #panel1{padding-bottom:176px;}
+    .oq-stickybar .oq-foot{padding:5px 18px 11px;}
+    .oq-stickybar .oq-btn{height:44px;font-size:14.5px;border-radius:12px;}
+    #panel1{padding-bottom:162px;}
     /* 라벨/입력 */
     .oq-label{display:block;font-size:12px;color:var(--mute);margin:0 0 5px;}
     .oq-input{width:100%;height:46px;border:1px solid var(--line);border-radius:13px;background:#fff;padding:0 13px;font-size:16px;color:var(--ink);font-family:inherit;}
@@ -189,7 +190,7 @@
   <div class="oq-wrap">
     <div class="oq-trust">
       <a class="home" href="index.html"><i data-lucide="chevron-left"></i> 홈</a>
-      <span class="oq-logo">OSS</span>
+      <span class="oq-logo">OSSohayo</span>
       <a class="home" href="guide.html">이용가이드 <i data-lucide="help-circle"></i></a>
     </div>
 
