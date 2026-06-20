@@ -234,8 +234,7 @@
         <!-- 배대지 주소 -->
         <div class="oq-center">
           <h3><i data-lucide="map-pin"></i> 이 주소로 상품을 보내주세요</h3>
-          <div class="addr" id="centerAddr"><span class="who">받는사람: OSS / 주문번호(주문 후 발급)</span>
-〒— 일본 배대지 주소는 주문 완료 후 안내드려요.</div>
+          <div class="addr" id="centerAddr"><span class="who">받는사람: OSS / 주문번호(주문 후 발급)</span><br>〒577-0841 大阪府 東大阪市 足代 3-1-25<br>ハイムリップルパート3 102号<br>Tel: 070-1381-4638</div>
           <p class="note">※ 일본 쇼핑몰에서 위 주소로 발송하신 뒤, 아래 상품 정보를 적어주세요. 받는사람에 <b>OSS / 주문번호</b>를 꼭 적어주세요.</p>
           <button type="button" class="oq-copybtn" id="copyCenterBtn1"><i data-lucide="copy"></i> 배대지 주소 복사</button>
         </div>
@@ -406,16 +405,23 @@
       }).catch(function () {});
     }
 
-    // ----- 배대지 주소 (settings.center_address) -----
-    var CENTER_ADDR = "";
+    // ----- 배대지 주소 (settings.center_address: {zip,addr1,addr2,tel}) -----
+    var CENTER_ADDR = "〒577-0841 大阪府 東大阪市 足代 3-1-25 ハイムリップルパート3 102号\nTel: 070-1381-4638";
+    function centerToStr(v) {
+      if (!v) return "";
+      if (typeof v === "string") return v;
+      var line = [v.zip, v.addr1, v.addr2].filter(Boolean).join(" ");
+      if (v.tel) line += "\nTel: " + v.tel;
+      return line;
+    }
     function applyCenter(addr) {
-      CENTER_ADDR = addr || "";
-      var html = '<span class="who">받는사람: OSS / 주문번호(주문 후 발급)</span>\n' + (addr || "〒— 일본 배대지 주소는 주문 완료 후 안내드려요.");
-      var c1 = $("#centerAddr"); if (c1) c1.innerHTML = esc(html).replace(/\n/g, "<br>").replace('받는사람: OSS / 주문번호(주문 후 발급)', '<span class="who">받는사람: OSS / 주문번호(주문 후 발급)</span>');
+      if (addr) CENTER_ADDR = addr;
+      var c1 = $("#centerAddr");
+      if (c1) c1.innerHTML = '<span class="who">받는사람: OSS / 주문번호(주문 후 발급)</span><br>' + esc(CENTER_ADDR).replace(/\n/g, "<br>");
     }
     if (window.OSS && OSS.getSetting) {
       OSS.getSetting("center_address").then(function (v) {
-        var addr = (typeof v === "string") ? v : (v && (v.address || v.air || v.text)) || "";
+        var addr = centerToStr(v);
         if (addr) applyCenter(addr);
       }).catch(function () {});
     }

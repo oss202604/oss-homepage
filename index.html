@@ -246,5 +246,52 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=10"></script>
   <script src="script.js?v=17"></script>
+
+  <!-- 회원가입 쿠폰 팝업 (홈 첫 진입 1회) -->
+  <style>
+    .ohpop{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:22px;}
+    .ohpop[hidden]{display:none;}
+    .ohpop-dim{position:absolute;inset:0;background:rgba(20,14,10,.5);}
+    .ohpop-card{position:relative;width:100%;max-width:330px;background:#fff;border-radius:24px;padding:26px 24px 18px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.28);animation:ohpop-in .32s cubic-bezier(.2,.9,.3,1.2);overflow:hidden;}
+    .ohpop-card::before{content:"";position:absolute;top:0;left:0;right:0;height:92px;background:linear-gradient(135deg,#FFE6B0,#FFC9D7 60%,#FFD8C2);z-index:0;}
+    .ohpop-card>*{position:relative;z-index:1;}
+    @keyframes ohpop-in{from{opacity:0;transform:translateY(16px) scale(.96);}to{opacity:1;transform:none;}}
+    .ohpop-x{position:absolute;top:12px;right:14px;z-index:2;width:30px;height:30px;border:none;background:rgba(255,255,255,.65);border-radius:50%;font-size:20px;line-height:1;color:#7a6a5e;cursor:pointer;}
+    .ohpop-emoji{font-size:46px;margin-top:4px;}
+    .ohpop-card h3{margin:8px 0 2px;font-size:18px;font-weight:800;color:#2b2018;}
+    .ohpop-big{margin:10px 0 0;font-size:21px;font-weight:800;color:#2b2018;letter-spacing:-.3px;}
+    .ohpop-big b{color:#F15E1C;}
+    .ohpop-sub{margin:9px 0 0;font-size:12.5px;color:#8a7f74;line-height:1.6;}
+    .ohpop-cta{display:block;margin:18px 0 0;height:52px;line-height:52px;border-radius:15px;background:#F15E1C;color:#fff;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 10px 22px rgba(241,94,28,.28);}
+    .ohpop-cta:active{transform:scale(.98);}
+    .ohpop-skip{display:inline-flex;align-items:center;gap:6px;margin-top:13px;font-size:12px;color:#a99b91;cursor:pointer;}
+    .ohpop-skip input{width:auto;}
+  </style>
+  <div class="ohpop" id="couponPop" hidden>
+    <div class="ohpop-dim" id="popDim"></div>
+    <div class="ohpop-card">
+      <button class="ohpop-x" id="popX" type="button" aria-label="닫기">×</button>
+      <div class="ohpop-emoji">🎁</div>
+      <h3>신규 회원가입 혜택</h3>
+      <p class="ohpop-big">배송비 <b>3,000원 쿠폰 3장</b></p>
+      <p class="ohpop-sub">가입 즉시 지급 · 발급일로부터 한 달 사용 가능<br>한 주문에 1장씩 사용돼요</p>
+      <a class="ohpop-cta" href="signup.html">회원가입하고 쿠폰 받기 →</a>
+      <label class="ohpop-skip"><input type="checkbox" id="popSkip" /> 다시 보지 않기</label>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var pop=document.getElementById('couponPop'); if(!pop) return;
+      try{ if(localStorage.getItem('oss_couponPop_off')==='1') return; }catch(e){}
+      try{ if(sessionStorage.getItem('oss_couponPop_seen')==='1') return; }catch(e){}
+      function show(){ pop.hidden=false; try{sessionStorage.setItem('oss_couponPop_seen','1');}catch(e){} }
+      function hide(){ pop.hidden=true; var sk=document.getElementById('popSkip'); if(sk&&sk.checked){try{localStorage.setItem('oss_couponPop_off','1');}catch(e){}} }
+      function later(){ setTimeout(show, 800); }
+      if(window.OSS && OSS.getMyProfile){ OSS.getMyProfile().then(function(p){ if(!p) later(); }).catch(later); }
+      else later();
+      document.getElementById('popX').addEventListener('click', hide);
+      document.getElementById('popDim').addEventListener('click', hide);
+    }());
+  </script>
 </body>
 </html>
