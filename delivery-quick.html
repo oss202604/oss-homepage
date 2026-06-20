@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>구매대행 주문서 | OSS(オッス)</title>
-  <meta name="description" content="OSS 공식 구매대행 주문서 — 링크만 보내주시면 일본 상품을 대신 구매해 한국까지 보내드려요." />
-  <!-- 카톡/문자 미리보기 카드 (OG) -->
+  <title>배송대행 주문서 | OSS(オッス)</title>
+  <meta name="description" content="OSS 공식 배송대행 주문서 — 일본에서 직접 산 상품을 OSS 배대지로 받아 한국까지 안전하게 보내드려요." />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="OSS 구매대행" />
-  <meta property="og:title" content="OSS 공식 구매대행 주문서" />
-  <meta property="og:description" content="링크만 보내주시면 일본 상품을 대신 구매해 한국까지! 1분이면 주문 끝." />
-  <!-- TODO: 캔바로 만든 미리보기 이미지(1200x630) 업로드 후 아래 주소로 교체 -->
+  <meta property="og:site_name" content="OSS 배송대행" />
+  <meta property="og:title" content="OSS 공식 배송대행 주문서" />
+  <meta property="og:description" content="일본에서 직접 산 상품, OSS 배대지로 받아 한국까지! 1분이면 신청 끝." />
   <meta property="og:image" content="og-order.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -30,7 +28,7 @@
     .oq-trust .l{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--mute);}
     .oq-trust .l i{color:#2BBF8A;width:15px;height:15px;}
     .oq-trust .home{display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--mute);text-decoration:none;}
-    .oq-trust .home svg{width:15px;height:15px;}
+    .oq-trust .home i{width:15px;height:15px;}
     .oq-logo{font-size:16px;font-weight:700;letter-spacing:2px;color:var(--ink);}
     /* 단계 표시 */
     .oq-steps{padding:16px 20px 0;}
@@ -53,10 +51,11 @@
     .oq-total-row.total span:first-child small{color:var(--hint);font-size:11px;font-weight:400;}
     .oq-total-row.total span:last-child{color:var(--o);font-weight:700;}
     .oq-stickybar .oq-foot{padding:8px 18px 14px;}
-    #panel1{padding-bottom:176px;}
+    #panel1{padding-bottom:184px;}
     /* 라벨/입력 */
     .oq-label{display:block;font-size:12px;color:var(--mute);margin:0 0 5px;}
     .oq-input{width:100%;height:46px;border:1px solid var(--line);border-radius:13px;background:#fff;padding:0 13px;font-size:16px;color:var(--ink);font-family:inherit;}
+    select.oq-input{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%238C8178' stroke-width='2'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:32px;}
     .oq-input::placeholder{color:var(--ph);}
     .oq-input:focus{outline:none;border-color:var(--o);box-shadow:0 0 0 3px rgba(241,94,28,.14);}
     textarea.oq-input{height:auto;min-height:64px;padding:11px 13px;line-height:1.5;resize:vertical;}
@@ -64,6 +63,22 @@
     .oq-help i{width:13px;height:13px;}
     .oq-help a{color:var(--o-dark);font-weight:600;text-decoration:none;}
     .oq-row{display:flex;flex-direction:column;gap:12px;}
+    /* 배대지 주소 카드 */
+    .oq-center{border:1px solid var(--o-line2);border-radius:16px;background:var(--o-tint);padding:14px 15px;margin-bottom:14px;}
+    .oq-center h3{margin:0 0 7px;font-size:13.5px;font-weight:700;color:var(--o-dark);display:flex;align-items:center;gap:6px;}
+    .oq-center h3 i{width:17px;height:17px;}
+    .oq-center .addr{font-size:13.5px;line-height:1.6;color:var(--ink);font-weight:500;white-space:pre-line;word-break:keep-all;}
+    .oq-center .who{font-weight:700;color:var(--o-dark);}
+    .oq-center .note{margin:9px 0 0;font-size:11.5px;color:var(--mute);line-height:1.55;word-break:keep-all;}
+    .oq-center .oq-copybtn{margin-top:11px;height:42px;font-size:13.5px;}
+    /* 항공/해상 선택 */
+    .oq-seg{display:flex;gap:8px;margin-bottom:14px;}
+    .oq-seg label{flex:1;}
+    .oq-seg input{position:absolute;opacity:0;width:0;height:0;}
+    .oq-seg .seg{display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px solid var(--line);border-radius:13px;padding:10px 6px;cursor:pointer;background:#fff;}
+    .oq-seg .seg b{font-size:13.5px;}
+    .oq-seg .seg small{font-size:11px;color:var(--mute);}
+    .oq-seg input:checked + .seg{border-color:var(--o);background:var(--o-tint);}
     /* 필독안내(0단계) */
     .oq-notice-head{position:relative;overflow:hidden;background:var(--o-tint);padding:22px 18px 18px;text-align:center;}
     .oq-bubble{position:absolute;border-radius:50%;}
@@ -100,13 +115,8 @@
     .oq-pricebox{position:relative;}
     .oq-pricebox .yen{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--o-dark);font-weight:700;font-size:15px;}
     .oq-pricebox .oq-input{padding-left:28px;}
-    .oq-optrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
-    .oq-optrow .oq-opt{flex:1;min-width:0;}
-    .oq-optrow .oq-qty{width:58px;text-align:center;padding:0 4px;}
-    .oq-optx{flex-shrink:0;width:30px;height:30px;border:none;background:none;color:var(--hint);cursor:pointer;display:flex;align-items:center;justify-content:center;}
-    .oq-optx i{width:18px;height:18px;}
-    .oq-addopt{border:none;background:none;color:var(--o-dark);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;gap:4px;padding:0;margin-bottom:12px;cursor:pointer;font-family:inherit;}
-    .oq-addopt i{width:14px;height:14px;}
+    .oq-grid2{display:flex;gap:8px;}
+    .oq-grid2 > div{flex:1;min-width:0;}
     .oq-photo-btn{width:100%;height:44px;border:1px dashed #F0C3A6;border-radius:13px;background:#FFF7F1;color:var(--o-dark);font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-family:inherit;}
     .oq-photo-btn i{width:16px;height:16px;}
     .oq-photo-thumb{margin-top:8px;}
@@ -127,7 +137,7 @@
     .oq-btn-primary:disabled{background:#F4C8B2;cursor:not-allowed;}
     .oq-btn-ghost{width:92px;background:#fff;border:1px solid #E0D5CC;color:#7A6E63;font-weight:500;}
     .oq-err{color:#B83232;font-size:13px;text-align:center;padding:0 18px;min-height:18px;word-break:keep-all;}
-    /* 완료 (20~30대 여성 셀러 감성) */
+    /* 완료 */
     .oq-done{display:none;position:relative;overflow:hidden;text-align:center;padding:40px 24px 52px;
       background:radial-gradient(120% 58% at 50% 0%,#FFEFF2 0%,#FFF5EE 44%,#fff 80%);}
     .oq-done::before,.oq-done::after{content:"";position:absolute;border-radius:50%;opacity:.55;z-index:0;}
@@ -150,17 +160,16 @@
     .oq-copybtn i{width:17px;height:17px;}
     .oq-foot-links{display:flex;align-items:center;justify-content:center;gap:10px;font-size:11.5px;color:var(--hint);padding:6px 0 22px;}
     .oq-foot-links a{color:var(--hint);text-decoration:none;}
-    /* Lucide는 <i>를 <svg>로 바꾸므로 아이콘 크기/토글은 svg로 지정 */
     .oq-wrap svg{flex-shrink:0;}
     .oq-trust .l svg{width:15px;height:15px;}
+    .oq-trust .home svg{width:15px;height:15px;}
+    .oq-center h3 svg{width:17px;height:17px;}
     .oq-notice-ic svg{width:26px;height:26px;}
     .oq-note-ic svg{width:18px;height:18px;}
     .oq-agree .box svg{width:15px;height:15px;color:#fff;display:none;}
     .oq-agree.on .box svg{display:block;}
     .oq-mini svg{width:14px;height:14px;}
     .oq-translate svg{width:15px;height:15px;}
-    .oq-addopt svg{width:14px;height:14px;}
-    .oq-optx svg{width:18px;height:18px;}
     .oq-photo-btn svg{width:16px;height:16px;}
     .oq-addproduct svg{width:17px;height:17px;}
     .oq-zip .oq-addrbtn svg{width:15px;height:15px;}
@@ -173,15 +182,15 @@
     .oq-total-row.krw span:first-child small{color:var(--hint);font-size:11px;font-weight:400;}
     .oq-total-row.krw span:last-child{color:var(--ink);font-weight:700;}
     .oq-paybox{margin:18px auto 4px;max-width:300px;background:#fff;border:1.5px solid var(--o-line2);border-radius:18px;padding:17px;text-align:left;box-shadow:0 8px 20px rgba(241,94,28,.06);}
-    .oq-paybox .pay-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink);font-weight:700;}
-    .oq-paybox .pay-row b{font-size:22px;color:var(--o);}
-    .oq-paybox .pay-note{margin:9px 0 0;font-size:11.5px;color:var(--mute);line-height:1.6;}
+    .oq-paybox .pay-note{margin:0;font-size:12px;color:var(--mute);line-height:1.6;}
     .oq-paybox .pay-note b{color:var(--ink);}
     .pay-acct{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);}
     .pay-acct-lab{font-size:11.5px;color:var(--o-dark);margin-bottom:5px;font-weight:600;}
     .pay-acct-num{font-size:18px;font-weight:800;color:var(--ink);display:flex;flex-direction:column;gap:1px;}
     .pay-acct-num span{font-size:12.5px;font-weight:500;color:var(--mute);}
     .pay-acct .oq-copybtn{margin-top:11px;height:44px;font-size:14px;background:#fff;color:var(--o);border:1.5px solid var(--o-line2);box-shadow:none;}
+    /* 완료화면 배대지 카드 */
+    .oq-done .oq-center{max-width:300px;margin:18px auto 0;text-align:left;}
   </style>
 </head>
 <body>
@@ -192,10 +201,9 @@
       <a class="home" href="guide.html">이용가이드 <i data-lucide="help-circle"></i></a>
     </div>
 
-    <!-- 단계 표시 (0단계에서는 숨김) -->
     <div class="oq-steps" id="oqSteps" hidden>
       <div class="oq-bars"><span id="bar1"></span><span id="bar2"></span></div>
-      <div class="oq-steptitle"><h2 id="stepTitle">상품정보</h2><span class="frac" id="stepFrac">1 / 2</span></div>
+      <div class="oq-steptitle"><h2 id="stepTitle">보내는 상품</h2><span class="frac" id="stepFrac">1 / 2</span></div>
     </div>
 
     <!-- ===== 0단계: 필독안내 동의 ===== -->
@@ -204,8 +212,8 @@
         <span class="oq-bubble" style="width:72px;height:72px;background:#FCDECF;top:-26px;right:-12px;"></span>
         <span class="oq-bubble" style="width:34px;height:34px;background:#FCE3D5;bottom:-10px;left:24px;"></span>
         <span class="oq-bubble" style="width:18px;height:18px;background:#FBD3BE;top:18px;left:22px;"></span>
-        <span class="oq-notice-ic" style="position:relative;"><i data-lucide="clipboard-list"></i></span>
-        <h2 style="position:relative;">구매대행 필독안내</h2>
+        <span class="oq-notice-ic" style="position:relative;"><i data-lucide="package"></i></span>
+        <h2 style="position:relative;">배송대행 필독안내</h2>
         <p style="position:relative;">신청 전 꼭 읽어주세요</p>
       </div>
       <div class="oq-body">
@@ -220,19 +228,34 @@
       </div>
     </section>
 
-    <!-- ===== 1단계: 상품정보 ===== -->
+    <!-- ===== 1단계: 보내는 상품 ===== -->
     <section class="oq-panel" id="panel1">
       <div class="oq-body">
+        <!-- 배대지 주소 -->
+        <div class="oq-center">
+          <h3><i data-lucide="map-pin"></i> 이 주소로 상품을 보내주세요</h3>
+          <div class="addr" id="centerAddr"><span class="who">받는사람: OSS / 주문번호(주문 후 발급)</span>
+〒— 일본 배대지 주소는 주문 완료 후 안내드려요.</div>
+          <p class="note">※ 일본 쇼핑몰에서 위 주소로 발송하신 뒤, 아래 상품 정보를 적어주세요. 받는사람에 <b>OSS / 주문번호</b>를 꼭 적어주세요.</p>
+          <button type="button" class="oq-copybtn" id="copyCenterBtn1"><i data-lucide="copy"></i> 배대지 주소 복사</button>
+        </div>
+
+        <!-- 항공/해상 -->
+        <label class="oq-label">배송 방법</label>
+        <div class="oq-seg">
+          <label><input type="radio" name="ship" value="항공" checked /><span class="seg"><b>✈️ 항공</b><small>빠름 · 표준요금</small></span></label>
+          <label><input type="radio" name="ship" value="해상" /><span class="seg"><b>🚢 해상</b><small>느림 · 저렴</small></span></label>
+        </div>
+
         <div id="oqProducts"></div>
         <button class="oq-addproduct" id="addProductBtn"><i data-lucide="plus"></i> 상품 추가</button>
       </div>
       <p class="oq-err" id="err1"></p>
       <div class="oq-stickybar">
         <div class="oq-total" id="oqTotal">
-          <div class="oq-total-row"><span>상품 합계</span><span id="totGoods">¥0</span></div>
-          <div class="oq-total-row"><span>구매대행 수수료 (3%)</span><span id="totFee">¥0</span></div>
-          <div class="oq-total-row total"><span>예상 합계 <small>· 배송비·관부가세 별도</small></span><span id="totFinal">¥0</span></div>
+          <div class="oq-total-row total"><span>총 신고금액 <small>· 세관 신고용</small></span><span id="totFinal">¥0</span></div>
           <div class="oq-total-row krw"><span>원화 환산 <small>· 1엔=10원</small></span><span id="totFinalKrw">₩0</span></div>
+          <div class="oq-total-row"><span style="color:var(--hint);font-size:11.5px;">국제배송비는 입고·무게 측정 후 안내돼요</span><span></span></div>
         </div>
         <div class="oq-foot">
           <button class="oq-btn oq-btn-ghost" data-back="0"><i data-lucide="arrow-left"></i> 이전</button>
@@ -241,7 +264,7 @@
       </div>
     </section>
 
-    <!-- ===== 2단계: 배송지정보 ===== -->
+    <!-- ===== 2단계: 한국 배송지 ===== -->
     <section class="oq-panel" id="panel2">
       <div class="oq-body oq-row">
         <div id="myAddrPick" style="display:none;grid-column:1/-1;"><label class="oq-label">내 주소지 사용</label><select class="oq-input" id="fSavedAddr"><option value="">저장된 배송지에서 불러오기</option></select></div>
@@ -250,7 +273,7 @@
         <div>
           <label class="oq-label">개인통관고유부호</label>
           <input class="oq-input" id="fCustoms" placeholder="P + 12자리" />
-          <span class="oq-help"><i data-lucide="lock"></i> 통관에만 쓰여요. 번호가 없으면 <a href="https://unipass.customs.go.kr/csp/persIndex.do" target="_blank" rel="noopener">유니패스에서 무료 발급 →</a></span>
+          <span class="oq-help"><i data-lucide="help-circle"></i> 번호가 없거나 모르시나요? <a href="https://unipass.customs.go.kr/csp/persIndex.do" target="_blank" rel="noopener">관세청 유니패스에서 무료 발급 →</a></span>
         </div>
         <div>
           <label class="oq-label">우편번호</label>
@@ -260,30 +283,36 @@
           </div>
         </div>
         <div><label class="oq-label">주소 (도로명 + 상세)</label><input class="oq-input" id="fAddr" placeholder="주소 검색 후 상세주소를 이어서 입력" /></div>
+        <div><label class="oq-label">요청사항 (선택)</label><textarea class="oq-input" id="fMemo" placeholder="합배송 요청, 재포장 요청 등 자유롭게 적어주세요"></textarea></div>
         <div id="fSaveAddrWrap" style="display:none;grid-column:1/-1;"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);cursor:pointer;"><input type="checkbox" id="fSaveAddr" style="width:auto;" /> 이 배송지를 내 주소지로 저장 (최대 3개)</label></div>
       </div>
       <p class="oq-err" id="err2"></p>
       <div class="oq-foot">
         <button class="oq-btn oq-btn-ghost" data-back="1"><i data-lucide="arrow-left"></i> 이전</button>
-        <button class="oq-btn oq-btn-primary" id="submitBtn"><i data-lucide="check"></i> 주문하기</button>
+        <button class="oq-btn oq-btn-primary" id="submitBtn"><i data-lucide="check"></i> 신청하기</button>
       </div>
     </section>
 
     <!-- ===== 완료 ===== -->
     <section class="oq-done" id="panelDone">
       <span class="check"><i data-lucide="check"></i></span>
-      <h2>주문 <span class="hi">접수 완료</span>! 🎉</h2>
-      <p>소중한 주문 감사해요 💛<br />아래 <b>주문번호</b>를 카톡·DM으로 보내주시면 더 빠르게 도와드릴게요.</p>
+      <h2>배송대행 <span class="hi">접수 완료</span>! 🎉</h2>
+      <p>아래 <b>주문번호</b>를 받는사람에 적어 일본 배대지로 보내주세요.<br />카톡·DM으로 주문번호를 주시면 더 빠르게 도와드릴게요 💛</p>
       <div class="oq-ordno">
         <div class="lab">주문번호</div>
         <div class="num" id="doneNo">OSS-000000-XXXX</div>
       </div>
       <button class="oq-copybtn" id="copyNoBtn"><i data-lucide="copy"></i> 주문번호 복사하기</button>
+      <!-- 배대지 주소 재안내 -->
+      <div class="oq-center">
+        <h3><i data-lucide="map-pin"></i> 이 주소로 상품을 보내주세요</h3>
+        <div class="addr" id="centerAddrDone"><span class="who">받는사람: OSS / <span id="doneNo2">주문번호</span></span></div>
+        <button type="button" class="oq-copybtn" id="copyCenterBtn2"><i data-lucide="copy"></i> 배대지 주소 복사</button>
+      </div>
       <div class="oq-paybox">
-        <div class="pay-row"><span>예상 결제금액</span><b id="donePay">₩0</b></div>
-        <p class="pay-note">상품가 + 구매대행 수수료(3%) · <b>국제배송비·관부가세 별도</b><br />정확한 최종 금액은 입고·무게 측정 후 카톡/문자로 안내드려요.</p>
+        <p class="pay-note"><b>다음 순서로 진행돼요</b><br />① 위 주소로 상품 발송 → ② 센터 입고·검수·무게 측정 → ③ <b>국제배송비 안내</b>(카톡/문자) → ④ 배송비 결제 후 한국으로 출고</p>
         <div class="pay-acct">
-          <div class="pay-acct-lab">입금 계좌 · 입금자명은 주문하신 분 성함으로</div>
+          <div class="pay-acct-lab">배송비 입금 계좌 · 입금자명은 주문하신 분 성함으로</div>
           <div class="pay-acct-num"><b>농협 302-2154-8330-21</b><span>예금주 송상익</span></div>
           <button type="button" class="oq-copybtn" id="copyAcctBtn"><i data-lucide="copy"></i> 계좌번호 복사하기</button>
         </div>
@@ -291,7 +320,7 @@
       <div class="oq-foot-links">
         <a href="index.html">홈으로</a><span>·</span>
         <a href="order-lookup.html">주문조회</a><span>·</span>
-        <a href="order-quick.html">새 주문</a>
+        <a href="delivery-quick.html">새 신청</a>
       </div>
     </section>
   </div>
@@ -312,26 +341,30 @@
         <button type="button" class="oq-translate"><i data-lucide="languages"></i> 번역</button>
       </div>
       <div class="oq-trans" hidden><span class="tag">한국어</span><span class="txt"></span></div>
-      <label class="oq-label" style="margin-top:10px;">상품 링크</label>
-      <input class="oq-input oq-url" placeholder="상품 링크 붙여넣기" inputmode="url" />
-      <span class="oq-help"><i data-lucide="info"></i> 상품 페이지 주소를 복사해 붙여넣어 주세요. 모르면 비워두고 상품명만 적어도 돼요.</span>
-      <label class="oq-label" style="margin-top:10px;">단가 (1개)</label>
-      <div class="oq-pricebox"><span class="yen">¥</span><input class="oq-input oq-price" inputmode="numeric" placeholder="12,800" /></div>
-      <span class="oq-help"><i data-lucide="info"></i> 일본 판매가(엔). 모르면 비워두세요 — 저희가 확인해 안내드려요.</span>
-      <label class="oq-label" style="margin-top:10px;">옵션 · 수량</label>
-      <div class="oq-options"></div>
-      <button type="button" class="oq-addopt"><i data-lucide="plus"></i> 옵션 추가</button>
-      <label class="oq-label">상품 사진</label>
+      <label class="oq-label" style="margin-top:10px;">송장번호 (트래킹넘버)</label>
+      <input class="oq-input oq-track" placeholder="쇼핑몰에서 받은 송장번호" inputmode="latin" />
+      <span class="oq-help"><i data-lucide="info"></i> 모르면 비워두셔도 돼요 — 입고되면 저희가 확인해요</span>
+      <div class="oq-grid2" style="margin-top:10px;">
+        <div>
+          <label class="oq-label">신고가 (1개)</label>
+          <div class="oq-pricebox"><span class="yen">¥</span><input class="oq-input oq-price" inputmode="numeric" placeholder="12,800" /></div>
+        </div>
+        <div>
+          <label class="oq-label">수량</label>
+          <input class="oq-input oq-qty" inputmode="numeric" value="1" />
+        </div>
+      </div>
+      <label class="oq-label" style="margin-top:10px;">품목 분류</label>
+      <select class="oq-input oq-cat">
+        <option value="">선택하세요</option>
+        <option>의류</option><option>신발</option><option>가방/잡화</option>
+        <option>전자제품</option><option>피규어/취미</option><option>화장품</option>
+        <option>식품</option><option>유아용품</option><option>기타</option>
+      </select>
+      <label class="oq-label" style="margin-top:10px;">상품 사진</label>
       <input type="file" accept="image/*" class="oq-photo-file" hidden />
       <button type="button" class="oq-photo-btn"><i data-lucide="upload"></i> 사진 추가</button>
       <div class="oq-photo-thumb"></div>
-    </div>
-  </template>
-  <template id="optionTpl">
-    <div class="oq-optrow">
-      <input class="oq-input oq-opt" placeholder="색상 / 사이즈" />
-      <input class="oq-input oq-qty" inputmode="numeric" value="1" />
-      <button type="button" class="oq-optx" hidden><i data-lucide="x"></i></button>
     </div>
   </template>
 
@@ -344,22 +377,19 @@
     var $ = function (s, r) { return (r || document).querySelector(s); };
     var icons = function () { try { lucide.createIcons(); } catch (e) {} };
 
-    // ----- 채널 태그 (?c=insta 등) -----
     var CH = { insta: "인스타그램", instagram: "인스타그램", kakao: "카카오톡", talk: "카카오톡", threads: "스레드", thread: "스레드", meru: "메루카리", mercari: "메루카리", web: "홈페이지", twitter: "트위터", x: "트위터" };
     var cParam = (new URLSearchParams(location.search).get("c") || "web").toLowerCase();
     var CHANNEL = CH[cParam] || "홈페이지";
     var SOURCE = (cParam === "web" || cParam === "") ? "web" : "sns";
 
-    // ----- 필독안내 기본문구 (관리자에서 수정 가능: settings.order_notice_purchase) -----
+    // ----- 배송대행 필독안내 기본문구 (관리자: settings.order_notice_delivery) -----
     var NOTICE = [
-      { icon: "shopping-bag", title: "신청 정보 · 공식 판매처", body: "상품 URL·옵션·수량을 정확히 적어주세요. 공식 판매처 여부는 직접 확인 부탁드려요 — 비공식 사이트로 인한 가품·미발송은 책임지기 어려워요. (재고 사정으로 품절될 수 있어요.)" },
-      { icon: "credit-card", title: "수수료 · 결제 · 취소", body: "구매대행 수수료는 상품가의 3%예요. 현지 구매가 시작되면 취소·수정이 어렵고(미주문 건만 예외), 신청 후 24시간 내 미결제 시 자동 취소돼요." },
-      { icon: "wallet", title: "배송비 · 예치금 · 출고", body: "배송비는 입고·검수·무게 측정 후 확정되며, 배송비 결제가 완료되어야 출고됩니다. 예치금을 충전해두시면 배송비가 예치금에서 자동 차감되어 바로 출고돼요. 예치금이 없으면 배송비를 결제하시기 전까지 출고되지 않습니다." },
-      { icon: "eye", title: "검수 · 상품 상태", body: "기본 검수는 사이즈·색상·수량·심한 파손이에요. 봉제·오염 정밀검수는 메모로 요청해 주세요(전자제품 작동·대형상품은 어려워요). 공식매장 바잉 특성상 미세 스크래치·패키지 구겨짐이 있을 수 있어요." },
-      { icon: "calendar-clock", title: "예약 · 수주 생산 상품", body: "예약·수주생산 상품은 도착까지 시간이 걸려요. 발매일을 꼭 확인해 주시고, 판매처 사정으로 인한 발매일 지연·변경은 책임지기 어려워요." },
-      { icon: "truck", title: "배송 기간", body: "출고일 기준 3~5일, CJ대한통운으로 보내 주말에도 받아보실 수 있어요. (현지·통관 사정에 따라 지연될 수 있어요.)" },
-      { icon: "rotate-ccw", title: "반품 · 환불", body: "입고 시 하자·파손이 확인되면 환불 또는 교환해 드려요. 단순 변심 반품은 반품 수수료(1,000엔)+택배비가 들고, 구매대행 수수료는 환불되지 않아요." },
-      { icon: "shield-check", title: "통관 · 관부가세", body: "통관 가능 여부는 관세청(125)에 확인 부탁드려요. 통관부호 오류·수취인명 불일치, 통관 불가로 인한 반송·폐기·벌금은 책임지기 어려워요. 미화 $150 초과 시 관·부가세가 부과될 수 있어요." }
+      { icon: "map-pin", title: "배대지로 직접 발송", body: "일본 쇼핑몰에서 OSS 배대지 주소로 직접 주문해 주세요. 받는사람에 'OSS / 주문번호'를 꼭 적어주셔야 입고가 빨라요." },
+      { icon: "truck", title: "송장번호(트래킹넘버)", body: "주문하신 일본 송장번호를 적어주시면 입고 매칭이 빨라요. 여러 건을 합배송하려면 송장번호를 각각 적어주세요." },
+      { icon: "eye", title: "검수 · 상품 상태", body: "기본 검수는 외관 파손·수량·박스 손상이에요. 작동 테스트·내부 정밀검수는 메모로 요청해 주세요(전자제품·대형상품은 어려워요)." },
+      { icon: "wallet", title: "배송비 · 예치금 · 출고", body: "배송비는 입고·검수·무게 측정 후 확정되며, 배송비 결제가 완료되어야 출고됩니다. 예치금을 충전해두시면 자동 차감되어 바로 출고돼요. 예치금이 없으면 결제 전까지 출고되지 않습니다." },
+      { icon: "calendar-clock", title: "무료 보관 · 합배송", body: "입고 후 30일까지 무료 보관해 드려요(이후 보관료 발생 가능). 여러 상품을 모아 한 박스로 보내면 배송비를 아낄 수 있어요." },
+      { icon: "shield-check", title: "통관 · 관부가세", body: "개인통관고유부호(P+12자리)가 꼭 필요해요. 신고가는 실제 구매가와 같아야 하고, 미화 $150 초과 시 관·부가세가 부과될 수 있어요. 통관 불가 품목 반송·폐기·벌금은 책임지기 어려워요." }
     ];
     function renderNotice(list) {
       $("#noticeList").innerHTML = list.map(function (n) {
@@ -370,22 +400,32 @@
     }
     function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
     renderNotice(NOTICE);
-    // 관리자 문구가 있으면 덮어쓰기
     if (window.OSS && OSS.getSetting) {
-      OSS.getSetting("order_notice_purchase").then(function (v) {
+      OSS.getSetting("order_notice_delivery").then(function (v) {
         if (Array.isArray(v) && v.length) renderNotice(v);
       }).catch(function () {});
     }
 
-    // ----- 동의 체크 -----
+    // ----- 배대지 주소 (settings.center_address) -----
+    var CENTER_ADDR = "";
+    function applyCenter(addr) {
+      CENTER_ADDR = addr || "";
+      var html = '<span class="who">받는사람: OSS / 주문번호(주문 후 발급)</span>\n' + (addr || "〒— 일본 배대지 주소는 주문 완료 후 안내드려요.");
+      var c1 = $("#centerAddr"); if (c1) c1.innerHTML = esc(html).replace(/\n/g, "<br>").replace('받는사람: OSS / 주문번호(주문 후 발급)', '<span class="who">받는사람: OSS / 주문번호(주문 후 발급)</span>');
+    }
+    if (window.OSS && OSS.getSetting) {
+      OSS.getSetting("center_address").then(function (v) {
+        var addr = (typeof v === "string") ? v : (v && (v.address || v.air || v.text)) || "";
+        if (addr) applyCenter(addr);
+      }).catch(function () {});
+    }
+
+    // ----- 동의 -----
     var agreed = false;
     $("#agreeRow").addEventListener("click", function () {
-      agreed = !agreed;
-      this.classList.toggle("on", agreed);
-      $("#startBtn").disabled = !agreed;
+      agreed = !agreed; this.classList.toggle("on", agreed); $("#startBtn").disabled = !agreed;
     });
 
-    // ----- 단계 이동 -----
     function showStep(n) {
       $("#panel0").classList.toggle("active", n === 0);
       $("#panel1").classList.toggle("active", n === 1);
@@ -396,7 +436,7 @@
         steps.hidden = false;
         $("#bar1").className = n >= 1 ? "on" : "";
         $("#bar2").className = n >= 2 ? "on" : "";
-        $("#stepTitle").textContent = n === 1 ? "상품정보" : "배송지정보";
+        $("#stepTitle").textContent = n === 1 ? "보내는 상품" : "한국 배송지";
         $("#stepFrac").textContent = n + " / 2";
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -406,198 +446,116 @@
       b.addEventListener("click", function () { showStep(Number(b.getAttribute("data-back"))); });
     });
 
-    // ----- 상품/옵션 동적 -----
     var productTpl = $("#productTpl").content;
-    var optionTpl = $("#optionTpl").content;
     var productsBox = $("#oqProducts");
 
     function formatPrice(el){var d=el.value.replace(/[^0-9]/g,"");el.value=d?Number(d).toLocaleString():"";}
     function formatPhone(el){var d=el.value.replace(/[^0-9]/g,"").slice(0,11);var o=d;if(d.length>=8)o=d.slice(0,3)+"-"+d.slice(3,7)+"-"+d.slice(7);else if(d.length>=4)o=d.slice(0,3)+"-"+d.slice(3);el.value=o;}
-    var YEN_KRW=10; // 1엔=10원 (고정 환율)
-    function recompute(){var goods=0;productsBox.querySelectorAll(".oq-product").forEach(function(p){var price=numOnly(p.querySelector(".oq-price").value);var q=0;p.querySelectorAll(".oq-options .oq-optrow").forEach(function(r){q+=numOnly(r.querySelector(".oq-qty").value);});if(!q)q=1;goods+=price*q;});var fee=Math.round(goods*0.03);var fmt=function(n){return "¥"+Number(n||0).toLocaleString();};var g=document.getElementById("totGoods");if(g)g.textContent=fmt(goods);var f=document.getElementById("totFee");if(f)f.textContent=fmt(fee);var fin=goods+fee;var t=document.getElementById("totFinal");if(t)t.textContent=fmt(fin);var k=document.getElementById("totFinalKrw");if(k)k.textContent="₩"+Number(fin*YEN_KRW).toLocaleString();}
+    var YEN_KRW=10;
+    function numOnly(s){return Number(String(s||"").replace(/[^0-9.]/g,""))||0;}
+    function recompute(){var goods=0;productsBox.querySelectorAll(".oq-product").forEach(function(p){var price=numOnly(p.querySelector(".oq-price").value);var q=numOnly(p.querySelector(".oq-qty").value)||1;goods+=price*q;});var t=$("#totFinal");if(t)t.textContent="¥"+Number(goods).toLocaleString();var k=$("#totFinalKrw");if(k)k.textContent="₩"+Number(goods*YEN_KRW).toLocaleString();}
     productsBox.addEventListener("input", function(e){var t=e.target;if(t.classList&&t.classList.contains("oq-price"))formatPrice(t);if(t.classList&&t.classList.contains("oq-qty"))t.value=t.value.replace(/[^0-9]/g,"");recompute();});
 
-    function addOption(prod, focus) {
-      var row = optionTpl.cloneNode(true);
-      prod.querySelector(".oq-options").appendChild(row);
-      var added = prod.querySelectorAll(".oq-options .oq-optrow");
-      var last = added[added.length - 1];
-      last.querySelector(".oq-optx").addEventListener("click", function () { last.remove(); refreshOptX(prod); recompute(); });
-      refreshOptX(prod);
-      icons();
-      recompute();
-      if (focus) last.querySelector(".oq-opt").focus();
-    }
-    function refreshOptX(prod) {
-      var rows = prod.querySelectorAll(".oq-options .oq-optrow");
-      rows.forEach(function (r, i) { r.querySelector(".oq-optx").hidden = (i === 0); });
-    }
-
     function wireProduct(prod) {
-      // 번역
       prod.querySelector(".oq-translate").addEventListener("click", function () { translateName(prod, this); });
-      // 옵션 추가
-      prod.querySelector(".oq-addopt").addEventListener("click", function () { addOption(prod, true); });
-      // 사진
       var file = prod.querySelector(".oq-photo-file");
       prod.querySelector(".oq-photo-btn").addEventListener("click", function () { file.click(); });
       file.addEventListener("change", function () { uploadPhoto(prod, file); });
-      // 복사
       prod.querySelector(".oq-copy").addEventListener("click", function () { copyProduct(prod); });
-      // 삭제
       prod.querySelector(".oq-remove").addEventListener("click", function () { prod.remove(); renumber(); recompute(); });
     }
-
     function addProduct() {
-      var frag = productTpl.cloneNode(true);
-      productsBox.appendChild(frag);
+      productsBox.appendChild(productTpl.cloneNode(true));
       var prod = productsBox.lastElementChild;
-      wireProduct(prod);
-      addOption(prod, false); // 기본 옵션 1줄
-      renumber();
-      icons();
-      recompute();
+      wireProduct(prod); renumber(); icons(); recompute();
       return prod;
     }
-
     function renumber() {
-      var prods = productsBox.querySelectorAll(".oq-product");
-      prods.forEach(function (p, i) {
+      productsBox.querySelectorAll(".oq-product").forEach(function (p, i) {
         p.querySelector(".oq-plabel").textContent = i === 0 ? "상품" : "상품 " + (i + 1);
-        p.querySelector(".oq-remove").hidden = (i === 0); // 첫 상품은 삭제 없음
+        p.querySelector(".oq-remove").hidden = (i === 0);
       });
     }
-
     function copyProduct(src) {
       var prod = addProduct();
       prod.querySelector(".oq-name").value = src.querySelector(".oq-name").value;
-      prod.querySelector(".oq-url").value = src.querySelector(".oq-url").value;
+      prod.querySelector(".oq-track").value = src.querySelector(".oq-track").value;
       prod.querySelector(".oq-price").value = src.querySelector(".oq-price").value;
+      prod.querySelector(".oq-qty").value = src.querySelector(".oq-qty").value;
+      prod.querySelector(".oq-cat").value = src.querySelector(".oq-cat").value;
       var st = src.querySelector(".oq-trans");
-      if (!st.hidden) {
-        var dt = prod.querySelector(".oq-trans");
-        dt.querySelector(".txt").textContent = st.querySelector(".txt").textContent;
-        dt.hidden = false;
-        prod.dataset.nameKo = src.dataset.nameKo || "";
-      }
+      if (!st.hidden) { var dt = prod.querySelector(".oq-trans"); dt.querySelector(".txt").textContent = st.querySelector(".txt").textContent; dt.hidden = false; prod.dataset.nameKo = src.dataset.nameKo || ""; }
       if (src.dataset.image) { prod.dataset.image = src.dataset.image; showThumb(prod, src.dataset.image); }
-      // 옵션 복사
-      prod.querySelectorAll(".oq-options .oq-optrow").forEach(function (r) { r.remove(); });
-      src.querySelectorAll(".oq-options .oq-optrow").forEach(function (r, i) {
-        addOption(prod, false);
-        var rows = prod.querySelectorAll(".oq-options .oq-optrow");
-        var nr = rows[rows.length - 1];
-        nr.querySelector(".oq-opt").value = r.querySelector(".oq-opt").value;
-        nr.querySelector(".oq-qty").value = r.querySelector(".oq-qty").value;
-      });
       recompute();
       window.scrollTo({ top: prod.offsetTop - 60, behavior: "smooth" });
     }
-
-    // ----- 일본어 → 한국어 번역 (무료 MyMemory, 키 없음) -----
     function translateName(prod, btn) {
       var name = prod.querySelector(".oq-name").value.trim();
-      var box = prod.querySelector(".oq-trans");
-      var txt = box.querySelector(".txt");
-      if (!name) { return; }
+      var box = prod.querySelector(".oq-trans"); var txt = box.querySelector(".txt");
+      if (!name) return;
       var old = btn.innerHTML; btn.disabled = true; btn.textContent = "번역중";
       fetch("https://api.mymemory.translated.net/get?q=" + encodeURIComponent(name) + "&langpair=ja|ko")
         .then(function (r) { return r.json(); })
-        .then(function (d) {
-          var ko = d && d.responseData && d.responseData.translatedText;
-          if (ko) { txt.textContent = ko; box.hidden = false; prod.dataset.nameKo = ko; box.querySelector(".tag").textContent = "한국어"; box.style.borderColor = "var(--o-line2)"; }
-          else throw 0;
-        })
+        .then(function (d) { var ko = d && d.responseData && d.responseData.translatedText; if (ko) { txt.textContent = ko; box.hidden = false; prod.dataset.nameKo = ko; } else throw 0; })
         .catch(function () { txt.textContent = "번역을 못 했어요 — 한국어로 직접 적어주셔도 돼요."; box.hidden = false; })
         .then(function () { btn.disabled = false; btn.innerHTML = old; icons(); });
     }
-
-    // ----- 사진 업로드 -----
     function uploadPhoto(prod, file) {
-      var f = file.files && file.files[0];
-      var thumb = prod.querySelector(".oq-photo-thumb");
+      var f = file.files && file.files[0]; var thumb = prod.querySelector(".oq-photo-thumb");
       if (!f) return;
       if (f.size > 8 * 1024 * 1024) { thumb.textContent = "사진은 8MB 이하만 가능해요."; file.value = ""; return; }
       if (!(window.OSS && OSS.uploadProductImage)) { thumb.textContent = "(사진 업로드 준비 중)"; return; }
       thumb.textContent = "업로드 중...";
-      OSS.uploadProductImage(f).then(function (url) {
-        prod.dataset.image = url; showThumb(prod, url);
-      }).catch(function (e) { thumb.textContent = "업로드 실패: " + (e.message || e); });
+      OSS.uploadProductImage(f).then(function (url) { prod.dataset.image = url; showThumb(prod, url); }).catch(function (e) { thumb.textContent = "업로드 실패: " + (e.message || e); });
     }
     function showThumb(prod, url) {
       var thumb = prod.querySelector(".oq-photo-thumb");
       thumb.innerHTML = '<img src="' + url + '" alt="상품사진" /><button type="button" class="rm">✕ 사진 삭제</button>';
       thumb.querySelector(".rm").addEventListener("click", function () { delete prod.dataset.image; thumb.innerHTML = ""; prod.querySelector(".oq-photo-file").value = ""; });
     }
-
     $("#addProductBtn").addEventListener("click", function () { var p = addProduct(); window.scrollTo({ top: p.offsetTop - 60, behavior: "smooth" }); });
-    addProduct(); // 시작 시 상품 1개
+    addProduct();
 
-    // ----- 주소 검색 (다음 우편번호, 무료) -----
+    // 주소검색
     $("#addrBtn").addEventListener("click", function () {
       if (!window.daum || !daum.Postcode) { alert("주소검색을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."); return; }
-      new daum.Postcode({ oncomplete: function (data) {
-        $("#fZip").value = data.zonecode;
-        $("#fAddr").value = (data.roadAddress || data.address) + " ";
-        $("#fAddr").focus();
-      } }).open();
+      new daum.Postcode({ oncomplete: function (data) { $("#fZip").value = data.zonecode; $("#fAddr").value = (data.roadAddress || data.address) + " "; $("#fAddr").focus(); } }).open();
     });
-
-    // 입력 제한: 수취인명 한글만 / 휴대폰 숫자→자동 하이픈
     $("#fName").addEventListener("input", function () { this.value = this.value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣ\s]/g, ""); });
     $("#fPhone").addEventListener("input", function () { formatPhone(this); });
 
-    // ----- 1단계 검증 → 2단계 -----
+    // 1단계 → 2단계 (상품명 또는 송장 하나 이상)
     $("#toStep2").addEventListener("click", function () {
-      var prods = productsBox.querySelectorAll(".oq-product");
       var ok = false;
-      prods.forEach(function (p) { if (p.querySelector(".oq-name").value.trim() || p.querySelector(".oq-url").value.trim()) ok = true; });
-      if (!ok) { $("#err1").textContent = "상품명 또는 상품 링크를 하나 이상 입력해 주세요."; return; }
-      $("#err1").textContent = "";
-      showStep(2);
+      productsBox.querySelectorAll(".oq-product").forEach(function (p) { if (p.querySelector(".oq-name").value.trim() || p.querySelector(".oq-track").value.trim()) ok = true; });
+      if (!ok) { $("#err1").textContent = "상품명 또는 송장번호를 하나 이상 입력해 주세요."; return; }
+      $("#err1").textContent = ""; showStep(2);
     });
 
-    // ----- 제출 -----
     function genOrderNo() {
-      var d = new Date();
-      var p = function (n) { return ("0" + n).slice(-2); };
+      var d = new Date(); var p = function (n) { return ("0" + n).slice(-2); };
       var r = Math.random().toString(36).slice(2, 6).toUpperCase();
       return "OSS-" + String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate()) + "-" + r;
     }
-    function numOnly(s) { return Number(String(s || "").replace(/[^0-9.]/g, "")) || 0; }
-
     function buildProducts() {
       var out = [], subtotal = 0;
       productsBox.querySelectorAll(".oq-product").forEach(function (p) {
         var nameJp = p.querySelector(".oq-name").value.trim();
         var nameKo = p.dataset.nameKo || "";
-        var url = p.querySelector(".oq-url").value.trim();
+        var track = p.querySelector(".oq-track").value.trim();
         var price = numOnly(p.querySelector(".oq-price").value);
-        var opts = [], qtyTotal = 0;
-        p.querySelectorAll(".oq-options .oq-optrow").forEach(function (r) {
-          var o = r.querySelector(".oq-opt").value.trim();
-          var q = numOnly(r.querySelector(".oq-qty").value) || 1;
-          qtyTotal += q;
-          if (o || q) opts.push({ option: o, qty: q });
-        });
-        if (!qtyTotal) qtyTotal = 1;
-        subtotal += price * qtyTotal;
-        out.push({
-          name: nameKo || nameJp, name_jp: nameJp, name_ko: nameKo,
-          url: url, price: price, qty: qtyTotal, options: opts,
-          memo: opts.map(function (o) { return o.option + (o.qty > 1 ? " x" + o.qty : ""); }).filter(Boolean).join(", "),
-          image: p.dataset.image || ""
-        });
+        var qty = numOnly(p.querySelector(".oq-qty").value) || 1;
+        var cat = p.querySelector(".oq-cat").value;
+        subtotal += price * qty;
+        out.push({ name: nameKo || nameJp, name_jp: nameJp, name_ko: nameKo, tracking_no: track, price: price, qty: qty, category: cat, image: p.dataset.image || "" });
       });
       return { products: out, subtotal: subtotal };
     }
 
     $("#submitBtn").addEventListener("click", function () {
-      var name = $("#fName").value.trim();
-      var phone = $("#fPhone").value.trim();
-      var customs = $("#fCustoms").value.trim();
-      var zip = $("#fZip").value.trim();
-      var addr = $("#fAddr").value.trim();
+      var name = $("#fName").value.trim(), phone = $("#fPhone").value.trim(), customs = $("#fCustoms").value.trim();
+      var zip = $("#fZip").value.trim(), addr = $("#fAddr").value.trim(), memo = $("#fMemo").value.trim();
+      var ship = (document.querySelector('input[name="ship"]:checked') || {}).value || "항공";
       var err = $("#err2");
       if (!name) { err.textContent = "수취인명을 입력해 주세요."; return; }
       if (!phone) { err.textContent = "휴대폰번호를 입력해 주세요."; return; }
@@ -605,53 +563,42 @@
       if (!addr) { err.textContent = "주소를 입력해 주세요."; return; }
       err.textContent = "";
       if (!(window.OSS && OSS.submitApplication)) { err.textContent = "연결 오류 — 잠시 후 다시 시도해 주세요."; return; }
-
       var btn = this; btn.disabled = true; btn.textContent = "접수 중...";
-      var bp = buildProducts();
-      var orderNo = genOrderNo();
+      var bp = buildProducts(); var orderNo = genOrderNo();
       var payload = {
-        order_no: orderNo, type: "purchase", status: "신규접수",
-        source: SOURCE, channel: CHANNEL,
+        order_no: orderNo, type: "delivery", status: "신규접수",
+        source: SOURCE, channel: CHANNEL, ship_method: ship,
         applicant_name: name, applicant_phone: phone,
         receiver_name: name, receiver_phone: phone,
-        customs_code: customs, zipcode: zip, address: addr,
+        customs_code: customs, zipcode: zip, address: addr, memo: memo,
         products: bp.products, subtotal: bp.subtotal
       };
       OSS.submitApplication(payload).then(function () {
-        $("#panel2").classList.remove("active");
-        $("#oqSteps").hidden = true;
+        $("#panel2").classList.remove("active"); $("#oqSteps").hidden = true;
         $("#doneNo").textContent = orderNo;
-        var _sa = document.getElementById("fSaveAddr");
+        var dn2 = $("#doneNo2"); if (dn2) dn2.textContent = orderNo;
+        var cd = $("#centerAddrDone"); if (cd) cd.innerHTML = '<span class="who">받는사람: OSS / ' + esc(orderNo) + '</span>' + (CENTER_ADDR ? "<br>" + esc(CENTER_ADDR).replace(/\n/g, "<br>") : "<br>〒— 배대지 주소는 카톡/문자로 안내드려요.");
+        var _sa = $("#fSaveAddr");
         if (_sa && _sa.checked && OSS.saveAddress) { OSS.saveAddress({ receiver_name: name, receiver_phone: phone, zipcode: zip, address: addr, customs_code: customs }).then(function () {}, function () {}); }
-        var _finalYen = bp.subtotal + Math.round(bp.subtotal * 0.03);
-        var _dp = $("#donePay"); if (_dp) _dp.textContent = "₩" + Number(_finalYen * YEN_KRW).toLocaleString();
         $("#panelDone").style.display = "block";
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        icons();
+        window.scrollTo({ top: 0, behavior: "smooth" }); icons();
       }).catch(function (e) {
         err.textContent = "접수 실패: " + (e.message || e) + " (관리자에게 문의해 주세요)";
-        btn.disabled = false; btn.innerHTML = '<i data-lucide="check"></i> 주문하기'; icons();
+        btn.disabled = false; btn.innerHTML = '<i data-lucide="check"></i> 신청하기'; icons();
       });
     });
 
-    // 주문번호 복사
-    $("#copyNoBtn").addEventListener("click", function () {
-      var t = $("#doneNo").textContent;
-      var done = function () { var b = $("#copyNoBtn"); b.innerHTML = '<i data-lucide="check"></i> 복사됐어요!'; icons(); };
+    function copyText(t, btn) {
+      var done = function () { var old = btn.getAttribute("data-label") || btn.innerHTML; btn.innerHTML = '<i data-lucide="check"></i> 복사됐어요!'; icons(); };
       if (navigator.clipboard) navigator.clipboard.writeText(t).then(done).catch(done);
-      else { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
-    });
+      else { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) {} ta.remove(); done(); }
+    }
+    $("#copyNoBtn").addEventListener("click", function () { copyText($("#doneNo").textContent, this); });
+    var cc1 = $("#copyCenterBtn1"); if (cc1) cc1.addEventListener("click", function () { copyText("받는사람: OSS / 주문번호\n" + (CENTER_ADDR || "배대지 주소는 주문 후 안내"), this); });
+    var cc2 = $("#copyCenterBtn2"); if (cc2) cc2.addEventListener("click", function () { copyText("받는사람: OSS / " + $("#doneNo").textContent + "\n" + (CENTER_ADDR || "배대지 주소는 카톡/문자로 안내"), this); });
+    var ca = $("#copyAcctBtn"); if (ca) ca.addEventListener("click", function () { copyText("농협 302-2154-8330-21 송상익", this); });
 
-    // 계좌번호 복사
-    var copyAcctBtn = $("#copyAcctBtn");
-    if (copyAcctBtn) copyAcctBtn.addEventListener("click", function () {
-      var t = "농협 302-2154-8330-21 송상익";
-      var done = function () { copyAcctBtn.innerHTML = '<i data-lucide="check"></i> 복사됐어요!'; icons(); };
-      if (navigator.clipboard) navigator.clipboard.writeText(t).then(done).catch(done);
-      else { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
-    });
-
-    // 내 주소지 사용 (로그인 회원) — 저장된 배송지 불러오기 / 저장 옵션 노출
+    // 내 주소지 (로그인 회원)
     if (window.OSS && OSS.getMyProfile) {
       OSS.getMyProfile().then(function (p) {
         if (!p) return;
