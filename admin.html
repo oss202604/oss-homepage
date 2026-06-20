@@ -229,6 +229,22 @@
         </div>
 
         <div class="dash-panel" style="margin-top:24px;">
+          <h3>회원등급 설정 (등업 조건 · 배송비 할인율)</h3>
+          <p class="form-note" style="text-align:left;margin:0 0 16px;">예상비용 계산기와 배송비 할인에 반영됩니다. 등급명 · 등업 기준(누적 주문 건수 이상) · 배송비 할인율(%)을 정하세요.</p>
+          <div class="table-wrap">
+            <table class="data-table" id="gradeTable">
+              <thead><tr><th>등급명</th><th>등업 조건 (주문 건수 이상)</th><th>배송비 할인율 (%)</th><th>관리</th></tr></thead>
+              <tbody id="gradeRows"></tbody>
+            </table>
+          </div>
+          <div class="set-actions">
+            <button class="btn btn-small" id="addGrade">+ 등급 추가</button>
+            <button class="btn btn-primary" id="saveGrade">등급 저장</button>
+            <span class="save-ok" id="gradeSaved"></span>
+          </div>
+        </div>
+
+        <div class="dash-panel" style="margin-top:24px;">
           <h3>이용안내 페이지 편집</h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">고객 이용가이드 페이지에 표시됩니다. 항목을 선택해 내용을 작성/수정하세요.</p>
           <div class="set-grid">
@@ -347,7 +363,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=10"></script>
-  <script src="admin.js?v=13"></script>
+  <script src="admin.js?v=14"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

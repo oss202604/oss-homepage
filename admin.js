@@ -754,6 +754,44 @@ document.getElementById("rcCalc").addEventListener("click", () => {
   document.getElementById("rcOut").textContent = fee ? "¥" + fee.toLocaleString() : "요율 없음";
 });
 
+// ----- 설정: 회원등급 (등업 조건 · 배송비 할인율) -----
+let MGRADES = [];
+function renderGradeRows() {
+  const tb = document.getElementById("gradeRows");
+  if (!tb) return;
+  tb.innerHTML = MGRADES.map((g, i) => `<tr>
+    <td><input value="${String(g.name || "").replace(/"/g, "&quot;")}" data-i="${i}" data-f="name" /></td>
+    <td><input type="number" value="${g.minOrders || 0}" data-i="${i}" data-f="minOrders" /></td>
+    <td><input type="number" value="${g.discountPct || 0}" data-i="${i}" data-f="discountPct" /></td>
+    <td><button class="btn btn-small remove-product" data-del="${i}">삭제</button></td>
+  </tr>`).join("");
+  tb.querySelectorAll("input").forEach((inp) => inp.addEventListener("input", () => {
+    const f = inp.dataset.f;
+    MGRADES[inp.dataset.i][f] = f === "name" ? inp.value : Number(inp.value);
+  }));
+  tb.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", () => {
+    MGRADES.splice(Number(b.dataset.del), 1); renderGradeRows();
+  }));
+}
+async function loadGrades() {
+  try {
+    const g = await window.OSS.getSetting("member_grades");
+    MGRADES = Array.isArray(g) && g.length ? g : [];
+  } catch (e) { MGRADES = []; }
+  renderGradeRows();
+}
+const addGradeBtn = document.getElementById("addGrade");
+if (addGradeBtn) addGradeBtn.addEventListener("click", () => { MGRADES.push({ name: "", minOrders: 0, discountPct: 0 }); renderGradeRows(); });
+const saveGradeBtn = document.getElementById("saveGrade");
+if (saveGradeBtn) saveGradeBtn.addEventListener("click", async () => {
+  const ok = document.getElementById("gradeSaved");
+  try {
+    await window.OSS.saveSetting("member_grades", MGRADES);
+    if (ok) { ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500); }
+  } catch (e) { alert("저장 실패: " + (e.message || e)); }
+});
+loadGrades();
+
 // ----- 설정: 이용안내 페이지 편집 -----
 const PAGE_TITLES = {
   "guide-how": "이용방법",
