@@ -72,9 +72,9 @@ if (menuToggle && mainMenu) {
   const biz = {
     company: "OSS (オッス)",
     desc: "일본 현지인이 직접 운영하는 구매대행 · 배송대행지",
-    email: "oss202604@gmail.com",
+    email: "",
     kakao: "@OSS (등록 예정)",
-    hours: "평일 10:00 ~ 18:00 (일본시간)",
+    hours: "평일 10:00 ~ 22:00 (일본시간)",
     bizline: "사업자 정보 등록 준비중",
   };
   function paint() {
@@ -87,7 +87,7 @@ if (menuToggle && mainMenu) {
         '</div>' +
         '<div class="footer-col">' +
           '<p class="footer-col-tit">고객센터</p>' +
-          '<p><i data-lucide="mail" class="ico-inline"></i> ' + biz.email + '</p>' +
+          (biz.email ? '<p><i data-lucide="mail" class="ico-inline"></i> ' + biz.email + '</p>' : '') +
           '<p><i data-lucide="message-circle" class="ico-inline"></i> 카카오톡 ' + biz.kakao + '</p>' +
           '<p><i data-lucide="clock" class="ico-inline"></i> ' + biz.hours + '</p>' +
         '</div>' +
@@ -167,7 +167,10 @@ if (menuToggle && mainMenu) {
     ["review", "index.html#reviews", "⭐ 이용후기"],
   ];
   el.innerHTML = '<p class="cs-sidebar-title">고객센터</p>' +
-    items.map(([k, h, l]) => `<a href="${h}" class="${k === active ? "active" : ""}">${l}</a>`).join("");
+    items.map(([k, h, l]) => `<a href="${h}" class="${k === active ? "active" : ""}">${l}</a>`).join("") +
+    '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.6;">' +
+    '<p style="margin:0 0 9px;"><b style="color:var(--text);">상담시간</b><br>평일 10:00 ~ 22:00 <small>(일본시간)</small></p>' +
+    '<p style="margin:0;"><b style="color:var(--text);">카카오톡</b><br>@OSS <small>(등록 예정)</small></p></div>';
 })();
 
 // ===== "전체 서비스" 드롭다운 (모든 페이지 공통) =====
