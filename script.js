@@ -399,6 +399,10 @@ if (form && modal) {
     return `OSS-${yy}${mm}${dd}-${rnd}`;
   }
 
+  // 로그인 회원 등급(주문에 기록 → 관리자 배송비 자동 할인). 비회원은 null.
+  let MY_GRADE = null;
+  if (window.OSS && window.OSS.getMyProfile) window.OSS.getMyProfile().then((p) => { if (p && p.grade) MY_GRADE = p.grade; }).catch(() => {});
+
   // 폼 → DB 저장용 payload 만들기
   function buildPayload(orderNo) {
     const data = new FormData(form);
@@ -445,6 +449,7 @@ if (form && modal) {
       subtotal: subNum,
       due_date: data.get("dueDate") || "",
       memo: data.get("memo") || "",
+      member_grade: MY_GRADE,
     };
   }
 

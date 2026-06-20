@@ -560,6 +560,9 @@
       return { products: out, subtotal: subtotal };
     }
 
+    var MY_GRADE = null;
+    if (window.OSS && OSS.getMyProfile) { OSS.getMyProfile().then(function (p) { if (p && p.grade) MY_GRADE = p.grade; }).catch(function () {}); }
+
     $("#submitBtn").addEventListener("click", function () {
       var name = $("#fName").value.trim(), phone = $("#fPhone").value.trim(), customs = $("#fCustoms").value.trim();
       var zip = $("#fZip").value.trim(), addr = $("#fAddr").value.trim(), memo = $("#fMemo").value.trim();
@@ -579,6 +582,7 @@
         applicant_name: name, applicant_phone: phone,
         receiver_name: name, receiver_phone: phone,
         customs_code: customs, zipcode: zip, address: addr, memo: memo,
+        member_grade: MY_GRADE,
         products: bp.products, subtotal: bp.subtotal
       };
       OSS.submitApplication(payload).then(function () {

@@ -46,6 +46,21 @@ function calcShippingFee(weightKg, center) {
   return 0; // 요율 미설정
 }
 
+// 회원등급 → 배송비 할인 (주문 자동 할인). profile.grade(silver…) → member_grades 매핑
+function gradeInfo(gradeKey) {
+  if (!gradeKey || gradeKey === "guest") return null;
+  const map = { silver: "실버", gold: "골드", diamond: "다이아", red: "레드" };
+  const name = map[gradeKey] || gradeKey;
+  const g = (typeof MGRADES !== "undefined" && Array.isArray(MGRADES) ? MGRADES : []).find((x) => x.name === name);
+  return g ? { name: g.name, pct: Number(g.discountPct) || 0 } : null;
+}
+function gradeLabel(gradeKey) {
+  if (!gradeKey) return "비회원 / 일반";
+  if (gradeKey === "guest") return "일반 회원 (할인 없음)";
+  const gi = gradeInfo(gradeKey);
+  return gi ? (gi.pct ? `${gi.name} · 배송비 ${gi.pct}% 할인` : gi.name) : gradeKey;
+}
+
 let ORDERS = [];
 
 // ----- DB 행 → 카드 형태로 변환 -----
@@ -507,6 +522,7 @@ function openModal(id) {
     <div class="detail-row"><span class="dk">이메일/카톡</span><span class="dv">${r.applicant_email || "-"} / ${r.applicant_kakao || "-"}</span></div>
     <div class="detail-row"><span class="dk">상품</span><span class="dv">${prodHtml || "-"}</span></div>
     <div class="detail-row"><span class="dk">합계</span><span class="dv">¥${(r.subtotal || 0).toLocaleString()}</span></div>
+    <div class="detail-row"><span class="dk">회원등급</span><span class="dv">${gradeLabel(r.member_grade)}</span></div>
     <div class="detail-row"><span class="dk">검수/옵션</span><span class="dv">${r.inspect || "없음"}${(r.addons && r.addons.length) ? " · " + r.addons.join(", ") : ""}</span></div>
     <div class="detail-row"><span class="dk">수취인</span><span class="dv">${r.receiver_name || "-"} (${r.receiver_phone || "-"})</span></div>
     <div class="detail-row"><span class="dk">통관부호</span><span class="dv">${r.customs_code || "-"}</span></div>
@@ -566,10 +582,13 @@ if (modalTrackBtn) modalTrackBtn.addEventListener("click", () => {
 
 // 배송비 계산 버튼 (미리보기)
 document.getElementById("modalCalcFee").addEventListener("click", () => {
+  const o = ORDERS.find((x) => x.id === modalOrderId);
   const w = document.getElementById("modalWeight").value;
   const c = document.getElementById("modalCenter").value;
-  const fee = calcShippingFee(w, c);
-  document.getElementById("modalFee").textContent = fee ? "₩" + fee.toLocaleString() : "-";
+  const base = calcShippingFee(w, c);
+  const gi = gradeInfo(o && o.raw && o.raw.member_grade);
+  const fee = gi && gi.pct ? Math.round(base * (1 - gi.pct / 100)) : base;
+  document.getElementById("modalFee").textContent = fee ? ("₩" + fee.toLocaleString() + (gi && gi.pct ? ` (${gi.name} ${gi.pct}% 할인)` : "")) : "-";
 });
 
 document.getElementById("modalSave").addEventListener("click", async () => {
@@ -579,7 +598,9 @@ document.getElementById("modalSave").addEventListener("click", async () => {
     const newStatus = document.getElementById("modalStatus").value;
     const weight = document.getElementById("modalWeight").value;
     const center = document.getElementById("modalCenter").value;
-    const fee = calcShippingFee(weight, center);
+    const _baseFee = calcShippingFee(weight, center);
+    const _gi = gradeInfo(o.raw.member_grade);
+    const fee = _gi && _gi.pct ? Math.round(_baseFee * (1 - _gi.pct / 100)) : _baseFee;
     const gv = (id) => { const e = document.getElementById(id); return e ? e.value.trim() : ""; };
     // 상태가 바뀌면 날짜 자동기록
     const sd = (o.raw.status_dates && typeof o.raw.status_dates === "object") ? { ...o.raw.status_dates } : {};
