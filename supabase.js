@@ -284,6 +284,20 @@ async function unuseCoupon(id) {
   const { error } = await sb.from("coupons").update({ status: "active", used_at: null, used_order_no: null }).eq("id", id);
   if (error) throw error;
 }
+// 관리자: 쿠폰 발급 (혜택관리). amount/reason/days 비우면 DB 기본값(₩3000·signup·1달)
+async function issueCoupon(userId, amount, reason, days) {
+  const row = { user_id: userId };
+  if (amount !== undefined && amount !== null && amount !== "") row.amount = Number(amount);
+  if (reason) row.reason = reason;
+  if (days !== undefined && days !== null && days !== "") row.expires_at = new Date(Date.now() + Number(days) * 86400000).toISOString();
+  const { error } = await sb.from("coupons").insert([row]);
+  if (error) throw error;
+}
+// 관리자: 쿠폰 삭제 (잘못 발급 시)
+async function deleteCoupon(id) {
+  const { error } = await sb.from("coupons").delete().eq("id", id);
+  if (error) throw error;
+}
 
 // ---- 구매후기 (회원만 작성, 사장님 승인 후 게시) ----
 async function submitReview(fields) {
@@ -426,6 +440,8 @@ window.OSS = {
   listMemberCoupons,
   useCoupon,
   unuseCoupon,
+  issueCoupon,
+  deleteCoupon,
   // 구매후기
   submitReview,
   fetchApprovedReviews,

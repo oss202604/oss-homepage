@@ -252,7 +252,9 @@ function initCoupons() {
           const state = used ? '<span style="color:#999;">사용완료</span>' : (expired ? '<span style="color:#C0392B;">만료</span>' : '<span style="color:#1F9D6B;font-weight:700;">사용가능</span>');
           const act = used
             ? '<button class="btn btn-small" data-cp-undo="' + c.id + '">되돌리기</button>'
-            : (expired ? "-" : '<button class="btn btn-small btn-primary" data-cp-use="' + c.id + '">사용처리</button>');
+            : (expired
+              ? '<button class="btn btn-small" data-cp-del="' + c.id + '">삭제</button>'
+              : '<button class="btn btn-small btn-primary" data-cp-use="' + c.id + '">사용처리</button> <button class="btn btn-small" data-cp-del="' + c.id + '">삭제</button>');
           return '<tr><td>' + esc(m.name || m.username) + '</td><td>₩' + Number(c.amount || 0).toLocaleString() + '</td><td>' + state + '</td><td>' + (c.expires_at || "").slice(0, 10) + '</td><td>' + esc(c.used_order_no || "-") + '</td><td>' + act + '</td></tr>';
         }).join("");
       }
@@ -263,11 +265,32 @@ function initCoupons() {
   inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); search(); } });
   tb.addEventListener("click", async function (e) {
     const t = e.target; if (!t || !t.getAttribute) return;
-    const use = t.getAttribute("data-cp-use"), undo = t.getAttribute("data-cp-undo");
+    const use = t.getAttribute("data-cp-use"), undo = t.getAttribute("data-cp-undo"), del = t.getAttribute("data-cp-del");
     try {
       if (use) { const ord = prompt("이 쿠폰을 사용한 주문번호 (선택):", ""); await window.OSS.useCoupon(use, ord || null); search(); }
       else if (undo) { await window.OSS.unuseCoupon(undo); search(); }
+      else if (del) { if (confirm("이 쿠폰을 삭제할까요?")) { await window.OSS.deleteCoupon(del); search(); } }
     } catch (err) { alert("처리 실패: " + (err.message || err)); }
+  });
+
+  const issueBtn = document.getElementById("cpIssueBtn");
+  if (issueBtn) issueBtn.addEventListener("click", async function () {
+    const msg = document.getElementById("cpIssueMsg");
+    const uname = (document.getElementById("cpIssueUser").value || "").trim();
+    const amt = document.getElementById("cpIssueAmt").value;
+    const days = document.getElementById("cpIssueDays").value;
+    const reason = (document.getElementById("cpIssueReason").value || "").trim();
+    if (!uname) { if (msg) msg.textContent = "회원 아이디를 입력하세요."; return; }
+    if (msg) msg.textContent = "발급 중…";
+    try {
+      const members = await window.OSS.listMembers();
+      const m = members.find(function (x) { return (x.username || "").toLowerCase() === uname.toLowerCase(); });
+      if (!m) { if (msg) msg.textContent = "그 아이디 회원이 없어요."; return; }
+      await window.OSS.issueCoupon(m.id, amt, reason || "이벤트", days);
+      if (msg) msg.textContent = "✓ " + (m.name || m.username) + "님께 발급 완료";
+      if ((inp.value || "").trim()) search();
+      setTimeout(function () { if (msg) msg.textContent = ""; }, 3000);
+    } catch (e) { if (msg) msg.textContent = "발급 실패: " + (e.message || e); }
   });
 }
 
