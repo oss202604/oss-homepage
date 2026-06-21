@@ -335,7 +335,7 @@ p { word-break: keep-all; }
 .main-menu a.active::after { content: ""; position: absolute; left: 22px; right: 22px; bottom: 0; height: 2.5px; background: var(--blue); border-radius: 3px; }
 
 /* ===== 페이지 배너 ===== */
-.page-hero { background: linear-gradient(120deg, #e85410, #ff8a45); color: #fff; padding: 48px 0; }
+.page-hero { background: linear-gradient(120deg, #e85410, #ff8a45); color: #fff; padding: 48px 0; text-align: center; }
 .page-hero h1 { font-size: 32px; font-weight: 900; margin-bottom: 10px; }
 .page-hero p { font-size: 16px; opacity: .9; }
 
