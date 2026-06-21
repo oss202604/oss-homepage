@@ -551,14 +551,14 @@ p { word-break: keep-all; }
 
 /* ===== 새 공통 헤더 (OSSohayo · 본리식) — script.js renderHeader 주입 ===== */
 .osshead { background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 80; }
-.osshead-in { width: min(1280px, 100% - 48px); margin: 0 auto; display: flex; align-items: center; gap: 30px; padding: 16px 0; }
-.osshead-logo { font-family: Georgia, "Times New Roman", serif; font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -.3px; text-decoration: none; flex: none; }
+.osshead-in { width: min(1280px, 100% - 48px); margin: 0 auto; display: flex; align-items: center; gap: 30px; padding: 9px 0; }
+.osshead-logo { font-family: Georgia, "Times New Roman", serif; font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -.3px; text-decoration: none; flex: none; }
 .osshead-nav { display: flex; align-items: center; gap: 24px; flex: 1; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
 .osshead-nav::-webkit-scrollbar { display: none; }
 .osshead-nav a { text-decoration: none; color: var(--text); font-weight: 700; font-size: 15px; white-space: nowrap; }
 .osshead-nav a.on, .osshead-nav a:hover { color: var(--orange); }
 .osshead-icons { display: flex; align-items: center; gap: 6px; flex: none; }
-.osshead-ic { width: 42px; height: 42px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--text); border: none; background: none; cursor: pointer; padding: 0; }
+.osshead-ic { width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--text); border: none; background: none; cursor: pointer; padding: 0; }
 .osshead-ic:hover { background: var(--hero-bg); color: var(--orange); }
 .osshead-acct { position: relative; }
 .osshead-menu { position: absolute; right: 0; top: 48px; min-width: 152px; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 8px; display: none; z-index: 90; }
