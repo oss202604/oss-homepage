@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=34" />
+  <link rel="stylesheet" href="styles.css?v=35" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <style>
     .coupon-list{display:grid;gap:10px;}
@@ -37,7 +37,7 @@
   </style>
 </head>
 <body>
-  <header class="osshead" id="top"><div class="osshead-in"><a class="osshead-logo" href="index.html">OSSohayo</a><nav class="osshead-nav"><a href="index.html">홈</a><a href="order.html">구매대행 신청</a><a href="delivery.html">배송대행 신청</a><a href="notice.html">공지사항</a><a href="guide.html">이용가이드</a><a href="order-lookup.html">주문조회</a></nav><div class="osshead-icons"><a class="osshead-ic" href="notice.html" aria-label="검색"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></a><div class="osshead-acct"><button class="osshead-ic" type="button" aria-label="계정"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg></button><div class="osshead-menu"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="order-lookup.html">주문조회</a><a href="mypage.html">마이페이지</a></div></div></div></div></header>
+  <header class="osshead" id="top"><div class="osshead-in"><a class="osshead-logo" href="index.html">OSSohayo</a><nav class="osshead-nav"><a href="index.html">홈</a><a href="order.html">구매대행 신청</a><a href="delivery.html">배송대행 신청</a><a href="notice.html">공지사항</a><a href="guide.html">이용가이드</a><a href="order-lookup.html">주문조회</a></nav><div class="osshead-icons"><a class="osshead-ic" href="notice.html#search" aria-label="검색"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></a><div class="osshead-acct"><button class="osshead-ic" type="button" aria-label="계정"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg></button><div class="osshead-menu"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="order-lookup.html">주문조회</a><a href="mypage.html">마이페이지</a></div></div></div></div></header>
 
   <section class="page-hero">
     <div class="container">
@@ -117,6 +117,7 @@
             </div>
             <label>후기 내용<textarea id="rvBody" rows="4" placeholder="상품·배송·응대 등 솔직한 후기를 남겨주세요. 사장님 확인 후 사이트에 게시됩니다 😊"></textarea></label>
             <button type="submit" class="btn btn-primary">후기 등록</button>
+            <p id="rvMsg" style="margin-top:8px;font-size:13px;min-height:16px;"></p>
           </form>
           <h3 style="margin:20px 0 8px;font-size:15px;">내가 쓴 후기</h3>
           <div id="myReviewList"><p class="empty">아직 작성한 후기가 없어요.</p></div>
@@ -318,13 +319,14 @@
         if (rf) rf.addEventListener("submit", async (e) => {
           e.preventDefault();
           const body = document.getElementById("rvBody").value.trim();
-          if (body.length < 5) { alert("후기 내용을 5자 이상 적어주세요."); return; }
+          const rvMsg = document.getElementById("rvMsg");
+          if (body.length < 5) { rvMsg.style.color = "#c0392b"; rvMsg.textContent = "후기 내용을 5자 이상 적어주세요."; return; }
           try {
             await window.OSS.submitReview({ rating: document.getElementById("rvRating").value, body, order_no: document.getElementById("rvOrder").value.trim() });
-            alert("후기가 등록됐어요. 사장님 확인 후 사이트에 게시됩니다 😊");
+            rvMsg.style.color = "#1F9D6B"; rvMsg.textContent = "✓ 후기가 등록됐어요. 사장님 확인 후 게시됩니다 😊";
             rf.reset();
             loadMyReviews();
-          } catch (err) { alert("등록 실패: " + (err.message || err)); }
+          } catch (err) { rvMsg.style.color = "#c0392b"; rvMsg.textContent = "등록 실패: " + (err.message || err); }
         });
 
         // 저장된 배송지

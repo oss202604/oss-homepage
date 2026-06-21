@@ -523,6 +523,12 @@
     }
     $("#addProductBtn").addEventListener("click", function () { var p = addProduct(); window.scrollTo({ top: p.offsetTop - 60, behavior: "smooth" }); });
     addProduct();
+    window.addEventListener("beforeunload", function (e) {
+      if (window.__oqDone) return;
+      var dirty = false;
+      document.querySelectorAll(".oq-name, .oq-track, #fName, #fPhone, #fAddr").forEach(function (el) { if (el && el.value && el.value.trim()) dirty = true; });
+      if (dirty) { e.preventDefault(); e.returnValue = ""; }
+    });
 
     // 주소검색
     $("#addrBtn").addEventListener("click", function () {
@@ -554,6 +560,7 @@
         var price = numOnly(p.querySelector(".oq-price").value);
         var qty = numOnly(p.querySelector(".oq-qty").value) || 1;
         var cat = p.querySelector(".oq-cat").value;
+        if (!nameJp && !nameKo && !track && !price) return; // 빈 상품카드 제외
         subtotal += price * qty;
         out.push({ name: nameKo || nameJp, name_jp: nameJp, name_ko: nameKo, tracking_no: track, price: price, qty: qty, category: cat, image: p.dataset.image || "" });
       });
@@ -592,6 +599,7 @@
         products: bp.products, subtotal: bp.subtotal
       };
       OSS.submitApplication(payload).then(function () {
+        window.__oqDone = true;
         $("#panel2").classList.remove("active"); $("#oqSteps").hidden = true;
         $("#doneNo").textContent = orderNo;
         var dn2 = $("#doneNo2"); if (dn2) dn2.textContent = orderNo;

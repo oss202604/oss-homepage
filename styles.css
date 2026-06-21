@@ -619,3 +619,11 @@ p { word-break: keep-all; }
 /* 모바일 표 가로스크롤 안내 */
 .table-hint { display: none; font-size: 12px; color: var(--muted); margin: 0 0 7px; }
 @media (max-width: 600px) { .table-hint { display: block; } }
+/* 버튼 로딩 스피너 */
+@keyframes oss-spin { to { transform: rotate(360deg); } }
+.btn-spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.55); border-top-color: #fff; border-radius: 50%; animation: oss-spin .7s linear infinite; vertical-align: -2px; margin-right: 7px; }
+/* 비활성 SNS 버튼 */
+.sns-btn:disabled, .sns-btn[disabled] { cursor: not-allowed; opacity: .5; }
+/* 앵커 이동 부드럽게 + 상단 가림 보정 */
+html { scroll-behavior: smooth; }
+.mypage-block { scroll-margin-top: 84px; }

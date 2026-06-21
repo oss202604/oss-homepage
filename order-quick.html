@@ -416,7 +416,7 @@
     function formatPrice(el){var d=el.value.replace(/[^0-9]/g,"");el.value=d?Number(d).toLocaleString():"";}
     function formatPhone(el){var d=el.value.replace(/[^0-9]/g,"").slice(0,11);var o=d;if(d.length>=8)o=d.slice(0,3)+"-"+d.slice(3,7)+"-"+d.slice(7);else if(d.length>=4)o=d.slice(0,3)+"-"+d.slice(3);el.value=o;}
     var YEN_KRW=10; // 1엔=10원 (고정 환율)
-    function recompute(){var goods=0;productsBox.querySelectorAll(".oq-product").forEach(function(p){var price=numOnly(p.querySelector(".oq-price").value);var q=0;p.querySelectorAll(".oq-options .oq-optrow").forEach(function(r){q+=numOnly(r.querySelector(".oq-qty").value);});if(!q)q=1;goods+=price*q;});var fee=Math.round(goods*0.03);var fmt=function(n){return "¥"+Number(n||0).toLocaleString();};var g=document.getElementById("totGoods");if(g)g.textContent=fmt(goods);var f=document.getElementById("totFee");if(f)f.textContent=fmt(fee);var fin=goods+fee;var t=document.getElementById("totFinal");if(t)t.textContent=fmt(fin);var k=document.getElementById("totFinalKrw");if(k)k.textContent="₩"+Number(fin*YEN_KRW).toLocaleString();}
+    function recompute(){var goods=0;productsBox.querySelectorAll(".oq-product").forEach(function(p){var price=numOnly(p.querySelector(".oq-price").value);var q=0;p.querySelectorAll(".oq-options .oq-optrow").forEach(function(r){q+=numOnly(r.querySelector(".oq-qty").value);});if(!q)q=1;goods+=price*q;});var fee=Math.round(goods*0.03);var fmt=function(n){return "¥"+Number(n||0).toLocaleString();};var g=document.getElementById("totGoods");if(g)g.textContent=fmt(goods);var f=document.getElementById("totFee");if(f)f.textContent=fmt(fee);var fin=goods+fee;var t=document.getElementById("totFinal");var k=document.getElementById("totFinalKrw");if(goods<=0){if(t)t.textContent="확인 후 안내";if(k)k.textContent="입금 시 안내";}else{if(t)t.textContent=fmt(fin);if(k)k.textContent="₩"+Number(fin*YEN_KRW).toLocaleString();}}
     productsBox.addEventListener("input", function(e){var t=e.target;if(t.classList&&t.classList.contains("oq-price"))formatPrice(t);if(t.classList&&t.classList.contains("oq-qty"))t.value=t.value.replace(/[^0-9]/g,"");recompute();});
 
     function addOption(prod, focus) {
@@ -535,6 +535,14 @@
     $("#addProductBtn").addEventListener("click", function () { var p = addProduct(); window.scrollTo({ top: p.offsetTop - 60, behavior: "smooth" }); });
     addProduct(); // 시작 시 상품 1개
 
+    // 작성 중 실수로 새로고침/뒤로가기 시 경고 (제출 완료 후엔 안 뜸)
+    window.addEventListener("beforeunload", function (e) {
+      if (window.__oqDone) return;
+      var dirty = false;
+      document.querySelectorAll(".oq-name, .oq-url, #fName, #fPhone, #fAddr").forEach(function (el) { if (el && el.value && el.value.trim()) dirty = true; });
+      if (dirty) { e.preventDefault(); e.returnValue = ""; }
+    });
+
     // ----- 주소 검색 (다음 우편번호, 무료) -----
     $("#addrBtn").addEventListener("click", function () {
       if (!window.daum || !daum.Postcode) { alert("주소검색을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."); return; }
@@ -629,6 +637,7 @@
         products: bp.products, subtotal: bp.subtotal
       };
       OSS.submitApplication(payload).then(function () {
+        window.__oqDone = true;
         $("#panel2").classList.remove("active");
         $("#oqSteps").hidden = true;
         $("#doneNo").textContent = orderNo;
