@@ -601,7 +601,8 @@ p { word-break: keep-all; }
 .slide-text h1 { font-size: 42px; }
 /* 마이페이지: 네이비 프로필 → 따뜻한 톤, 포커스색 주황 */
 .mypage-profile { background: linear-gradient(135deg, #FF8E76, #FF6F8B); }
-.mypage-menu a:hover, .mypage-menu a.active { background: var(--hero-bg); color: var(--orange); }
+.mypage-menu a:hover { background: var(--hero-bg); color: var(--orange); }
+.mypage-menu a.active { background: var(--blue); color: #fff; }
 /* 카드 hover 살짝 들어올림 */
 .fee-card, .review-card { transition: transform .12s; }
 .fee-card:hover, .review-card:hover { transform: translateY(-3px); }

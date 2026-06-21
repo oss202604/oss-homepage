@@ -161,10 +161,10 @@ if (menuToggle && mainMenu) {
   if (!el) return;
   const active = el.dataset.cs || "";
   const items = [
-    ["notice", "notice.html", "📢 공지사항"],
-    ["contact", "contact.html", "💬 1:1 문의"],
-    ["faq", "faq.html", "❓ 자주 묻는 질문"],
-    ["review", "index.html#reviews", "⭐ 이용후기"],
+    ["notice", "notice.html", "공지사항"],
+    ["contact", "contact.html", "1:1 문의"],
+    ["faq", "faq.html", "자주 묻는 질문"],
+    ["review", "index.html#reviews", "이용후기"],
   ];
   el.innerHTML = '<p class="cs-sidebar-title">고객센터</p>' +
     items.map(([k, h, l]) => `<a href="${h}" class="${k === active ? "active" : ""}">${l}</a>`).join("") +
