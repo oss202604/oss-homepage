@@ -263,6 +263,10 @@ async function setMemberGrade(id, grade) {
   const { error } = await sb.from("profiles").update({ grade }).eq("id", id);
   if (error) throw error;
 }
+async function setMailboxCode(id, code) {
+  const { error } = await sb.from("profiles").update({ mailbox_code: (code || "").trim() || null }).eq("id", id);
+  if (error) throw error;
+}
 async function setMemberPermissions(id, permissions) {
   const { error } = await sb.from("profiles").update({ permissions }).eq("id", id);
   if (error) throw error;
@@ -441,6 +445,7 @@ window.OSS = {
   listMembers,
   setMemberRole,
   setMemberGrade,
+  setMailboxCode,
   setMemberPermissions,
   // 쿠폰
   fetchMyCoupons,

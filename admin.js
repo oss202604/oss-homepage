@@ -306,17 +306,20 @@ async function loadMembers() {
 
   let members = [];
   try { members = await window.OSS.listMembers(); }
-  catch (e) { tb.innerHTML = '<tr><td colspan="9" class="empty">회원을 불러오지 못했어요: ' + (e.message || e) + "</td></tr>"; return; }
+  catch (e) { tb.innerHTML = '<tr><td colspan="10" class="empty">회원을 불러오지 못했어요: ' + (e.message || e) + "</td></tr>"; return; }
 
   const cnt = document.getElementById("memberCount");
   if (cnt) cnt.textContent = "(" + members.length + "명)";
-  if (!members.length) { tb.innerHTML = '<tr><td colspan="9" class="empty">회원이 없습니다.</td></tr>'; return; }
+  if (!members.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">회원이 없습니다.</td></tr>'; return; }
 
   tb.innerHTML = members.map((m) => {
     const perm = m.permissions || {};
     const gradeCell = isMaster
       ? `<select class="m-grade" data-id="${m.id}">${GRADES.map((g) => `<option ${m.grade === g ? "selected" : ""}>${g}</option>`).join("")}</select>`
       : esc(m.grade);
+    const mailboxCell = isMaster
+      ? `<input class="m-mailbox" data-id="${m.id}" value="${esc(m.mailbox_code || "")}" placeholder="고객번호" style="width:88px;" />`
+      : esc(m.mailbox_code || "-");
     const roleCell = isMaster
       ? `<select class="m-role" data-id="${m.id}">${ROLES.map(([v, l]) => `<option value="${v}" ${m.role === v ? "selected" : ""}>${l}</option>`).join("")}</select>`
       : esc((ROLES.find((r) => r[0] === m.role) || [])[1] || m.role);
@@ -331,6 +334,7 @@ async function loadMembers() {
       <td>${esc(m.name || "-")}</td>
       <td>${esc(m.phone || "-")}</td>
       <td>${esc(m.email || "-")}</td>
+      <td>${mailboxCell}</td>
       <td>${gradeCell}</td>
       <td>${roleCell}</td>
       <td>${permCell}</td>
@@ -347,6 +351,10 @@ async function loadMembers() {
   tb.querySelectorAll(".m-grade").forEach((sel) => sel.addEventListener("change", async () => {
     try { await window.OSS.setMemberGrade(sel.dataset.id, sel.value); }
     catch (e) { alert("등급 변경 실패: " + (e.message || e)); }
+  }));
+  tb.querySelectorAll(".m-mailbox").forEach((inp) => inp.addEventListener("change", async () => {
+    try { await window.OSS.setMailboxCode(inp.dataset.id, inp.value); inp.style.borderColor = "#1F9D6B"; }
+    catch (e) { alert("고객번호 저장 실패: " + (e.message || e)); }
   }));
   tb.querySelectorAll(".m-perm").forEach((cb) => cb.addEventListener("change", async () => {
     const id = cb.dataset.id;

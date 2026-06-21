@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=34" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="stylesheet" href="admin.css?v=13" />
 </head>
 <body class="admin-body">
@@ -109,9 +110,9 @@
         <div class="dash-panel">
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr><th>아이디</th><th>이름</th><th>연락처</th><th>이메일</th><th>등급</th><th>역할</th><th>매니저 권한</th><th>가입일</th><th>최근로그인</th></tr></thead>
+              <thead><tr><th>아이디</th><th>이름</th><th>연락처</th><th>이메일</th><th>고객번호</th><th>등급</th><th>역할</th><th>매니저 권한</th><th>가입일</th><th>최근로그인</th></tr></thead>
               <tbody id="memberRows">
-                <tr><td colspan="9" class="empty">불러오는 중…</td></tr>
+                <tr><td colspan="10" class="empty">불러오는 중…</td></tr>
               </tbody>
             </table>
           </div>
@@ -371,8 +372,8 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=15"></script>
-  <script src="admin.js?v=18"></script>
+  <script src="supabase.js?v=16"></script>
+  <script src="admin.js?v=19"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=34" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 </head>
 <body>
   <header class="osshead" id="top"><div class="osshead-in"><a class="osshead-logo" href="index.html">OSSohayo</a><nav class="osshead-nav"><a href="index.html">홈</a><a href="order.html">구매대행 신청</a><a href="delivery.html">배송대행 신청</a><a href="notice.html">공지사항</a><a href="guide.html">이용가이드</a><a href="order-lookup.html">주문조회</a></nav><div class="osshead-icons"><a class="osshead-ic" href="notice.html" aria-label="검색"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></a><div class="osshead-acct"><button class="osshead-ic" type="button" aria-label="계정"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg></button><div class="osshead-menu"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="order-lookup.html">주문조회</a><a href="mypage.html">마이페이지</a></div></div></div></div></header>
@@ -35,13 +36,13 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=15"></script>
+  <script src="supabase.js?v=16"></script>
   <script src="script.js?v=28"></script>
   <script>
     const DEFAULT_FAQ = [
       { category: "배송/통관", q: "배송은 얼마나 걸리나요?", a: "입고·검수·결제 완료 후 항공 기준 평균 3~5일 내 발송되며, 통관 상황에 따라 달라질 수 있습니다." },
       { category: "배송/통관", q: "개인통관고유부호가 꼭 필요한가요?", a: "네, 해외직구 통관에는 개인통관고유부호가 필요합니다. 관세청 유니패스에서 무료로 발급받을 수 있어요." },
-      { category: "결제", q: "결제는 어떻게 하나요?", a: "현재는 견적 안내 후 계좌이체로 진행됩니다. (간편결제는 추후 도입 예정)" },
+      { category: "결제", q: "결제는 어떻게 하나요?", a: "현재는 무통장입금(계좌이체)으로 진행됩니다. 1차로 상품가+수수료, 2차로 무게 측정 후 국제배송비를 입금해 주세요. (간편결제는 추후 도입 예정)" },
       { category: "취소/환불", q: "주문을 취소할 수 있나요?", a: "현지에서 상품을 구매하기 전에는 취소가 가능합니다. 구매 완료 후에는 현지 쇼핑몰 정책에 따라 제한될 수 있어요." },
       { category: "기타", q: "여러 쇼핑몰 상품을 한 번에 받을 수 있나요?", a: "네, 합배송 신청으로 여러 주문을 한 박스로 묶어 배송비를 절약할 수 있습니다." },
     ];
