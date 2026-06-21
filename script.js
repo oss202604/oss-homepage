@@ -127,9 +127,9 @@ if (menuToggle && mainMenu) {
 (function renderChatFab() {
   if (document.querySelector(".chat-fab")) return;
   const a = document.createElement("a");
-  a.href = "order.html";
+  a.href = "contact.html";
   a.className = "chat-fab";
-  a.title = "문의하기";
+  a.title = "1:1 문의";
   a.innerHTML = '<i data-lucide="message-circle"></i>';
   document.body.appendChild(a);
   if (window.lucide) lucide.createIcons();
