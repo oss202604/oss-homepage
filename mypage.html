@@ -164,7 +164,7 @@
               <label>받는 분<input id="adName" placeholder="홍길동" /></label>
             </div>
             <div class="form-row">
-              <label>연락처<input id="adPhone" placeholder="010-0000-0000" /></label>
+              <label>연락처<input id="adPhone" type="tel" placeholder="010-0000-0000" /></label>
               <label>우편번호<input id="adZip" placeholder="00000" /></label>
             </div>
             <label>주소<input id="adAddr" placeholder="도로명 주소 + 상세주소" /></label>
@@ -212,7 +212,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=14"></script>
-  <script src="script.js?v=23"></script>
+  <script src="script.js?v=24"></script>
   <script>
     (function () {
       const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

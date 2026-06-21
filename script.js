@@ -848,3 +848,24 @@ document.addEventListener("click", async (e) => {
     }).catch(() => {});
   }
 })();
+
+// ===== 휴대폰번호 자동 하이픈 (전 폼 공통) =====
+// 숫자만 입력해도 010-1234-5678 형태로 자동 변환. input[type=tel] 전부에 적용.
+(function bindPhoneFormat() {
+  function fmt(el) {
+    var d = (el.value || "").replace(/[^0-9]/g, "").slice(0, 11);
+    var o = d;
+    if (d.length >= 8) o = d.slice(0, 3) + "-" + d.slice(3, 7) + "-" + d.slice(7);
+    else if (d.length >= 4) o = d.slice(0, 3) + "-" + d.slice(3);
+    el.value = o;
+  }
+  function wire() {
+    document.querySelectorAll('input[type="tel"]').forEach(function (el) {
+      if (el.getAttribute("data-phonefmt")) return;
+      el.setAttribute("data-phonefmt", "1");
+      el.addEventListener("input", function () { fmt(el); });
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire);
+  else wire();
+})();
