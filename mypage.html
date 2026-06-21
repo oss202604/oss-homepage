@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=33" />
+  <link rel="stylesheet" href="styles.css?v=34" />
   <style>
     .coupon-list{display:grid;gap:10px;}
     .coupon{display:flex;justify-content:space-between;align-items:center;border:1.5px dashed #FBE0CF;border-radius:14px;padding:14px 16px;background:linear-gradient(135deg,#FFF6EF,#FFEFF2);}
@@ -71,6 +71,7 @@
         <!-- 주문 내역 -->
         <div class="mypage-block" id="orders">
           <h2 class="mypage-title">📦 구매대행 주문 내역</h2>
+          <p class="table-hint">💡 표가 넓으면 좌우로 밀어서 보세요</p>
           <div class="table-wrap">
             <table class="data-table">
               <thead>
@@ -123,6 +124,7 @@
         <!-- 배송 조회 -->
         <div class="mypage-block" id="shipping">
           <h2 class="mypage-title">🚚 배송대행 신청 내역</h2>
+          <p class="table-hint">💡 표가 넓으면 좌우로 밀어서 보세요</p>
           <div class="table-wrap">
             <table class="data-table">
               <thead>
@@ -219,7 +221,7 @@
       if (!(window.OSS && window.OSS.getMyProfile)) return;
 
       window.OSS.getMyProfile().then(async (p) => {
-        if (!p) { location.href = "login.html"; return; }
+        if (!p) { location.href = "login.html?need=1"; return; }
         // 운영진이면 관리자페이지로
         if (p.role === "master" || p.role === "manager") { location.href = "admin.html"; return; }
 
@@ -254,7 +256,7 @@
               <td>¥${Number(o.subtotal || 0).toLocaleString()}</td>
               <td>${esc(o.status || "-")}</td>
               <td>${fmtDate(o.created_at)}</td>
-              <td><a class="btn btn-small" href="order-lookup.html">조회</a></td>
+              <td><a class="btn btn-small" href="order-lookup.html?no=${encodeURIComponent(o.order_no || '')}">조회</a></td>
             </tr>`;
           }).join("");
         }
@@ -327,7 +329,10 @@
                 '<div class="acts">' + (a.is_default ? '' : '<button type="button" data-ad-def="' + a.id + '">기본으로</button>') + '<button type="button" data-ad-del="' + a.id + '">삭제</button></div></div>';
             }).join("") : '<p class="empty">저장된 배송지가 없어요. 아래에서 추가해 보세요.</p>';
             const btn = document.getElementById("addrSaveBtn");
-            if (btn) { btn.disabled = list.length >= 3; btn.textContent = list.length >= 3 ? "최대 3개까지 저장했어요" : "배송지 저장"; }
+            const full = list.length >= 3;
+            if (btn) { btn.disabled = full; btn.textContent = full ? "최대 3개까지 저장했어요" : "배송지 저장"; }
+            const adForm2 = document.getElementById("addrForm");
+            if (adForm2) adForm2.querySelectorAll("input").forEach(function (i) { i.disabled = full; });
           } catch (e) { box.innerHTML = '<p class="empty">불러오기 실패</p>'; }
         }
         await loadAddresses();
@@ -361,7 +366,7 @@
             alert("정보가 수정되었어요.");
           } catch (err) { alert("수정 실패: " + (err.message || err)); }
         });
-      }).catch(() => { location.href = "login.html"; });
+      }).catch(() => { location.href = "login.html?need=1"; });
 
       // 로그아웃
       const lo = document.getElementById("logoutBtn");

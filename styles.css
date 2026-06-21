@@ -616,3 +616,6 @@ p { word-break: keep-all; }
 .auth-help { display: block; margin-top: 5px; color: #999; font-size: 12px; }
 /* 상단바 로그인 인사 */
 .osshead-menu .oss-greet { font-weight: 800; color: var(--orange); }
+/* 모바일 표 가로스크롤 안내 */
+.table-hint { display: none; font-size: 12px; color: var(--muted); margin: 0 0 7px; }
+@media (max-width: 600px) { .table-hint { display: block; } }
