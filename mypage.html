@@ -411,6 +411,25 @@
         location.href = "index.html";
       });
     })();
+
+    // 마이페이지 사이드 메뉴 = 탭 전환 (클릭한 섹션만 표시)
+    (function mypageTabs() {
+      var blocks = document.querySelectorAll(".mypage-block");
+      var links = document.querySelectorAll(".mypage-menu a[href^='#']");
+      if (!blocks.length || !links.length) return;
+      function show(id) {
+        if (!id || id === "#") return;
+        blocks.forEach(function (b) { b.style.display = ("#" + b.id === id) ? "block" : "none"; });
+        links.forEach(function (a) { a.classList.toggle("active", a.getAttribute("href") === id); });
+      }
+      links.forEach(function (a) {
+        if (a.id === "logoutBtn") return;
+        a.addEventListener("click", function (e) { e.preventDefault(); show(a.getAttribute("href")); window.scrollTo({ top: 0, behavior: "smooth" }); });
+      });
+      var initial = "#orders";
+      try { if (location.hash && document.querySelector(".mypage-block" + location.hash)) initial = location.hash; } catch (e) {}
+      show(initial);
+    })();
   </script>
 </body>
 </html>
