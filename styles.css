@@ -224,7 +224,7 @@ p { word-break: keep-all; }
 .footer-copy { color: rgba(255,255,255,.5); font-size: 12.5px; }
 @media (max-width: 760px) { .footer-cols { grid-template-columns: 1fr; gap: 24px; } }
 /* 법적 페이지 본문 */
-.legal-body { font-size: 15px; line-height: 1.9; color: var(--text); max-width: 900px; }
+.legal-body { font-size: 15px; line-height: 1.9; color: var(--text); max-width: 900px; margin: 0 auto; }
 .legal-body { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 32px 34px; box-shadow: var(--shadow); }
 
 /* 예상비용 계산기 */
@@ -562,8 +562,7 @@ p { word-break: keep-all; }
 .osshead-ic:hover { background: var(--hero-bg); color: var(--orange); }
 .osshead-acct { position: relative; }
 .osshead-menu { position: absolute; right: 0; top: 48px; min-width: 152px; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 8px; display: none; z-index: 90; }
-.osshead-acct.open .osshead-menu,
-.osshead-acct:hover .osshead-menu { display: block; }
+.osshead-acct.open .osshead-menu { display: block; }
 .osshead-menu a { display: block; padding: 10px 14px; text-decoration: none; color: var(--text); font-size: 14px; font-weight: 600; border-radius: 9px; }
 .osshead-menu a:hover { background: var(--hero-bg); color: var(--orange); }
 .top-noti { background: #F79AC1; color: #412233; border: none; }
