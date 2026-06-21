@@ -47,7 +47,7 @@
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=15"></script>
-  <script src="script.js?v=25"></script>
+  <script src="script.js?v=26"></script>
   <script>
     const GUIDE_PAGES = [
       { slug: "guide-how", title: "이용방법" },
@@ -184,7 +184,19 @@ Tel : 070-1381-4638
       function linkify(s){ return esc(s).replace(/\[([^\]\n]{1,40})\]/g,'<b class="gb-h">[$1]</b>').replace(/\n/g,"<br>").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:var(--blue);word-break:break-all;">$1</a>'); }
       function show(slug) {
         const d = loaded[slug];
-        content.innerHTML = `<h2 class="guide-title">${esc(d.title)}</h2><div class="guide-body">${linkify(d.body)}</div>`;
+        let extra = "";
+        if (slug === "guide-center") extra = '<div style="margin-top:14px;"><button type="button" id="copyCenterBtn" class="btn btn-primary">📋 배송센터 주소 복사</button> <span id="copyCenterMsg" style="font-size:13px;color:#1F9D6B;font-weight:600;"></span></div>';
+        content.innerHTML = `<h2 class="guide-title">${esc(d.title)}</h2><div class="guide-body">${linkify(d.body)}</div>${extra}`;
+        if (slug === "guide-center") {
+          const cb = document.getElementById("copyCenterBtn");
+          if (cb) cb.addEventListener("click", function () {
+            const msg = document.getElementById("copyCenterMsg");
+            navigator.clipboard.writeText(d.body).then(
+              function () { msg.textContent = "✓ 복사됐어요! 일본 쇼핑몰 배송지에 붙여넣으세요."; },
+              function () { msg.style.color = "#c0392b"; msg.textContent = "복사 실패 — 주소를 길게 눌러 직접 복사해 주세요."; }
+            );
+          });
+        }
         nav.querySelectorAll(".guide-nav-btn").forEach((b) => b.classList.toggle("active", b.dataset.slug === slug));
       }
       nav.querySelectorAll(".guide-nav-btn").forEach((b) => b.addEventListener("click", () => show(b.dataset.slug)));

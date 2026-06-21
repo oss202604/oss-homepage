@@ -595,7 +595,7 @@ if (form && modal) {
     const cat = CATS[Number(document.getElementById("calcCat").value)] || CATS[CATS.length - 1];
     const set = (id, v) => (document.getElementById(id).textContent = v);
 
-    if (perJpy <= 0) { set("rJpy", "환율 미설정"); set("rShip", "-"); set("rTax", "-"); set("rTotal", "-"); return; }
+    if (perJpy <= 0) { set("rJpy", "잠시 후 다시 시도"); set("rShip", "-"); set("rTax", "-"); set("rTotal", "-"); return; }
 
     const productKrw = jpy * perJpy;
     const shipKrwBase = shipFeeYen(kg, center) * perJpy;
@@ -613,7 +613,7 @@ if (form && modal) {
       tax = duty + vat;
     }
     set("rJpy", `${won(productKrw)}  (${yen(jpy)})`);
-    set("rShip", shipKrwBase > 0 ? (won(shipKrw) + (gPct > 0 ? `  (${grade.name} ${gPct}% 할인)` : "")) : (RATES.length ? "무게 입력" : "요율 미설정"));
+    set("rShip", shipKrwBase > 0 ? (won(shipKrw) + (gPct > 0 ? `  (${grade.name} ${gPct}% 할인)` : "")) : (RATES.length ? "무게 입력" : "잠시 후 다시 시도"));
     set("rTax", exempt ? "면세 (목록통관)" : won(tax));
     set("rTotal", won(productKrw + shipKrw + tax));
   }
@@ -650,11 +650,6 @@ if (form && modal) {
 (function reviews() {
   const grid = document.getElementById("reviewGrid");
   if (!grid) return;
-  const SAMPLE = [
-    { author: "김*은", rating: 5, text: "다른 대행사보다 수수료가 저렴하고 문의 답변도 정말 빨라요. 계속 이용할게요!" },
-    { author: "이*리", rating: 5, text: "검수 사진 보내주셔서 안심하고 받았어요. 포장도 꼼꼼합니다." },
-    { author: "박*호", rating: 5, text: "일본어 하나도 몰라도 링크만 보내면 다 해주셔서 너무 편했어요." },
-  ];
   const esc = (s) => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   function render(list) {
     grid.innerHTML = list.map((r) => `<div class="review-card">
@@ -663,10 +658,12 @@ if (form && modal) {
       <p class="review-author">${esc(r.author || "고객님")}</p>
     </div>`).join("");
   }
-  render(SAMPLE);
-  // 승인된 고객 후기 우선 → 없으면 설정(reviews) → 없으면 샘플
+  function empty() { grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#A99B91;padding:18px 0;">아직 등록된 후기가 없어요. 첫 후기를 남겨주세요! 😊</p>'; }
+  grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#A99B91;">후기를 불러오는 중...</p>';
+  // 승인된 실제 후기 → 없으면 관리자 설정(reviews) → 없으면 빈 상태 (가짜 후기 표시 안 함)
   function loadFromSetting() {
-    if (window.OSS && window.OSS.getSetting) window.OSS.getSetting("reviews").then((r) => { if (Array.isArray(r) && r.length) render(r); }).catch(() => {});
+    if (window.OSS && window.OSS.getSetting) window.OSS.getSetting("reviews").then((r) => { if (Array.isArray(r) && r.length) render(r); else empty(); }).catch(empty);
+    else empty();
   }
   if (window.OSS && window.OSS.fetchApprovedReviews) {
     window.OSS.fetchApprovedReviews(12).then((rows) => {
