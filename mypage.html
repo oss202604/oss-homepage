@@ -165,9 +165,9 @@
             </div>
             <div class="form-row">
               <label>연락처<input id="adPhone" type="tel" placeholder="010-0000-0000" /></label>
-              <label>우편번호<input id="adZip" placeholder="00000" /></label>
+              <label>우편번호<span style="display:flex;gap:6px;"><input id="adZip" placeholder="검색 →" readonly style="background:#f7f3f0;" /><button type="button" id="adZipBtn" class="btn btn-small" style="white-space:nowrap;">주소 검색</button></span></label>
             </div>
-            <label>주소<input id="adAddr" placeholder="도로명 주소 + 상세주소" /></label>
+            <label>주소<input id="adAddr" placeholder="주소 검색 후 상세주소(동·호수) 입력" /></label>
             <div class="form-row">
               <label>개인통관고유부호<input id="adCcode" placeholder="P로 시작 13자리" /></label>
               <label style="display:flex;align-items:center;gap:8px;align-self:flex-end;padding-bottom:10px;"><input type="checkbox" id="adDefault" style="width:auto;" /> 기본 배송지로</label>
@@ -184,11 +184,18 @@
               <label>이름<input type="text" name="name" id="pfName" placeholder="홍길동" /></label>
               <label>휴대폰<input type="tel" name="phone" id="pfPhone" placeholder="010-0000-0000" /></label>
             </div>
-            <div class="form-row">
-              <label>이메일<input type="email" name="email" id="pfEmail" placeholder="example@email.com" readonly /></label>
-              <label>개인통관고유부호<input type="text" name="ccode" id="pfCcode" placeholder="P로 시작하는 13자리" /></label>
-            </div>
+            <label>이메일 <span style="font-weight:400;color:#999;font-size:.85em;">(로그인 계정 이메일 — 변경 불가)</span><input type="email" name="email" id="pfEmail" placeholder="example@email.com" readonly /></label>
             <button type="submit" class="btn btn-primary">정보 수정</button>
+          </form>
+          <hr style="border:none;border-top:1px solid #EFE3DA;margin:22px 0;" />
+          <h3 style="font-size:15px;margin-bottom:10px;">🔒 비밀번호 변경</h3>
+          <form class="order-form" id="pwForm">
+            <div class="form-row">
+              <label>새 비밀번호<input type="password" id="npw1" placeholder="6자 이상" autocomplete="new-password" /></label>
+              <label>새 비밀번호 확인<input type="password" id="npw2" placeholder="다시 입력" autocomplete="new-password" /></label>
+            </div>
+            <button type="submit" class="btn btn-primary">비밀번호 변경</button>
+            <p id="pwMsg" style="margin-top:8px;font-size:13px;min-height:16px;"></p>
           </form>
         </div>
       </div>
@@ -211,8 +218,9 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=14"></script>
+  <script src="supabase.js?v=15"></script>
   <script src="script.js?v=25"></script>
+  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script>
     (function () {
       const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -290,7 +298,7 @@
               <div class="coupon-meta"><span class="coupon-state">${state}</span><span class="coupon-exp">~ ${fmtDate(c.expires_at)}</span></div>
             </div>`;
           }).join("") : '<p class="empty">보유한 쿠폰이 없어요.</p>';
-        } catch (e) {}
+        } catch (e) { const cl = document.getElementById("couponList"); if (cl) cl.innerHTML = '<p class="empty">쿠폰을 불러오지 못했어요. 새로고침해 주세요.</p>'; }
 
         // 내가 쓴 후기 + 작성
         async function loadMyReviews() {
@@ -356,6 +364,15 @@
             alert("배송지가 저장됐어요.");
           } catch (err) { alert(err.message || err); }
         });
+        const adZipBtn = document.getElementById("adZipBtn");
+        if (adZipBtn) adZipBtn.addEventListener("click", function () {
+          if (!window.daum || !daum.Postcode) { alert("주소검색을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."); return; }
+          new daum.Postcode({ oncomplete: function (data) {
+            document.getElementById("adZip").value = data.zonecode;
+            document.getElementById("adAddr").value = (data.roadAddress || data.address || "") + " ";
+            document.getElementById("adAddr").focus();
+          } }).open();
+        });
 
         // 회원정보 수정
         const pf = document.getElementById("profileForm");
@@ -365,6 +382,21 @@
             await window.OSS.updateMyProfile(pfName.value.trim(), pfPhone.value.trim(), pfEmail.value.trim());
             alert("정보가 수정되었어요.");
           } catch (err) { alert("수정 실패: " + (err.message || err)); }
+        });
+
+        // 비밀번호 변경
+        const pwf = document.getElementById("pwForm");
+        if (pwf) pwf.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const a = document.getElementById("npw1").value, b = document.getElementById("npw2").value;
+          const m = document.getElementById("pwMsg");
+          if (a.length < 6) { m.style.color = "#c0392b"; m.textContent = "비밀번호는 6자 이상이어야 해요."; return; }
+          if (a !== b) { m.style.color = "#c0392b"; m.textContent = "두 비밀번호가 일치하지 않아요."; return; }
+          try {
+            await window.OSS.changePassword(a);
+            m.style.color = "#1F9D6B"; m.textContent = "✓ 비밀번호가 변경됐어요.";
+            pwf.reset();
+          } catch (err) { m.style.color = "#c0392b"; m.textContent = "변경 실패 — 다시 로그인 후 시도해 주세요."; }
         });
       }).catch(() => { location.href = "login.html?need=1"; });
 

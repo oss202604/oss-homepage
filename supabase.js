@@ -243,6 +243,12 @@ async function touchLogin() {
   try { await sb.rpc("oss_touch_login"); } catch (e) {}
 }
 
+// 비밀번호 변경 (로그인 상태에서 본인)
+async function changePassword(newPassword) {
+  const { error } = await sb.auth.updateUser({ password: newPassword });
+  if (error) throw error;
+}
+
 // ---- 마스터 전용: 회원 관리 ----
 async function listMembers() {
   const { data, error } = await sb.from("profiles").select("*").order("created_at", { ascending: false });
@@ -430,6 +436,7 @@ window.OSS = {
   myOrders,
   updateMyProfile,
   touchLogin,
+  changePassword,
   // 마스터: 회원관리
   listMembers,
   setMemberRole,

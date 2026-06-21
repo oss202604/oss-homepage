@@ -17,7 +17,7 @@
       <h1>회원가입</h1>
       <p class="auth-sub">OSS 회원이 되시면 구매대행·배송대행을 편리하게 이용하실 수 있습니다.</p>
       <form id="signupForm">
-        <label class="auth-label">아이디 <span class="req">*</span><input type="text" id="suId" placeholder="영문/숫자 4~20자" autocomplete="username" /></label>
+        <label class="auth-label">아이디 <span class="req">*</span><input type="text" id="suId" placeholder="영문/숫자 4~20자" autocomplete="username" /><small class="auth-help" id="suIdStatus"></small></label>
         <label class="auth-label">비밀번호 <span class="req">*</span><span class="pw-wrap"><input type="password" id="suPw" placeholder="영문+숫자 6자 이상 권장" autocomplete="new-password" /><button type="button" class="pw-toggle" data-target="suPw">표시</button></span></label>
         <label class="auth-label">비밀번호 확인 <span class="req">*</span><span class="pw-wrap"><input type="password" id="suPw2" placeholder="비밀번호 재입력" autocomplete="new-password" /><button type="button" class="pw-toggle" data-target="suPw2">표시</button></span></label>
         <label class="auth-label">이름 <span class="req">*</span><input type="text" id="suName" placeholder="홍길동" /></label>
@@ -60,7 +60,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=14"></script>
+  <script src="supabase.js?v=15"></script>
   <script src="script.js?v=25"></script>
   <script>
     (function () {
@@ -93,6 +93,25 @@
         i.type = show ? "text" : "password";
         b.textContent = show ? "숨김" : "표시";
       }));
+
+      // 아이디 실시간 중복확인 (입력 0.5초 후)
+      const idStatus = document.getElementById("suIdStatus");
+      let idTimer = null;
+      document.getElementById("suId").addEventListener("input", function () {
+        const v = this.value.trim();
+        idStatus.textContent = ""; idStatus.style.color = "#999";
+        if (idTimer) clearTimeout(idTimer);
+        if (!/^[a-zA-Z0-9_]{4,20}$/.test(v)) { if (v) { idStatus.style.color = "#c0392b"; idStatus.textContent = "영문/숫자 4~20자로 입력해 주세요."; } return; }
+        idStatus.textContent = "확인 중...";
+        idTimer = setTimeout(async function () {
+          try {
+            const exists = await window.OSS.usernameExists(v);
+            if (document.getElementById("suId").value.trim() !== v) return;
+            if (exists) { idStatus.style.color = "#c0392b"; idStatus.textContent = "✗ 이미 사용 중인 아이디예요."; }
+            else { idStatus.style.color = "#1F9D6B"; idStatus.textContent = "✓ 사용 가능한 아이디예요."; }
+          } catch (e) { idStatus.textContent = ""; }
+        }, 500);
+      });
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
