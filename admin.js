@@ -27,6 +27,10 @@ const labelOf = (k) => (ALL_STATUS.find((s) => s.key === k) || {}).label || k;
 // 배송비 요율표 (관리자 설정에서 로드, 단위 엔). 행: {kg: 무게이하, air, sea}
 let RATES = [];
 let FX_APPLIED = 1000; // 적용환율(100엔당 원). exchange_rate.applied. ¥→₩ 변환(perJpy = applied/100). 계산기와 동일
+
+// HTML 이스케이프(저장형 XSS 방지) + 안전 URL 가드 — 고객 입력을 관리자 화면에 렌더할 때 사용
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function safeUrl(u) { u = String(u == null ? "" : u).trim(); if (!/^https?:\/\//i.test(u)) return ""; return u.replace(/["'<>]/g, encodeURIComponent); }
 // 사토리 기본요율(항공 실측값, 해상은 동일값으로 두고 관리자가 조정) — "기본요율 불러오기"용
 const DEFAULT_RATES = [
   [0.5,1000,1000],[1,1150,1150],[1.5,1300,1300],[2,1450,1450],[2.5,1600,1600],
@@ -361,13 +365,13 @@ const FLAG_DOT = { red: "🔴", orange: "🟠", green: "🟢", blue: "🔵" };
 function cardHtml(o) {
   return `<div class="kanban-card" draggable="true" data-id="${o.id}">
     <div class="kc-top">
-      <span class="kc-id">${o.flag ? (FLAG_DOT[o.flag] || "") + " " : ""}${o.no}</span>
+      <span class="kc-id">${o.flag ? (FLAG_DOT[o.flag] || "") + " " : ""}${esc(o.no)}</span>
       <span class="kc-type ${o.type}">${o.type === "purchase" ? "구매" : "배송"}</span>
     </div>
-    <div class="kc-name">${o.name}</div>
-    ${o.bundleId ? `<div class="kc-bundle">🔗 ${o.bundleId}</div>` : ""}
-    ${o.raw && o.raw.tracking_no ? `<div class="kc-bundle">📦 ${o.raw.tracking_no}</div>` : ""}
-    <div class="kc-cust">👤 ${o.customer}</div>
+    <div class="kc-name">${esc(o.name)}</div>
+    ${o.bundleId ? `<div class="kc-bundle">🔗 ${esc(o.bundleId)}</div>` : ""}
+    ${o.raw && o.raw.tracking_no ? `<div class="kc-bundle">📦 ${esc(o.raw.tracking_no)}</div>` : ""}
+    <div class="kc-cust">👤 ${esc(o.customer)}</div>
     <div class="kc-amount">¥${(o.amount || 0).toLocaleString()}</div>
   </div>`;
 }
@@ -512,25 +516,31 @@ function openModal(id) {
   modalOrderNo = o.no;
   const r = o.raw;
   const products = Array.isArray(r.products) ? r.products : [];
-  const prodHtml = products.map((p, i) =>
-    `${i + 1}) ${p.name || "-"} ${p.category ? "[" + p.category + "]" : ""} ¥${p.price || 0} × ${p.qty || 0}` +
-    (p.orderNo ? ` / 오더:${p.orderNo}` : "") + (p.url ? `<br><a href="${p.url}" target="_blank" style="color:var(--blue);font-size:12px;">상품링크 ↗</a>` : "") +
-    (p.image ? `<br><a href="${p.image}" target="_blank"><img src="${p.image}" alt="상품사진" style="max-width:120px;max-height:120px;border-radius:8px;border:1px solid var(--line);margin-top:6px;" /></a>` : "")
-  ).join("<br>");
+  const prodHtml = products.map((p, i) => {
+    const u = safeUrl(p.url), img = safeUrl(p.image);
+    // 고객이 고른 옵션/수량 (order-quick은 options 배열, 그 외엔 memo 문자열)
+    const opt = Array.isArray(p.options) && p.options.length
+      ? " / " + p.options.map((x) => esc(x.option) + (x.qty > 1 ? " x" + x.qty : "")).join(", ")
+      : (p.memo ? " / " + esc(p.memo) : "");
+    return `${i + 1}) ${esc(p.name) || "-"} ${p.category ? "[" + esc(p.category) + "]" : ""} ¥${p.price || 0} × ${p.qty || 0}${opt}` +
+      (p.orderNo ? ` / 오더:${esc(p.orderNo)}` : "") +
+      (u ? `<br><a href="${u}" target="_blank" style="color:var(--blue);font-size:12px;">상품링크 ↗</a>` : "") +
+      (img ? `<br><a href="${img}" target="_blank"><img src="${img}" alt="상품사진" style="max-width:120px;max-height:120px;border-radius:8px;border:1px solid var(--line);margin-top:6px;" /></a>` : "");
+  }).join("<br>");
   document.getElementById("modalName").textContent = o.name;
   document.getElementById("modalId").textContent = `${o.no} · ${o.type === "purchase" ? "구매대행" : "배송대행"} · ${o.created}`;
   document.getElementById("modalDetail").innerHTML = `
-    <div class="detail-row"><span class="dk">신청자</span><span class="dv">${r.applicant_name || "-"} (${r.applicant_phone || "-"})</span></div>
-    <div class="detail-row"><span class="dk">이메일/카톡</span><span class="dv">${r.applicant_email || "-"} / ${r.applicant_kakao || "-"}</span></div>
+    <div class="detail-row"><span class="dk">신청자</span><span class="dv">${esc(r.applicant_name) || "-"} (${esc(r.applicant_phone) || "-"})</span></div>
+    <div class="detail-row"><span class="dk">이메일/카톡</span><span class="dv">${esc(r.applicant_email) || "-"} / ${esc(r.applicant_kakao) || "-"}</span></div>
     <div class="detail-row"><span class="dk">상품</span><span class="dv">${prodHtml || "-"}</span></div>
     <div class="detail-row"><span class="dk">합계</span><span class="dv">¥${(r.subtotal || 0).toLocaleString()}</span></div>
-    <div class="detail-row"><span class="dk">회원등급</span><span class="dv">${gradeLabel(r.member_grade)}</span></div>
-    <div class="detail-row"><span class="dk">검수/옵션</span><span class="dv">${r.inspect || "없음"}${(r.addons && r.addons.length) ? " · " + r.addons.join(", ") : ""}</span></div>
-    <div class="detail-row"><span class="dk">수취인</span><span class="dv">${r.receiver_name || "-"} (${r.receiver_phone || "-"})</span></div>
-    <div class="detail-row"><span class="dk">통관부호</span><span class="dv">${r.customs_code || "-"}</span></div>
-    <div class="detail-row"><span class="dk">주소</span><span class="dv">[${r.zipcode || "-"}] ${r.address || "-"}</span></div>
-    <div class="detail-row"><span class="dk">배송방법</span><span class="dv">${r.ship_method || "-"}</span></div>
-    <div class="detail-row"><span class="dk">요청사항</span><span class="dv">${r.memo || "-"}</span></div>`;
+    <div class="detail-row"><span class="dk">회원등급</span><span class="dv">${esc(gradeLabel(r.member_grade))}</span></div>
+    <div class="detail-row"><span class="dk">검수/옵션</span><span class="dv">${esc(r.inspect) || "없음"}${(r.addons && r.addons.length) ? " · " + esc(r.addons.join(", ")) : ""}</span></div>
+    <div class="detail-row"><span class="dk">수취인</span><span class="dv">${esc(r.receiver_name) || "-"} (${esc(r.receiver_phone) || "-"})</span></div>
+    <div class="detail-row"><span class="dk">통관부호</span><span class="dv">${esc(r.customs_code) || "-"}</span></div>
+    <div class="detail-row"><span class="dk">주소</span><span class="dv">[${esc(r.zipcode) || "-"}] ${esc(r.address) || "-"}</span></div>
+    <div class="detail-row"><span class="dk">배송방법</span><span class="dv">${esc(r.ship_method) || "-"}</span></div>
+    <div class="detail-row"><span class="dk">요청사항</span><span class="dv">${esc(r.memo) || "-"}</span></div>`;
   const sel = document.getElementById("modalStatus");
   sel.innerHTML = ALL_STATUS.map((s) => `<option value="${s.key}" ${s.key === o.status ? "selected" : ""}>${s.label}</option>`).join("");
   // 입고·무게·배송비

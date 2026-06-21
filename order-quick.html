@@ -340,7 +340,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=11"></script>
+  <script src="supabase.js?v=12"></script>
   <script>
   (function () {
     var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -607,7 +607,7 @@
       if (!name) { err.textContent = "수취인명을 입력해 주세요."; return; }
       if (!phone) { err.textContent = "휴대폰번호를 입력해 주세요."; return; }
       if (!customs) { err.textContent = "개인통관고유부호를 입력해 주세요 (통관에 꼭 필요해요)."; return; }
-      if (!addr) { err.textContent = "주소를 입력해 주세요."; return; }
+      if (!addr || !zip) { err.textContent = "주소를 '주소검색'으로 입력해 주세요 (우편번호 포함). 통관·국내배송에 꼭 필요해요."; return; }
       err.textContent = "";
       if (!(window.OSS && OSS.submitApplication)) { err.textContent = "연결 오류 — 잠시 후 다시 시도해 주세요."; return; }
 

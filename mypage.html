@@ -211,7 +211,7 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=11"></script>
+  <script src="supabase.js?v=12"></script>
   <script src="script.js?v=21"></script>
   <script>
     (function () {
@@ -260,8 +260,8 @@
             const prods = Array.isArray(o.products) ? o.products : [];
             return `<tr>
               <td>${esc(o.order_no || "-")}</td>
-              <td>${esc((prods[0] && prods[0].brand) || "-")}</td>
-              <td>${esc((prods[0] && prods[0].code) || "-")}</td>
+              <td>${esc((prods[0] && (prods[0].brand || prods[0].shipName)) || "-")}</td>
+              <td>${esc((prods[0] && (prods[0].tracking_no || prods[0].url || prods[0].code)) || "-")}</td>
               <td>${esc(o.status || "-")}</td>
               <td>${fmtDate(o.created_at)}</td>
             </tr>`;

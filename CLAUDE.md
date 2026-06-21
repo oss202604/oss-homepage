@@ -44,7 +44,7 @@ oss-homepage/
 - **비회원**: 메인/공지/FAQ 열람만
 - **회원**: + 구매대행/배송대행 신청, 마이페이지, 결제
 - **관리자(admin)**: + `/admin*` 페이지 (회원/주문/공지 관리)
-  - 관리자 판별: Supabase `profiles` 테이블의 `role = 'admin'` 컬럼
+  - 관리자 판별: Supabase `profiles` 테이블의 `role`(`master`/`manager`) + 세부권한 `permissions` jsonb. RLS는 `oss_is_staff()`(master·manager)와 `oss_has_perm(키)`(master는 전권)로 강제. (구식 `role='admin'`은 더 이상 사용 안 함)
 
 ## 작업 원칙
 
