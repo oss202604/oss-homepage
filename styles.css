@@ -567,7 +567,9 @@ p { word-break: keep-all; }
 .top-noti { background: #F79AC1; color: #412233; border: none; }
 .top-noti-msg, .top-noti a { color: inherit; }
 @media (max-width: 860px) {
-  .osshead-in { gap: 12px; width: min(1280px, 100% - 28px); padding: 10px 0; }
+  .osshead-in { gap: 12px; width: min(1280px, 100% - 28px); padding: 8px 0; }
+  .top-noti-in { padding: 7px 14px; }
+  .top-noti-msg { font-size: 13px; }
   .osshead-logo { font-size: 20px; }
   .osshead-nav { gap: 16px; -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent); mask-image: linear-gradient(90deg, #000 86%, transparent); }
   .osshead-nav a { font-size: 13.5px; }

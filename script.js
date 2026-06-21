@@ -772,14 +772,12 @@ document.addEventListener("change", async (e) => {
   function show() { var c = pal[i % pal.length]; bar.style.background = c.b; bar.style.color = c.f; if (el) { el.style.color = c.f; el.textContent = msgs[i % msgs.length]; } }
   show();
   setInterval(function () { i++; show(); }, 4000);
-  if (window.OSS && window.OSS.fetchNotices) {
-    window.OSS.fetchNotices().then(function (list) {
-      if (list && list.length) {
-        var t = list.slice(0, 6).map(function (n) { return n.title ? "🔔 " + n.title : ""; }).filter(Boolean);
-        if (t.length) { msgs = msgs.concat(t); i = 0; show(); }
-      }
-    }).catch(function () {});
-  }
+  // 관리자 설정(설정 → 띠배너 문구) 우선 적용. 여러 줄 입력 시 줄마다 순환.
+  if (window.OSS && window.OSS.getSetting) window.OSS.getSetting("topbar").then(function (v) {
+    var t = (typeof v === "string" ? v : (v && v.text)) || "";
+    var lines = t.split(/\n+/).map(function (s) { return s.trim(); }).filter(Boolean);
+    if (lines.length) { msgs = lines; i = 0; show(); }
+  }).catch(function () {});
 })();
 
 // ===== 예상비용 계산기 팝업 열기/닫기 (메인) =====
