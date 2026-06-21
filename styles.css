@@ -605,3 +605,14 @@ p { word-break: keep-all; }
 /* 카드 hover 살짝 들어올림 */
 .fee-card, .review-card { transition: transform .12s; }
 .fee-card:hover, .review-card:hover { transform: translateY(-3px); }
+
+/* ===== 비밀번호 표시/숨김 토글 ===== */
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { padding-right: 64px; }
+.pw-toggle { position: absolute; right: 8px; top: calc(50% + 4px); transform: translateY(-50%); background: #f1ece8; border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; font-size: 13px; font-weight: 700; color: #5C5048; cursor: pointer; font-family: inherit; }
+.pw-toggle:hover { background: #e7ded7; }
+/* 라벨 보조 표기(선택) + 도움말 */
+.auth-label .opt { color: #999; font-weight: 400; font-size: .85em; }
+.auth-help { display: block; margin-top: 5px; color: #999; font-size: 12px; }
+/* 상단바 로그인 인사 */
+.osshead-menu .oss-greet { font-weight: 800; color: var(--orange); }

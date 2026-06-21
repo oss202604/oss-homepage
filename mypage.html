@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=32" />
+  <link rel="stylesheet" href="styles.css?v=33" />
   <style>
     .coupon-list{display:grid;gap:10px;}
     .coupon{display:flex;justify-content:space-between;align-items:center;border:1.5px dashed #FBE0CF;border-radius:14px;padding:14px 16px;background:linear-gradient(135deg,#FFF6EF,#FFEFF2);}
@@ -144,11 +144,9 @@
         <!-- 배대지 주소 -->
         <div class="mypage-block" id="address">
           <h2 class="mypage-title">🏠 나의 일본 배대지 주소</h2>
-          <div class="address-card">
-            <p><b>받는사람:</b> OSS / 고객번호 <span id="myCustomerNo">OSS-0000</span></p>
-            <p>〒000-0000 日本 ○○県 ○○市 ○○ 0-0-0</p>
-            <p>Tel: 000-0000-0000</p>
-            <p class="form-note">※ 실제 배대지 주소는 운영 시작 시 회원별로 발급됩니다.</p>
+          <div class="address-card" id="addressCard">
+            <p>📮 배대지 주소는 <b>첫 주문 접수 후</b> 회원님 전용 <b>고객번호</b>와 함께 안내드려요.</p>
+            <p class="form-note" style="color:#c0392b;font-weight:700;">아직 발급 전이에요 — 일본 쇼핑몰에 입력하지 마세요.</p>
           </div>
         </div>
 
@@ -212,7 +210,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=14"></script>
-  <script src="script.js?v=24"></script>
+  <script src="script.js?v=25"></script>
   <script>
     (function () {
       const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -228,7 +226,13 @@
         // 프로필 표시
         document.getElementById("myName").textContent = (p.name || p.username || "회원") + "님";
         document.getElementById("myEmail").textContent = p.email || p.username || "";
-        const cn = document.getElementById("myCustomerNo"); if (cn) cn.textContent = p.mailbox_code || "OSS-0000";
+        const addrCard = document.getElementById("addressCard");
+        if (addrCard && p.mailbox_code) {
+          addrCard.innerHTML =
+            '<p><b>받는사람:</b> OSS / 고객번호 <b>' + esc(p.mailbox_code) + '</b></p>' +
+            '<p>주소·우편번호는 <a href="guide.html">이용가이드 → 배송센터(배대지) 주소</a>를 그대로 사용하세요.</p>' +
+            '<p class="form-note">일본 쇼핑몰 결제 시 받는사람을 <b>OSS / ' + esc(p.mailbox_code) + '</b>로 입력하면 회원님 물건으로 인식돼요.</p>';
+        }
         const pfName = document.getElementById("pfName"); if (pfName) pfName.value = p.name || "";
         const pfPhone = document.getElementById("pfPhone"); if (pfPhone) pfPhone.value = p.phone || "";
         const pfEmail = document.getElementById("pfEmail"); if (pfEmail) pfEmail.value = p.email || "";

@@ -807,31 +807,26 @@ document.addEventListener("change", async (e) => {
 // 로그인하면 "로그인 | 회원가입" → "○○○님 | 마이페이지 | 로그아웃"
 (function renderAuthState() {
   if (!(window.OSS && window.OSS.getMyProfile)) return;
-  const nav = document.querySelector(".utility-right");
+  const nav = document.querySelector(".osshead-menu");
   if (!nav) return;
   window.OSS.getMyProfile().then((p) => {
     if (!p) return;
-    // 기존 로그인/회원가입 링크 + 뒤따르는 구분선 제거
-    nav.querySelectorAll('a[href="login.html"], a[href="signup.html"]').forEach((a) => {
-      const nx = a.nextElementSibling;
-      if (nx && nx.classList.contains("divider")) nx.remove();
-      a.remove();
-    });
+    // 로그인 상태: 로그인·회원가입 링크 제거 → 인사·(관리자)·로그아웃 추가
+    nav.querySelectorAll('a[href="login.html"], a[href="signup.html"]').forEach((a) => a.remove());
     const name = (p.name || p.username || "회원").replace(/[<>&]/g, "");
     const staff = p.role === "master" || p.role === "manager";
-    const home = staff ? "admin.html" : "mypage.html";
-    const label = staff ? "관리자" : "마이페이지";
     nav.insertAdjacentHTML("afterbegin",
-      `<a href="${home}" class="oss-greet">${name}님</a><span class="divider">|</span>` +
-      `<a href="${home}">${label}</a><span class="divider">|</span>` +
-      `<a href="#" class="oss-logout">로그아웃</a><span class="divider">|</span>`
+      `<a href="mypage.html" class="oss-greet">${name}님</a>` +
+      (staff ? `<a href="admin.html">관리자</a>` : "")
     );
+    nav.insertAdjacentHTML("beforeend", `<a href="#" class="oss-logout">로그아웃</a>`);
   }).catch(() => {});
 })();
 document.addEventListener("click", async (e) => {
   const lo = e.target.closest(".oss-logout");
   if (!lo) return;
   e.preventDefault();
+  if (!confirm("로그아웃 하시겠어요?")) return;
   try { if (window.OSS && window.OSS.signOut) await window.OSS.signOut(); } catch (err) {}
   location.href = "index.html";
 });

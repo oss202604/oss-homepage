@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=32" />
+  <link rel="stylesheet" href="styles.css?v=33" />
 </head>
 <body>
   <header class="osshead" id="top"><div class="osshead-in"><a class="osshead-logo" href="index.html">OSSohayo</a><nav class="osshead-nav"><a href="index.html">홈</a><a href="order.html">구매대행 신청</a><a href="delivery.html">배송대행 신청</a><a href="notice.html">공지사항</a><a href="guide.html">이용가이드</a><a href="order-lookup.html">주문조회</a></nav><div class="osshead-icons"><a class="osshead-ic" href="notice.html" aria-label="검색"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></a><div class="osshead-acct"><button class="osshead-ic" type="button" aria-label="계정"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg></button><div class="osshead-menu"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="order-lookup.html">주문조회</a><a href="mypage.html">마이페이지</a></div></div></div></div></header>
@@ -18,12 +18,11 @@
       <p class="auth-sub">OSS 회원이 되시면 구매대행·배송대행을 편리하게 이용하실 수 있습니다.</p>
       <form id="signupForm">
         <label class="auth-label">아이디 <span class="req">*</span><input type="text" id="suId" placeholder="영문/숫자 4~20자" autocomplete="username" /></label>
-        <label class="auth-label">비밀번호 <span class="req">*</span><input type="password" id="suPw" placeholder="6자 이상" autocomplete="new-password" /></label>
-        <label class="auth-label">비밀번호 확인 <span class="req">*</span><input type="password" id="suPw2" placeholder="비밀번호 재입력" autocomplete="new-password" /></label>
+        <label class="auth-label">비밀번호 <span class="req">*</span><span class="pw-wrap"><input type="password" id="suPw" placeholder="영문+숫자 6자 이상 권장" autocomplete="new-password" /><button type="button" class="pw-toggle" data-target="suPw">표시</button></span></label>
+        <label class="auth-label">비밀번호 확인 <span class="req">*</span><span class="pw-wrap"><input type="password" id="suPw2" placeholder="비밀번호 재입력" autocomplete="new-password" /><button type="button" class="pw-toggle" data-target="suPw2">표시</button></span></label>
         <label class="auth-label">이름 <span class="req">*</span><input type="text" id="suName" placeholder="홍길동" /></label>
         <label class="auth-label">휴대폰 번호 <span class="req">*</span><input type="tel" id="suPhone" placeholder="010-1234-5678" /></label>
-        <label class="auth-label">이메일<input type="email" id="suEmail" placeholder="example@email.com (주문조회·내역 연동에 사용)" /></label>
-        <label class="auth-label">개인통관고유부호<input type="text" id="suCcode" placeholder="P로 시작하는 13자리 (선택)" /></label>
+        <label class="auth-label">이메일 <span class="opt">(선택)</span><input type="email" id="suEmail" placeholder="example@email.com" /><small class="auth-help">주문조회·내역 연동에 사용돼요</small></label>
         <label class="auth-check"><input type="checkbox" id="suAgree" /> <span><a href="terms.html" target="_blank">이용약관</a> 및 <a href="privacy.html" target="_blank">개인정보 처리방침</a>에 동의합니다. <span class="req">*</span></span></label>
         <button type="submit" class="btn btn-primary btn-block" id="signupBtn">가입하기</button>
       </form>
@@ -62,7 +61,7 @@
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=14"></script>
-  <script src="script.js?v=24"></script>
+  <script src="script.js?v=25"></script>
   <script>
     (function () {
       const modal = document.getElementById("authModal");
@@ -87,6 +86,14 @@
 
       const g = (id) => document.getElementById(id).value.trim();
 
+      // 비밀번호 표시/숨김 토글
+      document.querySelectorAll(".pw-toggle").forEach((b) => b.addEventListener("click", () => {
+        const i = document.getElementById(b.dataset.target);
+        const show = i.type === "password";
+        i.type = show ? "text" : "password";
+        b.textContent = show ? "숨김" : "표시";
+      }));
+
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const username = g("suId");
@@ -99,9 +106,13 @@
 
         if (!/^[a-zA-Z0-9_]{4,20}$/.test(username)) { popup(false, "아이디를 확인하세요", "아이디는 영문/숫자 4~20자로 입력해 주세요."); return; }
         if (pw.length < 6) { popup(false, "비밀번호를 확인하세요", "비밀번호는 6자 이상으로 입력해 주세요."); return; }
+        const weakPw = ["123456","1234567","12345678","123456789","password","aaaaaa","000000","111111","qwerty","abc123"];
+        if (weakPw.includes(pw.toLowerCase())) { popup(false, "너무 쉬운 비밀번호", "다른 사람이 쉽게 추측할 수 있어요. 영문과 숫자를 섞어 다시 입력해 주세요."); return; }
         if (pw !== pw2) { popup(false, "비밀번호가 일치하지 않아요", "비밀번호 확인을 다시 입력해 주세요."); return; }
-        if (!name) { popup(false, "이름을 입력하세요", "받으실 분 이름을 입력해 주세요."); return; }
-        if (!phone) { popup(false, "휴대폰 번호를 입력하세요", "연락 가능한 휴대폰 번호를 입력해 주세요."); return; }
+        if (!name) { popup(false, "이름을 입력하세요", "성함을 입력해 주세요."); return; }
+        const dPhone = phone.replace(/[^0-9]/g, "");
+        if (!/^01[016789]\d{7,8}$/.test(dPhone) || (dPhone.startsWith("010") && dPhone.length !== 11)) { popup(false, "휴대폰 번호를 확인하세요", "010으로 시작하는 휴대폰 번호 11자리를 정확히 입력해 주세요."); return; }
+        const normPhone = dPhone.length === 11 ? dPhone.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3") : dPhone.replace(/(\d{3})(\d{3,4})(\d{4})/, "$1-$2-$3");
         if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { popup(false, "이메일 형식 오류", "이메일 형식이 올바르지 않아요."); return; }
         if (!agree) { popup(false, "약관 동의가 필요해요", "이용약관 및 개인정보 처리방침에 동의해 주세요."); return; }
 
@@ -113,14 +124,15 @@
             popup(false, "이미 사용 중인 아이디", "다른 아이디를 입력해 주세요.");
             btn.disabled = false; btn.textContent = "가입하기"; return;
           }
-          await window.OSS.signUpMember(username, pw, { name, phone, email });
-          popup(true, "회원가입 완료", "가입이 완료되었어요. 로그인 페이지로 이동합니다.", "login.html");
+          await window.OSS.signUpMember(username, pw, { name, phone: normPhone, email });
+          popup(true, "회원가입 완료", "가입이 완료되었어요! 바로 이용하실 수 있어요.", "mypage.html");
         } catch (err) {
           const m = (err && err.message) || "";
           if (/already registered|already been registered/i.test(m)) {
             popup(false, "이미 사용 중인 아이디", "다른 아이디를 입력해 주세요.");
           } else {
-            popup(false, "가입 실패", m || "알 수 없는 오류가 발생했어요.");
+            console.error("[signup]", m);
+            popup(false, "가입 실패", "가입 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
           }
           btn.disabled = false; btn.textContent = "가입하기";
         }
