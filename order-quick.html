@@ -541,6 +541,7 @@
       new daum.Postcode({ oncomplete: function (data) {
         $("#fZip").value = data.zonecode;
         $("#fAddr").value = (data.roadAddress || data.address) + " ";
+        $("#fAddr").dataset.road = (data.roadAddress || data.address);
         $("#fAddr").focus();
       } }).open();
     });
@@ -605,9 +606,13 @@
       var addr = $("#fAddr").value.trim();
       var err = $("#err2");
       if (!name) { err.textContent = "수취인명을 입력해 주세요."; return; }
-      if (!phone) { err.textContent = "휴대폰번호를 입력해 주세요."; return; }
-      if (!customs) { err.textContent = "개인통관고유부호를 입력해 주세요 (통관에 꼭 필요해요)."; return; }
-      if (!addr || !zip) { err.textContent = "주소를 '주소검색'으로 입력해 주세요 (우편번호 포함). 통관·국내배송에 꼭 필요해요."; return; }
+      var pdig = phone.replace(/[^0-9]/g, "");
+      if (pdig.length < 10 || pdig.length > 11 || !/^01/.test(pdig)) { err.textContent = "휴대폰번호 11자리를 정확히 입력해 주세요."; return; }
+      customs = customs.replace(/\s/g, "").toUpperCase();
+      if (!/^P\d{12}$/.test(customs)) { err.textContent = "개인통관고유부호는 P와 숫자 12자리예요. 예: P012345678901"; return; }
+      if (!addr || !zip) { err.textContent = "주소를 '주소검색'으로 입력해 주세요 (우편번호 포함)."; return; }
+      var road = $("#fAddr").dataset.road || "";
+      if (road && addr.replace(road, "").trim().length < 2) { err.textContent = "상세주소(동·호수 등)를 입력해 주세요. 도로명만으로는 배송이 어려워요."; return; }
       err.textContent = "";
       if (!(window.OSS && OSS.submitApplication)) { err.textContent = "연결 오류 — 잠시 후 다시 시도해 주세요."; return; }
 

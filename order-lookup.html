@@ -104,12 +104,17 @@
 
     document.getElementById("lookupForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const orderNo = document.getElementById("lkOrderNo").value.trim();
-      const phone = document.getElementById("lkPhone").value.trim();
       const err = document.getElementById("lkError");
       const btn = document.getElementById("lkBtn");
       const resultBox = document.getElementById("lkResult");
+      let orderNo = document.getElementById("lkOrderNo").value.toUpperCase().replace(/\s+/g, "");
+      const m = orderNo.match(/^OSS-?(\d{6})-?([A-Z0-9]{4})$/);
+      if (m) orderNo = "OSS-" + m[1] + "-" + m[2];
+      const phone = document.getElementById("lkPhone").value.trim();
+      const pdig = phone.replace(/[^0-9]/g, "");
       err.textContent = ""; resultBox.hidden = true;
+      if (!m) { err.textContent = "주문번호 형식을 확인해 주세요 (예: OSS-260608-A3F9)."; return; }
+      if (pdig.length < 10 || pdig.length > 11) { err.textContent = "전화번호를 숫자 10~11자리로 입력해 주세요."; return; }
       btn.disabled = true; btn.textContent = "조회 중...";
       try {
         const rows = await window.OSS.lookupOrder(orderNo, phone);
