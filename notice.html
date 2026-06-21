@@ -14,8 +14,8 @@
 
   <section class="page-hero">
     <div class="container">
-      <h1>공지사항</h1>
-      <p>OSS의 새로운 소식과 이용 안내를 확인하세요.</p>
+      <h1>공지사항 · 검색</h1>
+      <p>새로운 소식과 자주 묻는 질문(FAQ)을 검색해 보세요.</p>
     </div>
   </section>
 
@@ -23,6 +23,10 @@
     <div class="container cs-layout">
       <aside class="cs-sidebar" data-cs="notice"></aside>
       <div class="cs-content">
+        <div style="margin-bottom:18px;">
+          <input id="searchBox" type="search" placeholder="🔍 공지·FAQ 검색 (예: 배송, 통관, 환불)" style="width:100%;height:48px;padding:0 16px;border:1.5px solid #EFE3DA;border-radius:12px;font-family:inherit;font-size:15px;background:#fff;" />
+        </div>
+        <div id="faqResults"></div>
         <div class="notice-list" id="noticeList">
           <p class="section-lead">공지사항을 불러오는 중...</p>
         </div>
@@ -52,28 +56,56 @@
   <script src="script.js?v=21"></script>
   <script>
     function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function bindAccordion(container){
+      container.querySelectorAll(".notice-head").forEach((h) => {
+        h.addEventListener("click", () => {
+          const body = h.nextElementSibling;
+          body.hidden = !body.hidden;
+          h.classList.toggle("open", !body.hidden);
+        });
+      });
+    }
     (async function () {
       const wrap = document.getElementById("noticeList");
-      try {
-        const list = await window.OSS.fetchNotices();
-        if (!list.length) { wrap.innerHTML = '<p class="section-lead">등록된 공지사항이 없습니다.</p>'; return; }
-        wrap.innerHTML = list.map((n) => `
-          <div class="notice-item">
-            <button class="notice-head" type="button">
-              <span class="notice-title">${n.pinned ? '<span class="notice-pin">중요</span> ' : ''}${esc(n.title)}</span>
-              <span class="notice-date">${(n.created_at||"").slice(0,10)}</span>
-            </button>
-            <div class="notice-body" hidden>${esc(n.body).replace(/\n/g,"<br>")}</div>
-          </div>`).join("");
-        wrap.querySelectorAll(".notice-head").forEach((h) => {
-          h.addEventListener("click", () => {
-            const body = h.nextElementSibling;
-            body.hidden = !body.hidden;
-            h.classList.toggle("open", !body.hidden);
-          });
-        });
-      } catch (e) {
-        wrap.innerHTML = '<p class="section-lead">공지사항을 불러오지 못했어요: ' + (e.message || e) + '</p>';
+      const faqBox = document.getElementById("faqResults");
+      const search = document.getElementById("searchBox");
+      let NOTICES = [], FAQ = [], ok = true;
+      try { NOTICES = await window.OSS.fetchNotices(); }
+      catch (e) { ok = false; wrap.innerHTML = '<p class="section-lead">공지사항을 불러오지 못했어요: ' + (e.message || e) + '</p>'; }
+      try { const f = await window.OSS.getSetting("faq"); if (Array.isArray(f)) FAQ = f; } catch (e) {}
+
+      function noticeCard(n){
+        return `<div class="notice-item"><button class="notice-head" type="button">
+            <span class="notice-title">${n.pinned ? '<span class="notice-pin">중요</span> ' : ''}${esc(n.title)}</span>
+            <span class="notice-date">${(n.created_at||"").slice(0,10)}</span>
+          </button><div class="notice-body" hidden>${esc(n.body).replace(/\n/g,"<br>")}</div></div>`;
+      }
+      function renderNotices(q){
+        const list = q ? NOTICES.filter((n) => ((n.title||"") + " " + (n.body||"")).toLowerCase().includes(q)) : NOTICES;
+        wrap.innerHTML = list.length ? list.map(noticeCard).join("")
+          : '<p class="section-lead">' + (q ? '일치하는 공지가 없어요.' : '등록된 공지사항이 없습니다.') + '</p>';
+        bindAccordion(wrap);
+      }
+      function renderFaq(q){
+        if (!q || !FAQ.length) { faqBox.innerHTML = ""; return; }
+        const hits = FAQ.filter((it) => ((it.q||"") + " " + (it.a||"") + " " + (it.category||"")).toLowerCase().includes(q));
+        faqBox.innerHTML = hits.length
+          ? '<h2 class="section-lead" style="margin:0 0 10px;font-size:16px;">❓ FAQ 검색결과 (' + hits.length + ')</h2>'
+            + hits.map((it) => `<div class="notice-item"><button class="notice-head" type="button">
+                <span class="notice-title">${esc(it.q)}</span>${it.category ? `<span class="notice-date">${esc(it.category)}</span>` : ''}
+              </button><div class="notice-body" hidden>${esc(it.a).replace(/\n/g,"<br>")}</div></div>`).join("")
+            + '<h2 class="section-lead" style="margin:22px 0 10px;font-size:16px;">📢 공지사항</h2>'
+          : "";
+        bindAccordion(faqBox);
+      }
+      function run(){ const q = (search.value || "").trim().toLowerCase(); renderFaq(q); renderNotices(q); }
+
+      if (ok && search) {
+        search.addEventListener("input", run);
+        const qp = new URLSearchParams(location.search).get("q");
+        if (qp) search.value = qp;
+        run();
+        if (qp || location.hash === "#search") search.focus();
       }
     })();
   </script>

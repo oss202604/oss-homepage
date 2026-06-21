@@ -630,7 +630,7 @@
         var _sa = document.getElementById("fSaveAddr");
         if (_sa && _sa.checked && OSS.saveAddress) { OSS.saveAddress({ receiver_name: name, receiver_phone: phone, zipcode: zip, address: addr, customs_code: customs }).then(function () {}, function () {}); }
         var _finalYen = bp.subtotal + Math.round(bp.subtotal * 0.03);
-        var _dp = $("#donePay"); if (_dp) _dp.textContent = "₩" + Number(_finalYen * YEN_KRW).toLocaleString();
+        var _dp = $("#donePay"); if (_dp) _dp.textContent = bp.subtotal > 0 ? "₩" + Number(_finalYen * YEN_KRW).toLocaleString() : "상품가 확인 후 안내드려요";
         $("#panelDone").style.display = "block";
         window.scrollTo({ top: 0, behavior: "smooth" });
         icons();
