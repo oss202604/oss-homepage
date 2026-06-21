@@ -281,7 +281,7 @@ p { word-break: keep-all; }
 
 /* 상단 공지 띠배너 */
 .top-noti { background: #F79AC1; color: #412233; font-size: 14px; font-weight: 700; }
-.top-noti-in { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 11px 16px; position: relative; }
+.top-noti-in { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 16px; position: relative; }
 .top-noti-msg { text-align: center; font-weight: 700; letter-spacing: -.2px; }
 .top-noti-msg a { color: inherit; text-decoration: underline; }
 

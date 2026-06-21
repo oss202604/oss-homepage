@@ -167,11 +167,11 @@ async function adminSignOut() {
 
 // ============================================================
 // 회원(고객) 인증 — 아이디 기반
-// 아이디는 내부적으로 "아이디@oss.local" 가짜 이메일로 변환해 Supabase Auth에 저장.
+// 아이디는 내부적으로 "아이디@ossohayo.com" 가짜 이메일로 변환해 Supabase Auth에 저장.
 // ⚠️ Supabase → Authentication → Providers → Email → "Confirm email" 을 OFF 해야
 //    가입 즉시 로그인됩니다(가짜 이메일이라 인증메일 수신 불가).
 // ============================================================
-const OSS_LOGIN_DOMAIN = "@oss.local";
+const OSS_LOGIN_DOMAIN = "@ossohayo.com"; // @oss.local은 Supabase가 형식 거부(invalid) → 변경
 function usernameToEmail(username) {
   return String(username).trim().toLowerCase() + OSS_LOGIN_DOMAIN;
 }
