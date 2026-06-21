@@ -578,8 +578,10 @@
       if (road && addr.replace(road, "").trim().length < 2) { err.textContent = "상세주소(동·호수 등)를 입력해 주세요. 도로명만으로는 배송이 어려워요."; return; }
       err.textContent = "";
       if (!(window.OSS && OSS.submitApplication)) { err.textContent = "연결 오류 — 잠시 후 다시 시도해 주세요."; return; }
+      var bp = buildProducts();
+      if (bp.products.some(function (p) { return !p.category; })) { err.textContent = "각 상품의 품목 분류를 선택해 주세요 (통관 신고에 필요해요)."; return; }
       var btn = this; btn.disabled = true; btn.textContent = "접수 중...";
-      var bp = buildProducts(); var orderNo = genOrderNo();
+      var orderNo = genOrderNo();
       var payload = {
         order_no: orderNo, type: "delivery", status: "신규접수",
         source: SOURCE, channel: CHANNEL, ship_method: ship,

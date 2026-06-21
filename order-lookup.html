@@ -70,7 +70,7 @@
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=15"></script>
-  <script src="script.js?v=26"></script>
+  <script src="script.js?v=27"></script>
   <script>
     function badgeClass(s) {
       if (s === "신규접수") return "status-new";
@@ -126,7 +126,7 @@
               <td>${r.order_no || "-"}</td>
               <td>${r.type === "purchase" ? "구매대행" : "배송대행"}</td>
               <td><span class="status-badge ${badgeClass(r.status)}">${r.status}</span></td>
-              <td>¥${(r.subtotal || 0).toLocaleString()}</td>
+              <td>¥${(r.subtotal || 0).toLocaleString()}<br><span style="font-size:11px;color:#888;">약 ₩${((r.subtotal || 0) * 10).toLocaleString()}</span></td>
               <td>${(r.created_at || "").slice(0,10)}</td>
             </tr>`).join("");
           resultBox.hidden = false;

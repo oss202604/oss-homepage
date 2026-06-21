@@ -753,6 +753,7 @@ document.addEventListener("change", async (e) => {
 
 // ===== 상단 공지 띠배너 (전 페이지) =====
 (function renderTopBar() {
+  try { if (sessionStorage.getItem("oss_topbar_closed")) { var ex = document.querySelector(".top-noti"); if (ex) ex.remove(); return; } } catch (e) {}
   var bar = document.querySelector(".top-noti");
   if (!bar) {
     bar = document.createElement("div");
@@ -761,14 +762,23 @@ document.addEventListener("change", async (e) => {
     document.body.insertBefore(bar, document.body.firstChild);
   }
   var el = document.getElementById("topNotiMsg") || bar.querySelector(".top-noti-msg");
+  var i = 0, timer = null;
+  // 닫기(×) 버튼 — 이번 방문 동안 안 보이게
+  bar.style.position = "relative";
+  if (!bar.querySelector(".top-noti-x")) {
+    var xb = document.createElement("button");
+    xb.type = "button"; xb.className = "top-noti-x"; xb.setAttribute("aria-label", "닫기"); xb.textContent = "×";
+    xb.style.cssText = "position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:inherit;font-size:18px;line-height:1;cursor:pointer;opacity:.6;padding:4px;";
+    xb.addEventListener("click", function () { try { sessionStorage.setItem("oss_topbar_closed", "1"); } catch (e) {} if (timer) clearInterval(timer); bar.remove(); });
+    (bar.querySelector(".top-noti-in") || bar).appendChild(xb);
+  }
   // 글마다 색상 순환(본리식 밝은 파스텔): 분홍 · 노랑 · 복숭아 · 민트
   var pal = [{ b: "#F79AC1", f: "#412233" }, { b: "#FFE04A", f: "#5A4A10" }, { b: "#FFB58A", f: "#5A3018" }, { b: "#8FD9C8", f: "#184038" }];
   var msgs = ["신규 가입하면 배송비 쿠폰 3장 드려요 🎁", "일본 직구, 링크만 보내면 OSS가 다 해드려요 ✨", "검수사진 제공 · 실시간 배송추적 · 카톡 상담 💬"];
   bar.style.transition = "background .4s ease, color .4s ease";
-  var i = 0;
   function show() { var c = pal[i % pal.length]; bar.style.background = c.b; bar.style.color = c.f; if (el) { el.style.color = c.f; el.textContent = msgs[i % msgs.length]; } }
   show();
-  setInterval(function () { i++; show(); }, 4000);
+  timer = setInterval(function () { i++; show(); }, 5500);
   // 관리자 설정(설정 → 띠배너 문구) 우선 적용. 여러 줄 입력 시 줄마다 순환.
   if (window.OSS && window.OSS.getSetting) window.OSS.getSetting("topbar").then(function (v) {
     var t = (typeof v === "string" ? v : (v && v.text)) || "";
