@@ -590,6 +590,15 @@ p { word-break: keep-all; }
 .osshead-acct.open .osshead-menu { display: block; }
 .osshead-menu a { display: block; padding: 10px 14px; text-decoration: none; color: var(--text); font-size: 14px; font-weight: 600; border-radius: 9px; }
 .osshead-menu a:hover { background: var(--hero-bg); color: var(--orange); }
+/* 네비 드롭다운 (데스크톱 hover로 하위메뉴 바로가기) */
+.osshead-navitem { position: relative; display: inline-flex; align-items: center; }
+.osshead-navitem > a::after { content: "▾"; font-size: 10px; margin-left: 3px; opacity: .55; }
+.osshead-sub { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); min-width: 172px; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 8px; display: none; z-index: 95; }
+.osshead-navitem:hover .osshead-sub { display: block; }
+.osshead-sub a { display: block; padding: 10px 14px; border-radius: 9px; color: var(--text); font-weight: 600; font-size: 14px; white-space: nowrap; }
+.osshead-sub a:hover { background: var(--hero-bg); color: var(--orange); }
+@media (min-width: 901px) { .osshead-nav { overflow: visible; } }
+@media (max-width: 900px) { .osshead-sub { display: none !important; } .osshead-navitem > a::after { display: none; } }
 .top-noti { background: #F79AC1; color: #412233; border: none; }
 .top-noti-msg, .top-noti a { color: inherit; }
 @media (max-width: 860px) {

@@ -63,6 +63,30 @@ if (menuToggle && mainMenu) {
     if (btn) btn.addEventListener("click", function (e) { e.stopPropagation(); acct.classList.toggle("open"); });
     document.addEventListener("click", function () { acct.classList.remove("open"); });
   }
+  // 네비 드롭다운 주입 (마우스 올리면 하위메뉴) — 전 페이지 공통
+  var navEl = document.querySelector(".osshead-nav");
+  if (navEl && !navEl.getAttribute("data-sub")) {
+    navEl.setAttribute("data-sub", "1");
+    var SUBS = {
+      "order.html": [["order.html", "구매대행 신청"], ["order-quick.html", "간편 주문 (링크만)"], ["order-lookup.html", "주문조회"]],
+      "delivery.html": [["delivery.html", "배송대행 신청"], ["delivery-quick.html", "간편 배송신청"]],
+      "guide.html": [["guide.html", "이용안내"], ["faq.html", "자주 묻는 질문"], ["guide.html#guide-customs", "통관·관세 안내"], ["guide.html#guide-money", "예치금(머니충전)"]],
+      "notice.html": [["notice.html", "공지사항"], ["faq.html", "자주 묻는 질문"], ["contact.html", "1:1 문의"]]
+    };
+    [].slice.call(navEl.querySelectorAll("a")).forEach(function (a) {
+      var key = (a.getAttribute("href") || "").split("#")[0];
+      var items = SUBS[key];
+      if (!items) return;
+      var item = document.createElement("span");
+      item.className = "osshead-navitem";
+      a.parentNode.insertBefore(item, a);
+      item.appendChild(a);
+      var sub = document.createElement("div");
+      sub.className = "osshead-sub";
+      sub.innerHTML = items.map(function (it) { return '<a href="' + it[0] + '">' + it[1] + "</a>"; }).join("");
+      item.appendChild(sub);
+    });
+  }
 })();
 
 (function renderFooter() {
