@@ -31,6 +31,36 @@ let FX_APPLIED = 1000; // 적용환율(100엔당 원). exchange_rate.applied. ¥
 // HTML 이스케이프(저장형 XSS 방지) + 안전 URL 가드 — 고객 입력을 관리자 화면에 렌더할 때 사용
 function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
 function safeUrl(u) { u = String(u == null ? "" : u).trim(); if (!/^https?:\/\//i.test(u)) return ""; return u.replace(/["'<>]/g, encodeURIComponent); }
+
+// CSV 한 칸 (한글/콤마/줄바꿈/따옴표 안전 + CSV Injection 가드: =,+,-,@ 로 시작하면 ' 프리픽스)
+function csvCell(v) { v = String(v == null ? "" : v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }
+function downloadCsv(filename, rows) {
+  const body = rows.map((r) => r.map(csvCell).join(",")).join("\r\n");
+  const blob = new Blob(["﻿" + body], { type: "text/csv;charset=utf-8;" }); // BOM: 엑셀 한글 안 깨짐
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+}
+// UTC ISO → 사장님 PC(한국시간) 기준 날짜 YYYY-MM-DD (월말 새벽/막차 주문 오집계 방지)
+function toLocalYmd(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return String(iso).slice(0, 10);
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return d.getFullYear() + "-" + m + "-" + day;
+}
+
+// 정산·대시보드·표뷰·배너 공용 전역
+const perJpy = () => FX_APPLIED / 100;   // ¥1 → ₩ (계산기·요율과 동일 환율)
+let COMMISSION_PCT = 3;                   // 구매대행 수수료% (loadFx에서 설정값으로 덮어씀)
+let DELAY_DAYS = 7;                       // 지연 경보 기준일 (fee_policy.delayDays로 조정)
+const TYPE_LABEL = { all: "전체", purchase: "구매대행", delivery: "배송대행" };
+let VIEW = "kanban";                      // 주문관리 보기 (kanban|table)
+let SORT = { key: "created", dir: -1 };   // 표뷰 정렬 (기본 등록일 최신순)
+let SETTLE_ROWS = null;                   // 정산 첫 진입 자동집계 판단 + CSV 대상
+let SETTLE_META = null;                   // 마지막 정산 조건 (CSV 파일명·합계)
+let BANNERS = [];                         // 메인 배너 목록
 // 사토리 기본요율(항공 실측값, 해상은 동일값으로 두고 관리자가 조정) — "기본요율 불러오기"용
 const DEFAULT_RATES = [
   [0.5,1000,1000],[1,1150,1150],[1.5,1300,1300],[2,1450,1450],[2.5,1600,1600],
@@ -87,6 +117,7 @@ function mapRow(row) {
     amount: row.subtotal || 0,
     status: row.status || "신규접수",
     created: (row.created_at || "").slice(0, 10),
+    created_local: toLocalYmd(row.created_at),
     flag: row.flag || "",
     deleted: !!row.deleted_at,
     raw: row,
@@ -108,6 +139,7 @@ function applyPermGate() {
   if (!can("orders_view")) hideNav("orders");
   if (!can("board_manage")) hideNav("board");
   if (!can("settings_manage")) hideNav("settings");
+  if (!can("settings_manage")) hideNav("settle");
   hideNav("members"); // 회원관리(등급·권한)는 마스터 전용
   if (!can("orders_delete")) {
     const md = document.getElementById("modalDelete");
@@ -154,6 +186,8 @@ async function reloadOrders() {
     const rows = await window.OSS.fetchApplications();
     ORDERS = rows.map(mapRow);
     renderKanban(); renderDashboard();
+    const sp = document.getElementById("page-settle");
+    if (sp && sp.classList.contains("active")) { const b = document.getElementById("settleStale"); if (b) b.textContent = "데이터가 바뀌었어요 — [집계]를 다시 눌러주세요."; }
   } catch (e) { console.warn("[admin] reload", e); }
 }
 function scheduleReload() { clearTimeout(_adminReloadTimer); _adminReloadTimer = setTimeout(reloadOrders, 400); }
@@ -378,8 +412,21 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
     document.querySelectorAll(".admin-page").forEach((p) => p.classList.remove("active"));
     btn.classList.add("active");
     document.getElementById("page-" + btn.dataset.page).classList.add("active");
+    if (btn.dataset.page === "settle" && SETTLE_ROWS === null) renderSettle(); // 첫 진입 시 이번달 자동집계
   });
 });
+
+// 설정 하위 탭 — 한 번에 한 그룹만 보이게 (배송센터·환율·수수료=기본 / 요율·등급 / 띠배너·메인배너=홈 / 안내·후기·FAQ=콘텐츠)
+(function setSubtabs() {
+  const tabs = document.querySelectorAll(".set-subtab");
+  if (!tabs.length) return;
+  function show(group) {
+    tabs.forEach((t) => t.classList.toggle("active", t.dataset.setgroup === group));
+    document.querySelectorAll("#page-settings .dash-panel[data-setgroup]").forEach((p) => { p.hidden = (p.dataset.setgroup !== group); });
+  }
+  tabs.forEach((t) => t.addEventListener("click", () => show(t.dataset.setgroup)));
+  show("basic");
+})();
 
 // ----- 검색 -----
 let SEARCH = "";
@@ -420,6 +467,7 @@ function renderKanban() {
   bindCardClick();
   renderBundlePanel();
   renderTrash();
+  if (VIEW === "table") renderOrderTable();
 }
 
 // ----- 휴지통 (삭제된 주문) -----
@@ -709,6 +757,17 @@ function renderDashboard() {
     ? recent.map((o) => `<tr><td>${o.no}</td><td>${o.type === "purchase" ? "구매" : "배송"}</td><td>${o.customer}</td><td><span class="status-badge ${badgeClass(o.status)}">${labelOf(o.status)}</span></td></tr>`).join("")
     : `<tr><td colspan="4" class="empty">아직 신청이 없습니다.</td></tr>`;
 
+  // 이번달 KPI(한국시간 기준) + 지연 경보
+  const ymLocal = toLocalYmd(new Date().toISOString()).slice(0, 7);
+  const live = ORDERS.filter((o) => !o.deleted);
+  const monthOrders = live.filter((o) => (o.created_local || "").startsWith(ymLocal));
+  const elKc = document.getElementById("kpiMonthCnt");
+  if (elKc) elKc.innerHTML = monthOrders.length + "<small>건</small>";
+  const gmv = monthOrders.reduce((s, o) => s + Math.round((o.amount || 0) * perJpy()) + (Number(o.raw.shipping_fee) || 0), 0);
+  const elKg = document.getElementById("kpiMonthGmv");
+  if (elKg) elKg.textContent = "₩" + gmv.toLocaleString();
+  renderDelayAlert(live);
+
   // 문의 목록은 loadInquiries()가 채웁니다.
 }
 function badgeClass(s) {
@@ -717,6 +776,186 @@ function badgeClass(s) {
   if (EXCEPTION.some((e) => e.key === s)) return "status-hold";
   return "status-progress";
 }
+
+// ===== 지연 경보 — 진행중인데 현재 상태에 DELAY_DAYS일 이상 머문 주문 =====
+function renderDelayAlert(live) {
+  const tb = document.getElementById("delayRows");
+  if (!tb) return;
+  const skip = ["배송완료", "취소", "반품/교환", "사고/폐기"];
+  const now = Date.now();
+  const list = live.filter((o) => !skip.includes(o.status)).map((o) => {
+    const sd = (o.raw.status_dates && typeof o.raw.status_dates === "object") ? o.raw.status_dates : {};
+    const baseIso = sd[o.status] || o.raw.created_at || o.created;
+    const days = Math.floor((now - new Date(baseIso).getTime()) / 86400000);
+    return { o: o, days: days, estimated: !sd[o.status] };
+  }).filter((x) => isFinite(x.days) && x.days >= DELAY_DAYS).sort((a, b) => b.days - a.days);
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="3" class="empty">오래 멈춘 주문이 없어요 👍</td></tr>'; return; }
+  tb.innerHTML = list.map((x) =>
+    `<tr data-id="${x.o.id}" style="cursor:pointer;"><td>${esc(x.o.no)}</td><td>${esc(x.o.customer)} <span style="color:var(--muted);font-size:12px;">· ${labelOf(x.o.status)}</span></td><td style="color:var(--red);font-weight:700;white-space:nowrap;">${x.days}일째${x.estimated ? " (추정)" : ""}</td></tr>`
+  ).join("");
+  tb.querySelectorAll("tr[data-id]").forEach((tr) => tr.addEventListener("click", () => openModal(tr.dataset.id)));
+}
+
+// ===== 정산·통계 =====
+function settleRange() {
+  const period = (document.querySelector('input[name="settlePeriod"]:checked') || {}).value || "thisMonth";
+  const today = toLocalYmd(new Date().toISOString());
+  if (period === "thisMonth") return [today.slice(0, 7) + "-01", today];
+  if (period === "lastMonth") {
+    const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1);
+    const lm = toLocalYmd(d.toISOString()).slice(0, 7);
+    const lastDay = new Date(Number(lm.slice(0, 4)), Number(lm.slice(5, 7)), 0).getDate();
+    return [lm + "-01", lm + "-" + String(lastDay).padStart(2, "0")];
+  }
+  if (period === "thisYear") return [today.slice(0, 4) + "-01-01", today.slice(0, 4) + "-12-31"];
+  return [(document.getElementById("settleFrom").value || "1900-01-01"), (document.getElementById("settleTo").value || "2999-12-31")];
+}
+function renderSettle() {
+  const range = settleRange(); const from = range[0], to = range[1];
+  if (from > to) { alert("시작일이 종료일보다 늦어요. 날짜를 확인해 주세요."); return; }
+  const typeSel = document.getElementById("settleType").value || "all";
+  const inRange = (o) => (o.created_local || "") >= from && (o.created_local || "") <= to;
+  const base = ORDERS.filter((o) => !o.deleted && inRange(o));
+  const rows = base.filter((o) => o.status !== "취소" && o.status !== "반품/교환" && (typeSel === "all" || o.type === typeSel));
+  const S = (o) => Number(o.raw.subtotal) || 0;
+  const SH = (o) => Number(o.raw.shipping_fee) || 0;
+  const goodsYen = rows.reduce((s, o) => s + S(o), 0);
+  const goodsWon = Math.round(rows.reduce((s, o) => s + S(o) * perJpy(), 0));
+  const ship = rows.reduce((s, o) => s + SH(o), 0);
+  const commission = Math.round(rows.reduce((s, o) => s + S(o) * perJpy() * COMMISSION_PCT / 100, 0));
+  const gross = goodsWon + ship;
+  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  const elc = document.getElementById("stCnt"); if (elc) elc.innerHTML = rows.length + "<small>건</small>";
+  set("stGoodsYen", "¥" + goodsYen.toLocaleString());
+  set("stGoodsWon", "₩" + goodsWon.toLocaleString());
+  set("stShip", "₩" + ship.toLocaleString());
+  set("stCommission", "₩" + commission.toLocaleString());
+  set("stGross", "₩" + gross.toLocaleString());
+  const cancelCnt = base.filter((o) => o.status === "취소" || o.status === "반품/교환").length;
+  set("stCancelNote", cancelCnt ? `※ 같은 기간 취소·반품/교환 ${cancelCnt}건은 위 집계에서 제외했어요.` : "");
+  const settleSum = rows.reduce((s, o) => s + (Number(o.raw.settle_krw) || 0), 0);
+  set("stSettleManual", settleSum > 0 ? `· 수동 입력된 실정산 합계: ₩${settleSum.toLocaleString()} (추정과 별개)` : "");
+  const tb = document.getElementById("settleRows");
+  if (tb) {
+    tb.innerHTML = rows.length
+      ? rows.map((o) => `<tr data-id="${o.id}" style="cursor:pointer;"><td>${esc(o.no)}</td><td>${o.created_local || o.created}</td><td>${o.type === "purchase" ? "구매" : "배송"}</td><td>${labelOf(o.status)}</td><td>${esc(o.customer)}</td><td style="max-width:200px;white-space:normal;">${esc(o.name)}</td><td>¥${S(o).toLocaleString()}</td><td>₩${Math.round(S(o) * perJpy()).toLocaleString()}</td><td>₩${SH(o).toLocaleString()}</td><td>₩${Math.round(S(o) * perJpy() * COMMISSION_PCT / 100).toLocaleString()}</td></tr>`).join("")
+      : '<tr><td colspan="10" class="empty">해당 기간 주문이 없어요.</td></tr>';
+    tb.querySelectorAll("tr[data-id]").forEach((tr) => tr.addEventListener("click", () => openModal(tr.dataset.id)));
+  }
+  SETTLE_ROWS = rows; SETTLE_META = { from: from, to: to, typeSel: typeSel, settleSum: settleSum };
+  const stale = document.getElementById("settleStale"); if (stale) stale.textContent = "";
+}
+function settleCsv() {
+  renderSettle(); // 최신 데이터로 재집계 후 추출 (낡은 값 추출 방지)
+  if (!SETTLE_ROWS || !SETTLE_META) return;
+  const S = (o) => Number(o.raw.subtotal) || 0, SH = (o) => Number(o.raw.shipping_fee) || 0;
+  const C = (o) => Math.round(S(o) * perJpy() * COMMISSION_PCT / 100);
+  const hasSettle = SETTLE_META.settleSum > 0;
+  const head = ["주문번호", "접수일(KST)", "유형", "상태", "고객", "상품요약", "상품합계(엔)", "환산(원)", "배송비(원)", "추정수수료(원)"];
+  if (hasSettle) head.push("실정산(원)");
+  const body = SETTLE_ROWS.map((o) => {
+    const r = [o.no, o.created_local || o.created, TYPE_LABEL[o.type] || o.type, labelOf(o.status), o.customer, o.name, S(o), Math.round(S(o) * perJpy()), SH(o), C(o)];
+    if (hasSettle) r.push(Number(o.raw.settle_krw) || 0);
+    return r;
+  });
+  const sum = (f) => SETTLE_ROWS.reduce((s, o) => s + f(o), 0);
+  const total = ["합계", "", "", "", "", SETTLE_ROWS.length + "건", sum(S), Math.round(sum((o) => S(o) * perJpy())), sum(SH), sum(C)];
+  if (hasSettle) total.push(sum((o) => Number(o.raw.settle_krw) || 0));
+  downloadCsv("정산_" + SETTLE_META.from + "_" + (TYPE_LABEL[SETTLE_META.typeSel] || "전체") + ".csv", [head].concat(body, [total]));
+}
+(function bindSettle() {
+  const run = document.getElementById("settleRun"); if (run) run.addEventListener("click", renderSettle);
+  document.querySelectorAll('input[name="settlePeriod"]').forEach((r) => r.addEventListener("change", renderSettle));
+  const csv = document.getElementById("settleCsvBtn"); if (csv) csv.addEventListener("click", settleCsv);
+})();
+
+// ===== 주문 표 보기 (칸반 대안) =====
+function renderOrderTable() {
+  const tb = document.getElementById("orderTableRows");
+  if (!tb) return;
+  const list = ORDERS.filter((o) => !o.deleted && matchSearch(o)).slice().sort((a, b) => {
+    let av, bv;
+    if (SORT.key === "amount") { av = Number(a.amount) || 0; bv = Number(b.amount) || 0; }
+    else { av = a.created || ""; bv = b.created || ""; }
+    if (av < bv) return -1 * SORT.dir;
+    if (av > bv) return 1 * SORT.dir;
+    return 0;
+  });
+  tb.innerHTML = list.length
+    ? list.map((o) => `<tr data-id="${o.id}" style="cursor:pointer;"><td>${esc(o.no)}</td><td>${o.type === "purchase" ? "구매" : "배송"}</td><td>${esc(o.customer)}</td><td>${esc(o.name)}</td><td><span class="status-badge ${badgeClass(o.status)}">${labelOf(o.status)}</span></td><td>¥${(o.amount || 0).toLocaleString()}</td><td>${o.created}</td><td>${esc(o.raw.tracking_no || "-")}</td></tr>`).join("")
+    : '<tr><td colspan="8" class="empty">주문이 없습니다.</td></tr>';
+  tb.querySelectorAll("tr[data-id]").forEach((tr) => tr.addEventListener("click", () => openModal(tr.dataset.id)));
+  document.querySelectorAll("#orderTable th[data-sort]").forEach((th) => {
+    const ind = th.querySelector(".sort-ind");
+    if (ind) ind.textContent = (th.dataset.sort === SORT.key) ? (SORT.dir === -1 ? "▼" : "▲") : "";
+  });
+}
+(function bindOrderView() {
+  document.querySelectorAll(".view-toggle").forEach((b) => b.addEventListener("click", () => {
+    VIEW = b.dataset.view;
+    document.querySelectorAll(".view-toggle").forEach((x) => x.classList.toggle("active", x.dataset.view === VIEW));
+    const kw = document.getElementById("kanbanWrap"), tw = document.getElementById("orderTableWrap");
+    if (kw) kw.hidden = (VIEW !== "kanban");
+    if (tw) tw.hidden = (VIEW !== "table");
+    if (VIEW === "table") renderOrderTable();
+  }));
+  document.querySelectorAll("#orderTable th[data-sort]").forEach((th) => th.addEventListener("click", () => {
+    const k = th.dataset.sort;
+    if (SORT.key === k) SORT.dir *= -1; else { SORT.key = k; SORT.dir = -1; }
+    renderOrderTable();
+  }));
+  const csv = document.getElementById("orderCsvBtn");
+  if (csv) csv.addEventListener("click", () => {
+    const list = ORDERS.filter((o) => !o.deleted && matchSearch(o));
+    const head = ["주문번호", "유형", "고객", "상품", "상태", "합계(엔)", "등록일", "송장"];
+    const body = list.map((o) => [o.no, TYPE_LABEL[o.type] || o.type, o.customer, o.name, labelOf(o.status), Number(o.amount) || 0, o.created, o.raw.tracking_no || ""]);
+    downloadCsv("주문목록.csv", [head].concat(body));
+  });
+})();
+
+// ===== 메인 배너 관리 (설정) =====
+function renderBanners() {
+  const box = document.getElementById("bannerList");
+  if (!box) return;
+  box.innerHTML = BANNERS.length
+    ? BANNERS.map((b, i) => `<div class="bn-item"><img src="${safeUrl(b.url)}" alt="" onerror="this.style.display='none'"><div class="bn-meta">${esc(b.alt || "(설명 없음)")}<br><span style="color:var(--muted);font-size:12px;">${esc(b.link || "(링크 없음)")}</span></div><button class="btn btn-small" data-bn-del="${i}" style="color:var(--red);">삭제</button></div>`).join("")
+    : '<p class="form-note" style="text-align:left;">등록된 배너가 없어요. 비우면 홈에 기본 자리표시가 보여요.</p>';
+  box.querySelectorAll("[data-bn-del]").forEach((btn) => btn.addEventListener("click", async () => {
+    if (!confirm("이 배너를 목록에서 뺄까요? (홈에서 사라져요)")) return;
+    BANNERS.splice(Number(btn.dataset.bnDel), 1);
+    await saveBanners();
+  }));
+}
+async function saveBanners() {
+  try { await window.OSS.saveSetting("banners", BANNERS); renderBanners(); }
+  catch (e) { alert("저장 실패: " + (e.message || e)); }
+}
+async function loadBanners() {
+  try { const b = await window.OSS.getSetting("banners"); BANNERS = Array.isArray(b) ? b : []; }
+  catch (e) { BANNERS = []; }
+  renderBanners();
+}
+(function bindBanner() {
+  const add = document.getElementById("bnAdd"); if (!add) return;
+  add.addEventListener("click", async () => {
+    const msg = document.getElementById("bnMsg");
+    const fileEl = document.getElementById("bnFile");
+    const file = fileEl && fileEl.files && fileEl.files[0];
+    if (!file) { if (msg) msg.textContent = "이미지 파일을 먼저 선택하세요."; return; }
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) { if (msg) msg.textContent = "png·jpeg·webp 이미지만 올릴 수 있어요."; return; }
+    if (file.size > 5 * 1024 * 1024) { if (msg) msg.textContent = "5MB 이하 이미지만 올릴 수 있어요."; return; }
+    if (msg) msg.textContent = "업로드 중…";
+    try {
+      const url = await window.OSS.uploadBannerImage(file);
+      BANNERS.push({ url: url, link: (document.getElementById("bnLink").value || "").trim(), alt: (document.getElementById("bnAlt").value || "").trim() });
+      await window.OSS.saveSetting("banners", BANNERS);
+      if (msg) msg.textContent = "✓ 추가됐어요";
+      renderBanners();
+      fileEl.value = ""; document.getElementById("bnLink").value = ""; document.getElementById("bnAlt").value = "";
+      setTimeout(() => { if (msg) msg.textContent = ""; }, 3000);
+    } catch (e) { if (msg) msg.textContent = "업로드/저장 실패: " + (e.message || e); }
+  });
+})();
 
 // ----- 공지사항 (작성/목록/삭제) -----
 async function loadNotices() {
@@ -894,6 +1133,9 @@ async function loadFx() {
     v("setCommission", fee.commissionPct != null ? fee.commissionPct : 3);
     v("setFreeDays", fee.freeStorageDays != null ? fee.freeStorageDays : 30);
     v("setStorageDay", fee.storagePerDayKrw != null ? fee.storagePerDayKrw : 0);
+    COMMISSION_PCT = Number(fee.commissionPct) || 3;   // 정산 추정 수수료에 사용
+    DELAY_DAYS = Number(fee.delayDays) || 7;            // 대시보드 지연 경보 기준일
+    if (fx.applied) FX_APPLIED = Number(fx.applied) || FX_APPLIED;
   } catch (e) { console.error(e); }
 }
 document.getElementById("saveFx").addEventListener("click", async () => {
@@ -1052,3 +1294,4 @@ loadReviews();
 loadFaq();
 loadInquiries();
 loadTopbar();
+loadBanners();

@@ -72,6 +72,17 @@ async function uploadProductImage(file) {
   return data.publicUrl;
 }
 
+// ---- 메인 배너 이미지 업로드 (Storage: product-images 버킷의 banner/ 경로) ----
+// ※ banner/ 경로는 직원만 업로드 가능하도록 Storage RLS 정책을 배포 전 1회 적용해야 함
+async function uploadBannerImage(file) {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const path = "banner/" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext;
+  const { error } = await sb.storage.from("product-images").upload(path, file, { cacheControl: "3600", upsert: false });
+  if (error) throw error;
+  const { data } = sb.storage.from("product-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 // ---- 활동 로그 (세무·감사용, 누적만) ----
 async function logActivity(entry) {
   try { await sb.from("activity_log").insert([entry]); } catch (e) { /* 로그 실패는 본작업 막지 않음 */ }
@@ -413,6 +424,7 @@ window.OSS = {
   updateApplication,
   deleteApplication,
   uploadProductImage,
+  uploadBannerImage,
   logActivity,
   fetchActivityLog,
   fetchActivityLogByOrder,

@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=40" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="admin.css?v=13" />
+  <link rel="stylesheet" href="admin.css?v=14" />
 </head>
 <body class="admin-body">
   <!-- 상단 바 -->
@@ -28,6 +28,7 @@
         <li><button data-page="orders"><span class="ico"><i data-lucide="package"></i></span> 주문관리</button></li>
         <li><button data-page="members"><span class="ico"><i data-lucide="users"></i></span> 회원관리</button></li>
         <li><button data-page="board"><span class="ico"><i data-lucide="megaphone"></i></span> 공지·문의</button></li>
+        <li><button data-page="settle"><span class="ico"><i data-lucide="calculator"></i></span> 정산</button></li>
         <li><button data-page="settings"><span class="ico"><i data-lucide="settings"></i></span> 설정</button></li>
       </ul>
     </aside>
@@ -41,6 +42,19 @@
           <div class="stat-card accent-wait"><div class="stat-label">처리 대기</div><div class="stat-num" id="statWait">0<small>건</small></div></div>
           <div class="stat-card accent-alert"><div class="stat-label">예외 (보류·사고 등)</div><div class="stat-num" id="statAlert">0<small>건</small></div></div>
           <div class="stat-card accent-done"><div class="stat-label">오늘 완료</div><div class="stat-num" id="statDone">0<small>건</small></div></div>
+        </div>
+        <div class="stat-grid" style="margin-top:14px;grid-template-columns:repeat(2,1fr);">
+          <div class="stat-card"><div class="stat-label">이번달 주문</div><div class="stat-num" id="kpiMonthCnt">0<small>건</small></div></div>
+          <div class="stat-card"><div class="stat-label">이번달 총거래액 <small style="font-size:11px;">(추정·현재환율)</small></div><div class="stat-num" id="kpiMonthGmv">₩0</div></div>
+        </div>
+        <div class="dash-panel" style="margin:14px 0;">
+          <h3>⏰ 오래 멈춘 주문 <span style="font-size:12px;font-weight:400;color:var(--muted);">(설정 '지연 기준일' 이상 손 안 댄 진행중 주문 · 추정)</span></h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>주문번호</th><th>고객</th><th>정체</th></tr></thead>
+              <tbody id="delayRows"></tbody>
+            </table>
+          </div>
         </div>
         <div class="dash-cols">
           <div class="dash-panel">
@@ -84,13 +98,27 @@
 
         <div class="kanban-toolbar">
           <input id="orderSearch" placeholder="🔍 주문번호 · 고객명 · 연락처 · 송장번호로 검색" />
+          <button class="btn btn-small view-toggle active" data-view="kanban" type="button">칸반</button>
+          <button class="btn btn-small view-toggle" data-view="table" type="button">표</button>
           <button class="btn btn-small" id="trashToggle" type="button">🗑 휴지통 (<span id="trashCount">0</span>)</button>
         </div>
 
-        <p class="kanban-section-label">정상 흐름 — 카드를 끌어다 다음 단계로 옮기세요</p>
-        <div class="kanban" id="kanbanNormal"></div>
-        <p class="kanban-section-label" style="margin-top:20px;">예외 처리 — 취소·반품·사고 등은 이쪽으로</p>
-        <div class="kanban" id="kanbanException"></div>
+        <div id="kanbanWrap">
+          <p class="kanban-section-label">정상 흐름 — 카드를 끌어다 다음 단계로 옮기세요</p>
+          <div class="kanban" id="kanbanNormal"></div>
+          <p class="kanban-section-label" style="margin-top:20px;">예외 처리 — 취소·반품·사고 등은 이쪽으로</p>
+          <div class="kanban" id="kanbanException"></div>
+        </div>
+
+        <div id="orderTableWrap" hidden>
+          <div class="set-actions"><button class="btn btn-small" id="orderCsvBtn" type="button">📊 엑셀(CSV) 추출</button></div>
+          <div class="table-wrap">
+            <table class="data-table" id="orderTable">
+              <thead><tr><th>주문번호</th><th>유형</th><th>고객</th><th>상품</th><th>상태</th><th data-sort="amount">합계¥ <span class="sort-ind"></span></th><th data-sort="created">등록일 <span class="sort-ind"></span></th><th>송장</th></tr></thead>
+              <tbody id="orderTableRows"></tbody>
+            </table>
+          </div>
+        </div>
 
         <div class="dash-panel" id="trashPanel" hidden style="margin-top:22px;">
           <h3>🗑 휴지통 <span style="font-size:13px;font-weight:400;color:var(--muted);">(삭제된 주문 · 복원 가능)</span></h3>
@@ -179,11 +207,59 @@
           </div>
         </div>
       </section>
+
+      <!-- ===== 정산·통계 ===== -->
+      <section class="admin-page" id="page-settle">
+        <h2 class="admin-page-title">정산·통계</h2>
+        <p class="form-note" style="text-align:left;margin:0 0 16px;">한국시간(KST) 접수일 기준 · 현재환율 환산 · <b>추정치</b>(과거환율 미보관). 부가세 과세표준(수수료/총수취액)은 회계사 확인을 권장해요.</p>
+        <div class="dash-panel" style="margin-bottom:20px;">
+          <div class="set-grid">
+            <label class="full">기간
+              <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:14px;color:var(--text);font-weight:500;">
+                <label style="flex-direction:row;align-items:center;gap:5px;color:var(--text);"><input type="radio" name="settlePeriod" value="thisMonth" checked style="width:auto;"> 이번달</label>
+                <label style="flex-direction:row;align-items:center;gap:5px;color:var(--text);"><input type="radio" name="settlePeriod" value="lastMonth" style="width:auto;"> 지난달</label>
+                <label style="flex-direction:row;align-items:center;gap:5px;color:var(--text);"><input type="radio" name="settlePeriod" value="thisYear" style="width:auto;"> 올해</label>
+                <label style="flex-direction:row;align-items:center;gap:5px;color:var(--text);"><input type="radio" name="settlePeriod" value="custom" style="width:auto;"> 직접지정</label>
+              </div>
+            </label>
+            <label>시작일<input type="date" id="settleFrom" /></label>
+            <label>종료일<input type="date" id="settleTo" /></label>
+            <label>유형
+              <select id="settleType" style="padding:11px 13px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fbfcfe;"><option value="all">전체</option><option value="purchase">구매대행</option><option value="delivery">배송대행</option></select>
+            </label>
+          </div>
+          <div class="set-actions"><button class="btn btn-primary" id="settleRun" type="button">집계</button><span class="form-note" id="settleStale" style="color:#C0392B;margin:0;"></span></div>
+        </div>
+        <div class="stat-grid" id="settleCards" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card"><div class="stat-label">집계 건수</div><div class="stat-num" id="stCnt">0<small>건</small></div></div>
+          <div class="stat-card"><div class="stat-label">상품 합계 (¥)</div><div class="stat-num" id="stGoodsYen">¥0</div></div>
+          <div class="stat-card"><div class="stat-label">상품가 환산 <small style="font-size:11px;">(₩·현재환율)</small></div><div class="stat-num" id="stGoodsWon">₩0</div></div>
+          <div class="stat-card"><div class="stat-label">배송비 합계 (₩)</div><div class="stat-num" id="stShip">₩0</div></div>
+          <div class="stat-card settle-emph"><div class="stat-label">추정 수수료 수익 (₩)</div><div class="stat-num" id="stCommission">₩0</div></div>
+          <div class="stat-card settle-emph"><div class="stat-label">총 거래액 <small style="font-size:11px;">(고객 지불·매출 아님)</small></div><div class="stat-num" id="stGross">₩0</div></div>
+        </div>
+        <p class="form-note" id="stCancelNote" style="text-align:left;margin:10px 0 0;"></p>
+        <p class="form-note" id="stSettleManual" style="text-align:left;margin:4px 0 0;"></p>
+        <div class="set-actions"><button class="btn btn-small" id="settleCsvBtn" type="button">📊 엑셀(CSV) 다운로드</button></div>
+        <div class="table-wrap" style="margin-top:8px;">
+          <table class="data-table" id="settleTable">
+            <thead><tr><th>주문번호</th><th>접수일(KST)</th><th>유형</th><th>상태</th><th>고객</th><th>상품</th><th>상품합계¥</th><th>환산₩</th><th>배송비₩</th><th>추정수수료₩</th></tr></thead>
+            <tbody id="settleRows"><tr><td colspan="10" class="empty">[집계] 버튼을 눌러 기간을 조회하세요.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- ===== 설정 ===== -->
       <section class="admin-page" id="page-settings">
         <h2 class="admin-page-title">설정</h2>
+        <div class="set-subtabs">
+          <button class="set-subtab active" data-setgroup="basic" type="button">기본 설정</button>
+          <button class="set-subtab" data-setgroup="rates" type="button">요금·등급</button>
+          <button class="set-subtab" data-setgroup="home" type="button">홈 화면</button>
+          <button class="set-subtab" data-setgroup="content" type="button">고객 안내글</button>
+        </div>
 
-        <div class="dash-panel" style="margin-bottom:24px;">
+        <div class="dash-panel" data-setgroup="basic" style="margin-bottom:24px;">
           <h3>배송센터 주소 (일본 배대지)</h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">고객의 배송대행 신청 화면에 그대로 표시됩니다.</p>
           <div class="set-grid">
@@ -196,7 +272,7 @@
           <div class="set-actions"><button class="btn btn-primary" id="saveCenter">센터주소 저장</button><span class="save-ok" id="centerSaved"></span></div>
         </div>
 
-        <div class="dash-panel" style="margin-bottom:24px;">
+        <div class="dash-panel" data-setgroup="basic" style="margin-bottom:24px;">
           <h3>환율 설정 (예상비용 계산 기준)</h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">사장님이 직접 입력합니다. 사이트 환율 위젯과 예상비용 계산기에 즉시 반영됩니다. (기준: 일본 100엔당 원화)</p>
           <div class="set-grid">
@@ -207,7 +283,7 @@
           <div class="set-actions"><button class="btn btn-primary" id="saveFx">환율 저장</button><span class="save-ok" id="fxSaved"></span></div>
         </div>
 
-        <div class="dash-panel" style="margin-bottom:24px;">
+        <div class="dash-panel" data-setgroup="basic" style="margin-bottom:24px;">
           <h3>수수료 · 정책 설정</h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">구매대행 수수료율과 보관 정책입니다. 이용가이드 '수수료 안내' 페이지와 간편주문 견적에 즉시 반영됩니다.</p>
           <div class="set-grid">
@@ -218,14 +294,26 @@
           <div class="set-actions"><button class="btn btn-primary" id="saveFee">수수료·정책 저장</button><span class="save-ok" id="feeSaved"></span></div>
         </div>
 
-        <div class="dash-panel" style="margin-bottom:24px;">
+        <div class="dash-panel" data-setgroup="home" style="margin-bottom:24px;">
           <h3>상단 띠배너 문구</h3>
           <p class="form-note" style="text-align:left;margin:0 0 12px;">모든 페이지 맨 위 띠에 표시됩니다. 비워두면 최신 공지가 자동으로 표시돼요. (예: 14시 전 입고분 당일 출고 / 설 연휴 배송 안내 / 이벤트)</p>
           <input id="setTopbar" placeholder="예: 14시 전 입고분 당일 출고 / 이벤트 안내" style="width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fbfcfe;" />
           <div class="set-actions" style="margin-top:12px;"><button class="btn btn-primary" id="saveTopbar">띠배너 저장</button><span class="save-ok" id="topbarSaved"></span></div>
         </div>
 
-        <div class="dash-panel">
+        <div class="dash-panel" data-setgroup="home" style="margin-bottom:24px;">
+          <h3>메인 배너 관리 <span style="font-size:13px;font-weight:400;color:var(--muted);">(홈 첫화면 큰 이미지)</span></h3>
+          <p class="form-note" style="text-align:left;margin:0 0 16px;">권장 2480×800px · png/jpeg/webp · 5MB 이하. 비워두면 홈에 기본 자리표시가 보여요. 여러 장 올리면 홈에서 자동으로 넘어가요.</p>
+          <div class="set-grid">
+            <label class="full">이미지 파일<input type="file" id="bnFile" accept="image/png,image/jpeg,image/webp" /></label>
+            <label class="full">클릭 시 이동 (선택)<input id="bnLink" placeholder="예: order.html (비우면 구매대행 신청으로)" /></label>
+            <label class="full">설명 (선택)<input id="bnAlt" placeholder="배너 설명 (이미지 깨질 때·접근성용)" /></label>
+          </div>
+          <div class="set-actions"><button class="btn btn-small btn-primary" id="bnAdd" type="button">배너 추가</button><span class="save-ok" id="bnMsg"></span></div>
+          <div id="bannerList" style="margin-top:12px;"></div>
+        </div>
+
+        <div class="dash-panel" data-setgroup="rates">
           <h3>배송비 요율표 (무게 이하 → 배송비)</h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">고객 예상비용·관리자 입고계산에 자동 반영됩니다. 행을 수정/추가하세요. 단위: 엔(¥)</p>
           <div class="table-wrap">
@@ -249,7 +337,7 @@
           </div>
         </div>
 
-        <div class="dash-panel" style="margin-top:24px;">
+        <div class="dash-panel" data-setgroup="rates" style="margin-top:24px;">
           <h3>회원등급 설정 (등업 조건 · 배송비 할인율)</h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">예상비용 계산기와 배송비 할인에 반영됩니다. 등급명 · 등업 기준(누적 주문 건수 이상) · 배송비 할인율(%)을 정하세요.</p>
           <div class="table-wrap">
@@ -265,7 +353,7 @@
           </div>
         </div>
 
-        <div class="dash-panel" style="margin-top:24px;">
+        <div class="dash-panel" data-setgroup="content" style="margin-top:24px;">
           <h3>이용안내 페이지 편집</h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">고객 이용가이드 페이지에 표시됩니다. 항목을 선택해 내용을 작성/수정하세요.</p>
           <div class="set-grid">
@@ -288,7 +376,7 @@
           </div>
         </div>
 
-        <div class="dash-panel" style="margin-top:24px;">
+        <div class="dash-panel" data-setgroup="content" style="margin-top:24px;">
           <h3>이용후기 관리</h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">메인 페이지 하단 후기 섹션에 표시됩니다. 작성자명은 가운데를 *로 가려 등록하세요. (예: 양*향)</p>
           <div id="reviewRows"></div>
@@ -299,7 +387,7 @@
           </div>
         </div>
 
-        <div class="dash-panel" style="margin-top:24px;">
+        <div class="dash-panel" data-setgroup="content" style="margin-top:24px;">
           <h3>FAQ (자주 묻는 질문) 관리</h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">고객 FAQ 페이지에 표시됩니다. 카테고리·질문·답변을 등록하세요.</p>
           <div id="faqRows"></div>
@@ -383,8 +471,8 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=16"></script>
-  <script src="admin.js?v=19"></script>
+  <script src="supabase.js?v=17"></script>
+  <script src="admin.js?v=20"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

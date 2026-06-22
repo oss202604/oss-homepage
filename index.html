@@ -299,7 +299,7 @@
       document.getElementById('popDim').addEventListener('click', hide);
     }());
     // 히어로 캐러셀 (자동 넘김 5초 + 좌우 화살표 + 점, 호버 시 정지)
-    (function heroCarousel(){
+    function heroCarousel(){
       var car=document.getElementById('heroCarousel'); if(!car) return;
       var track=document.getElementById('heroSlides');
       var n=track.children.length, i=0, timer=null;
@@ -308,12 +308,29 @@
       var dots=dotsWrap.children;
       function go(to){ i=(to+n)%n; track.style.transform='translateX('+(-i*100)+'%)'; for(var k=0;k<n;k++){ dots[k].className='oh-dot'+(k===i?' on':''); } }
       function next(){ go(i+1); } function prev(){ go(i-1); }
-      function start(){ timer=setInterval(next,5000); } function restart(){ clearInterval(timer); start(); }
+      function start(){ if(n>1) timer=setInterval(next,5000); } function restart(){ clearInterval(timer); start(); }
       document.getElementById('heroNext').addEventListener('click',function(){ next(); restart(); });
       document.getElementById('heroPrev').addEventListener('click',function(){ prev(); restart(); });
       car.addEventListener('mouseenter',function(){ clearInterval(timer); });
       car.addEventListener('mouseleave',start);
       go(0); start();
+    }
+    // 관리자가 올린 배너(settings.banners)가 있으면 자리표시 대신 표시한 뒤 캐러셀 시작
+    (function initHero(){
+      function escLocal(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+      function safeUrlLocal(u){ u=String(u==null?'':u).trim(); if(/^https?:\/\//i.test(u)) return u.replace(/["'<>]/g,encodeURIComponent); if(/^[a-z0-9_\-]+\.html(\?|#|$)/i.test(u)) return u.replace(/["'<>]/g,encodeURIComponent); return ''; }
+      function done(){ heroCarousel(); }
+      try {
+        if(window.OSS && OSS.getSetting){
+          OSS.getSetting('banners').then(function(banners){
+            if(Array.isArray(banners) && banners.length){
+              var html=banners.map(function(b){ var src=safeUrlLocal(b.url); if(!src) return ''; var href=safeUrlLocal(b.link)||'order.html'; var alt=escLocal(b.alt||'배너'); return '<a class="oh-slide" href="'+href+'"><img src="'+src+'" alt="'+alt+'" onerror="this.remove()"></a>'; }).join('');
+              if(html) document.getElementById('heroSlides').innerHTML=html;
+            }
+            done();
+          }).catch(done);
+        } else { done(); }
+      } catch(e){ done(); }
     })();
   </script>
 </body>
