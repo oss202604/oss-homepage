@@ -41,7 +41,7 @@
 
   <section class="page-hero">
     <div class="container">
-      <h1>👤 마이페이지</h1>
+      <h1>마이페이지</h1>
       <p>나의 주문 내역과 배송 상태를 확인할 수 있습니다.</p>
     </div>
   </section>
@@ -54,25 +54,51 @@
           <div class="mypage-avatar">👤</div>
           <p class="mypage-name" id="myName">게스트</p>
           <p class="mypage-email" id="myEmail">로그인이 필요합니다</p>
+          <p class="mypage-grade" id="myGrade"></p>
+        </div>
+        <div class="mp-wallet">
+          <div class="mp-wallet-row"><span class="lab">적립금</span><span class="val" id="walPoint">0<em>원·준비중</em></span></div>
+          <div class="mp-wallet-row"><span class="lab">쿠폰</span><span class="val" id="walCoupon">0<em>개</em></span></div>
+          <div class="mp-wallet-row"><span class="lab">예치금</span><span class="val" id="walDeposit">0<em>원·준비중</em></span></div>
+          <!-- TODO: 예치금 충전은 PG 결제 연동 후 활성화 -->
+          <button type="button" class="mp-charge" id="walChargeBtn" disabled title="결제 연동 후 제공됩니다">예치금 충전 (준비중)</button>
         </div>
         <ul class="mypage-menu">
-          <li><a href="#orders" class="active">주문 내역</a></li>
+          <li><a href="#dashboard" class="active">신청 현황</a></li>
+          <li><a href="#orders">구매대행 내역</a></li>
+          <li><a href="#shipping">배송대행 내역</a></li>
           <li><a href="#coupons">쿠폰함</a></li>
           <li><a href="#reviews">구매후기</a></li>
-          <li><a href="#shipping">배송 조회</a></li>
-          <li><a href="#address">나의 배대지 주소</a></li>
+          <li><a href="#address">배대지 주소</a></li>
           <li><a href="#savedAddrs">저장된 배송지</a></li>
-          <li><a href="#info">회원 정보 수정</a></li>
+          <li><a href="#info">회원 정보</a></li>
           <li><a href="#" id="logoutBtn">로그아웃</a></li>
         </ul>
       </aside>
 
       <!-- 우측 컨텐츠 -->
       <div class="mypage-content">
+        <!-- 신청 현황 대시보드 -->
+        <div class="mypage-block" id="dashboard">
+          <h2 class="mypage-title">신청 현황</h2>
+          <div class="mp-dash-group">
+            <h4>구매대행 <span class="cnt" id="dashCntPurchase">0건</span></h4>
+            <div class="mp-stats" id="dashPurchase"></div>
+          </div>
+          <div class="mp-dash-group">
+            <h4>배송대행 <span class="cnt" id="dashCntDelivery">0건</span></h4>
+            <div class="mp-stats" id="dashDelivery"></div>
+          </div>
+          <div class="mp-dash-group">
+            <h4>확인 / 예외</h4>
+            <div class="mp-stats" id="dashExcept"></div>
+          </div>
+          <div id="dashResult" class="mp-dash-result"><p class="mp-dash-hint">위 상태를 누르면 해당 주문이 여기에 바로 표시돼요.</p></div>
+        </div>
         <!-- 주문 내역 -->
         <div class="mypage-block" id="orders">
-          <h2 class="mypage-title">📦 구매대행 주문 내역</h2>
-          <p class="table-hint">💡 표가 넓으면 좌우로 밀어서 보세요</p>
+          <h2 class="mypage-title">구매대행 주문 내역</h2>
+          <p class="table-hint">표가 넓으면 좌우로 밀어서 보세요</p>
           <div class="table-wrap">
             <table class="data-table">
               <thead>
@@ -94,14 +120,14 @@
 
         <!-- 쿠폰함 -->
         <div class="mypage-block" id="coupons">
-          <h2 class="mypage-title">🎟️ 내 쿠폰함</h2>
+          <h2 class="mypage-title">내 쿠폰함</h2>
           <p class="form-note">회원가입 축하 <b>배송비 할인쿠폰</b>이에요. 주문하실 때 "쿠폰 쓸게요"라고 알려주시면 사장님이 정산할 때 배송비에서 차감해드려요. (한 주문에 1장 · 발급일로부터 한 달)</p>
           <div id="couponList" class="coupon-list"><p class="empty">불러오는 중...</p></div>
         </div>
 
         <!-- 구매후기 -->
         <div class="mypage-block" id="reviews">
-          <h2 class="mypage-title">⭐ 구매후기 작성</h2>
+          <h2 class="mypage-title">구매후기 작성</h2>
           <form class="order-form" id="reviewForm">
             <div class="form-row">
               <label>별점
@@ -115,7 +141,7 @@
               </label>
               <label>주문번호 (선택)<input type="text" id="rvOrder" placeholder="OSS-..." /></label>
             </div>
-            <label>후기 내용<textarea id="rvBody" rows="4" placeholder="상품·배송·응대 등 솔직한 후기를 남겨주세요. 사장님 확인 후 사이트에 게시됩니다 😊"></textarea></label>
+            <label>후기 내용<textarea id="rvBody" rows="4" placeholder="상품·배송·응대 등 솔직한 후기를 남겨주세요. 사장님 확인 후 사이트에 게시됩니다"></textarea></label>
             <button type="submit" class="btn btn-primary">후기 등록</button>
             <p id="rvMsg" style="margin-top:8px;font-size:13px;min-height:16px;"></p>
           </form>
@@ -125,8 +151,8 @@
 
         <!-- 배송 조회 -->
         <div class="mypage-block" id="shipping">
-          <h2 class="mypage-title">🚚 배송대행 신청 내역</h2>
-          <p class="table-hint">💡 표가 넓으면 좌우로 밀어서 보세요</p>
+          <h2 class="mypage-title">배송대행 신청 내역</h2>
+          <p class="table-hint">표가 넓으면 좌우로 밀어서 보세요</p>
           <div class="table-wrap">
             <table class="data-table">
               <thead>
@@ -147,16 +173,16 @@
 
         <!-- 배대지 주소 -->
         <div class="mypage-block" id="address">
-          <h2 class="mypage-title">🏠 나의 일본 배대지 주소</h2>
+          <h2 class="mypage-title">나의 일본 배대지 주소</h2>
           <div class="address-card" id="addressCard">
-            <p>📮 배대지 주소는 <b>첫 주문 접수 후</b> 회원님 전용 <b>고객번호</b>와 함께 안내드려요.</p>
+            <p>배대지 주소는 <b>첫 주문 접수 후</b> 회원님 전용 <b>고객번호</b>와 함께 안내드려요.</p>
             <p class="form-note" style="color:#c0392b;font-weight:700;">아직 발급 전이에요 — 일본 쇼핑몰에 입력하지 마세요.</p>
           </div>
         </div>
 
         <!-- 저장된 배송지 (최대 3개) -->
         <div class="mypage-block" id="savedAddrs">
-          <h2 class="mypage-title">📍 저장된 배송지 <span style="font-size:13px;font-weight:400;color:#888;">(최대 3개)</span></h2>
+          <h2 class="mypage-title">저장된 배송지<span style="font-size:13px;font-weight:400;color:#888;">(최대 3개)</span></h2>
           <p class="form-note" style="text-align:left;margin:0 0 12px;">자주 쓰는 배송지를 저장해두면, 주문서 작성할 때 <b>"내 주소지 사용"</b>으로 한 번에 불러올 수 있어요.</p>
           <div id="addrList" class="addr-list"><p class="empty">불러오는 중...</p></div>
           <form class="order-form" id="addrForm" style="margin-top:14px;">
@@ -180,7 +206,7 @@
 
         <!-- 회원정보 -->
         <div class="mypage-block" id="info">
-          <h2 class="mypage-title">⚙️ 회원 정보</h2>
+          <h2 class="mypage-title">회원 정보</h2>
           <form class="order-form" id="profileForm">
             <div class="form-row">
               <label>이름<input type="text" name="name" id="pfName" placeholder="홍길동" /></label>
@@ -190,7 +216,7 @@
             <button type="submit" class="btn btn-primary">정보 수정</button>
           </form>
           <hr style="border:none;border-top:1px solid #EFE3DA;margin:22px 0;" />
-          <h3 style="font-size:15px;margin-bottom:10px;">🔒 비밀번호 변경</h3>
+          <h3 style="font-size:15px;margin-bottom:10px;">비밀번호 변경</h3>
           <form class="order-form" id="pwForm">
             <div class="form-row">
               <label>새 비밀번호<input type="password" id="npw1" placeholder="6자 이상" autocomplete="new-password" /></label>
@@ -211,9 +237,9 @@
         <p class="footer-desc">일본 현지인 구매대행 배대지</p>
       </div>
       <div class="footer-contact">
-        <p>✉️ 이메일: oss202604@gmail.com</p>
-        <p>💬 카카오톡: @OSS (등록 예정)</p>
-        <p>🕒 상담시간: 평일 10:00 ~ 18:00 (일본시간)</p>
+        <p>이메일: oss202604@gmail.com</p>
+        <p>카카오톡: @OSS (등록 예정)</p>
+        <p>상담시간: 평일 10:00 ~ 18:00 (일본시간)</p>
       </div>
     </div>
     <div class="footer-bottom"><div class="container">© 2026 OSS. All rights reserved.</div></div>
@@ -238,6 +264,7 @@
         // 프로필 표시
         document.getElementById("myName").textContent = (p.name || p.username || "회원") + "님";
         document.getElementById("myEmail").textContent = p.email || p.username || "";
+        var _g = document.getElementById("myGrade"); if (_g) _g.textContent = (p.grade ? p.grade + " 회원" : "일반 회원") + (p.mailbox_code ? " · 고객번호 " + p.mailbox_code : "");
         const addrCard = document.getElementById("addressCard");
         if (addrCard && p.mailbox_code) {
           addrCard.innerHTML =
@@ -255,12 +282,58 @@
         const purchases = orders.filter((o) => o.type !== "delivery");
         const deliveries = orders.filter((o) => o.type === "delivery");
 
+        // ── 신청 현황 대시보드 (상태별 건수 · 클릭 시 바로 아래에 해당 주문 펼침) ──
+        (function buildDash() {
+          var P = ["신규접수", "결제대기", "구매중", "입고완료", "포장/측정", "배송중", "배송완료"];
+          var D = ["신규접수", "결제대기", "입고완료", "포장/측정", "배송중", "배송완료"];
+          var X = ["보류", "일부입고", "반품/교환", "사고/폐기", "취소"];
+          function cnt(list, st) { return list.filter(function (o) { return o.status === st; }).length; }
+          function cards(list, stages, scope, exc) {
+            return stages.map(function (st) {
+              var n = cnt(list, st);
+              return '<div class="mp-stat' + (exc ? ' exc' : '') + '" data-scope="' + scope + '" data-st="' + st + '"><div class="n' + (n ? '' : ' zero') + '">' + n + '</div><div class="t">' + st + '</div></div>';
+            }).join("");
+          }
+          var dp = document.getElementById("dashPurchase"); if (dp) dp.innerHTML = cards(purchases, P, "purchase", false);
+          var dd = document.getElementById("dashDelivery"); if (dd) dd.innerHTML = cards(deliveries, D, "delivery", false);
+          var dx = document.getElementById("dashExcept"); if (dx) dx.innerHTML = cards(orders, X, "except", true);
+          var cp = document.getElementById("dashCntPurchase"); if (cp) cp.textContent = purchases.length + "건";
+          var cd = document.getElementById("dashCntDelivery"); if (cd) cd.textContent = deliveries.length + "건";
+          var box = document.getElementById("dashResult");
+          function rowHtml(o, isDel) {
+            var prods = Array.isArray(o.products) ? o.products : [];
+            if (isDel) return '<tr><td>' + esc(o.order_no || "-") + '</td><td>' + esc((prods[0] && (prods[0].brand || prods[0].shipName)) || "-") + '</td><td>' + esc(o.status || "-") + '</td><td>' + fmtDate(o.created_at) + '</td></tr>';
+            var title = prods.length ? esc(prods[0].name || "상품") + (prods.length > 1 ? " 외 " + (prods.length - 1) + "건" : "") : "-";
+            return '<tr><td>' + esc(o.order_no || "-") + '</td><td>' + title + '</td><td>¥' + Number(o.subtotal || 0).toLocaleString() + '</td><td>' + esc(o.status || "-") + '</td><td>' + fmtDate(o.created_at) + '</td><td><a class="btn btn-small" href="order-lookup.html?no=' + encodeURIComponent(o.order_no || "") + '">조회</a></td></tr>';
+          }
+          function showResult(scope, st) {
+            if (!box) return;
+            var list = scope === "delivery" ? deliveries : (scope === "purchase" ? purchases : orders);
+            var rows = list.filter(function (o) { return o.status === st; });
+            var label = (scope === "delivery" ? "배송대행" : (scope === "purchase" ? "구매대행" : "확인/예외")) + " · " + st;
+            var head = '<div class="mp-dash-result-head">' + label + ' <span>' + rows.length + '건</span></div>';
+            if (!rows.length) { box.innerHTML = head + '<p class="empty">해당 주문이 없어요.</p>'; return; }
+            if (scope === "delivery") {
+              box.innerHTML = head + '<div class="table-wrap"><table class="data-table"><thead><tr><th>접수번호</th><th>판매처</th><th>상태</th><th>접수일</th></tr></thead><tbody>' + rows.map(function (o) { return rowHtml(o, true); }).join("") + '</tbody></table></div>';
+            } else {
+              box.innerHTML = head + '<div class="table-wrap"><table class="data-table"><thead><tr><th>주문번호</th><th>상품</th><th>금액</th><th>상태</th><th>주문일</th><th></th></tr></thead><tbody>' + rows.map(function (o) { return rowHtml(o, false); }).join("") + '</tbody></table></div>';
+            }
+          }
+          document.querySelectorAll(".mp-stat").forEach(function (card) {
+            card.addEventListener("click", function () {
+              document.querySelectorAll(".mp-stat").forEach(function (c) { c.classList.remove("on"); });
+              card.classList.add("on");
+              showResult(card.getAttribute("data-scope"), card.getAttribute("data-st"));
+            });
+          });
+        })();
+
         const oTb = document.getElementById("orderTbody");
         if (purchases.length) {
           oTb.innerHTML = purchases.map((o) => {
             const prods = Array.isArray(o.products) ? o.products : [];
             const title = prods.length ? esc(prods[0].name || "상품") + (prods.length > 1 ? ` 외 ${prods.length - 1}건` : "") : "-";
-            return `<tr>
+            return `<tr data-status="${esc(o.status || "")}">
               <td>${esc(o.order_no || "-")}</td>
               <td>${title}</td>
               <td>¥${Number(o.subtotal || 0).toLocaleString()}</td>
@@ -274,7 +347,7 @@
         if (deliveries.length) {
           dTb.innerHTML = deliveries.map((o) => {
             const prods = Array.isArray(o.products) ? o.products : [];
-            return `<tr>
+            return `<tr data-status="${esc(o.status || "")}">
               <td>${esc(o.order_no || "-")}</td>
               <td>${esc((prods[0] && (prods[0].brand || prods[0].shipName)) || "-")}</td>
               <td>${esc((prods[0] && (prods[0].tracking_no || prods[0].url || prods[0].code)) || "-")}</td>
@@ -287,6 +360,7 @@
         // 쿠폰함
         try {
           const coupons = await window.OSS.fetchMyCoupons();
+          var _wc = document.getElementById("walCoupon"); if (_wc) _wc.innerHTML = coupons.filter(function (c) { return c.status !== "used"; }).length + "<em>개</em>";
           const cl = document.getElementById("couponList");
           const now = Date.now();
           if (cl) cl.innerHTML = coupons.length ? coupons.map((c) => {
@@ -323,7 +397,7 @@
           if (body.length < 5) { rvMsg.style.color = "#c0392b"; rvMsg.textContent = "후기 내용을 5자 이상 적어주세요."; return; }
           try {
             await window.OSS.submitReview({ rating: document.getElementById("rvRating").value, body, order_no: document.getElementById("rvOrder").value.trim() });
-            rvMsg.style.color = "#1F9D6B"; rvMsg.textContent = "✓ 후기가 등록됐어요. 사장님 확인 후 게시됩니다 😊";
+            rvMsg.style.color = "#1F9D6B"; rvMsg.textContent = "✓ 후기가 등록됐어요. 사장님 확인 후 게시됩니다";
             rf.reset();
             loadMyReviews();
           } catch (err) { rvMsg.style.color = "#c0392b"; rvMsg.textContent = "등록 실패: " + (err.message || err); }
@@ -426,7 +500,7 @@
         if (a.id === "logoutBtn") return;
         a.addEventListener("click", function (e) { e.preventDefault(); show(a.getAttribute("href")); window.scrollTo({ top: 0, behavior: "smooth" }); });
       });
-      var initial = "#orders";
+      var initial = "#dashboard";
       try { if (location.hash && document.querySelector(".mypage-block" + location.hash)) initial = location.hash; } catch (e) {}
       show(initial);
     })();

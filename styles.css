@@ -437,19 +437,44 @@ p { word-break: keep-all; }
 .addon-price { color: var(--red); font-size: 12px; font-weight: 700; }
 
 /* ===== 마이페이지 ===== */
-.mypage-layout { display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start; }
-.mypage-side { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+.mypage-layout { display: grid; grid-template-columns: 232px 1fr; gap: 30px; align-items: start; }
+.mypage-side { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
 .mypage-profile { background: var(--navy); color: #fff; padding: 24px; text-align: center; }
 .mypage-avatar { font-size: 40px; }
 .mypage-name { font-size: 17px; font-weight: 700; margin-top: 8px; }
 .mypage-email { font-size: 13px; opacity: .8; margin-top: 4px; }
-.mypage-menu { list-style: none; }
-.mypage-menu a { display: block; padding: 14px 20px; font-size: 14px; color: var(--text); border-bottom: 1px solid var(--line); }
-.mypage-menu a:hover, .mypage-menu a.active { background: #f3f7ff; color: var(--blue); font-weight: 700; }
+.mypage-menu { list-style: none; padding: 10px; }
+.mypage-menu a { display: block; padding: 12px 14px; border-radius: 10px; font-size: 15px; font-weight: 600; color: var(--text); }
+.mypage-menu a:hover, .mypage-menu a.active { background: #fff3ec; color: var(--orange); }
 .mypage-content { display: flex; flex-direction: column; gap: 28px; }
 .mypage-block { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 26px; }
 .mypage-title { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid var(--yellow); }
 .address-card { background: var(--bg-soft); border-radius: 12px; padding: 20px; line-height: 1.9; font-size: 15px; }
+/* 마이페이지: 회원등급 · 나의 통장 · 신청현황 대시보드 (사토리식) */
+.mypage-grade { font-size: 12px; margin-top: 7px; opacity: .92; }
+.mp-wallet { padding: 12px 14px; border-top: 1px solid rgba(255,255,255,.25); margin-top: -2px; }
+.mp-wallet-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; padding: 6px 4px; }
+.mp-wallet-row .lab { color: var(--muted); }
+.mp-wallet-row .val { font-weight: 800; color: var(--navy); }
+.mp-wallet-row .val em { font-size: 11px; font-weight: 600; color: var(--muted); font-style: normal; margin-left: 3px; }
+.mp-charge { display: block; width: 100%; margin-top: 8px; padding: 10px; text-align: center; border: 1px solid var(--line); border-radius: 10px; background: #faf7f4; color: var(--muted); font-size: 13px; font-weight: 600; cursor: not-allowed; font-family: inherit; }
+.mp-dash-group { margin-bottom: 24px; }
+.mp-dash-group h4 { font-size: 15px; font-weight: 800; color: var(--navy); margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+.mp-dash-group h4 .cnt { font-size: 12px; font-weight: 700; color: var(--orange); background: #fff3ec; padding: 2px 10px; border-radius: 999px; }
+.mp-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(106px, 1fr)); gap: 10px; }
+.mp-stat { border: 1px solid var(--line); border-radius: 12px; padding: 15px 8px; text-align: center; background: #fff; cursor: pointer; transition: transform .1s, border-color .1s, box-shadow .1s; }
+.mp-stat:hover { transform: translateY(-2px); border-color: var(--orange); box-shadow: var(--shadow); }
+.mp-stat .n { font-size: 23px; font-weight: 900; color: var(--orange); line-height: 1.1; }
+.mp-stat .n.zero { color: #d3ccc5; }
+.mp-stat .t { font-size: 12.5px; color: var(--muted); margin-top: 5px; word-break: keep-all; }
+.mp-stat.exc .n { color: var(--red); }
+.mp-stat.exc .n.zero { color: #e7d6d6; }
+@media (max-width: 560px) { .mp-stats { grid-template-columns: repeat(3, 1fr); } }
+.mp-stat.on { border-color: var(--orange); background: #fff3ec; box-shadow: var(--shadow); }
+.mp-dash-result { margin-top: 6px; }
+.mp-dash-hint { color: var(--muted); font-size: 13px; padding: 10px 2px; }
+.mp-dash-result-head { font-size: 14px; font-weight: 800; color: var(--navy); margin: 4px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--orange); }
+.mp-dash-result-head span { color: var(--orange); margin-left: 6px; }
 
 /* ===== 데이터 테이블 (마이페이지/관리자 공용) ===== */
 .table-wrap { overflow-x: auto; }
@@ -482,11 +507,11 @@ p { word-break: keep-all; }
 .bundle-req textarea:focus { outline: none; border-color: var(--blue); background: #fff; }
 
 /* ===== 이용안내 ===== */
-.guide-layout { display: grid; grid-template-columns: 220px 1fr; gap: 28px; align-items: start; }
-.guide-nav { display: flex; flex-direction: column; gap: 8px; position: sticky; top: 80px; }
-.guide-nav-btn { text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 13px 16px; font-size: 14px; font-weight: 500; color: var(--text); cursor: pointer; font-family: inherit; }
-.guide-nav-btn:hover { border-color: var(--blue); }
-.guide-nav-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 700; }
+.guide-layout { display: grid; grid-template-columns: 232px 1fr; gap: 30px; align-items: start; }
+.guide-nav { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 14px; position: sticky; top: 70px; display: flex; flex-direction: column; gap: 4px; }
+.guide-nav-btn { text-align: left; background: none; border: none; border-radius: 10px; padding: 12px 14px; font-size: 15px; font-weight: 600; color: var(--text); cursor: pointer; font-family: inherit; }
+.guide-nav-btn:hover { background: #fff3ec; color: var(--orange); }
+.guide-nav-btn.active { background: var(--orange); color: #fff; }
 .guide-content { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 32px; min-height: 300px; min-width: 0; overflow-wrap: anywhere; }
 .guide-title { font-size: 22px; font-weight: 900; color: var(--navy); margin-bottom: 18px; padding-bottom: 14px; border-bottom: 2px solid var(--yellow); }
 .guide-body { font-size: 15px; color: var(--text); line-height: 1.85; word-break: break-word; overflow-wrap: anywhere; }
