@@ -527,6 +527,10 @@ p { word-break: keep-all; }
 .fee-table th { background: var(--hero-bg); color: var(--navy); font-weight: 700; white-space: nowrap; }
 .fee-table td.r, .fee-table th.r { text-align: right; white-space: nowrap; }
 .fee-big { font-size: 18px; font-weight: 900; color: var(--orange); }
+.tariff-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.tariff-tab { padding: 7px 13px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.tariff-tab.on { background: var(--orange); color: #fff; border-color: var(--orange); }
+.tariff-panel[hidden] { display: none; }
 
 /* ===== 공지사항 목록 ===== */
 .notice-list { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
