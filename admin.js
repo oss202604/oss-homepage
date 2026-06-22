@@ -61,6 +61,19 @@ let SORT = { key: "created", dir: -1 };   // 표뷰 정렬 (기본 등록일 최
 let SETTLE_ROWS = null;                   // 정산 첫 진입 자동집계 판단 + CSV 대상
 let SETTLE_META = null;                   // 마지막 정산 조건 (CSV 파일명·합계)
 let BANNERS = [];                         // 메인 배너 목록
+
+// 주문 첫 상품 썸네일 (주문목록·칸반카드용)
+function thumbHtml(o) {
+  const p = (o && o.raw && Array.isArray(o.raw.products) && o.raw.products[0]) || {};
+  const u = safeUrl(p.image);
+  return u ? `<img src="${u}" alt="" style="width:30px;height:30px;object-fit:cover;border-radius:5px;border:1px solid var(--line);vertical-align:middle;margin-right:6px;" onerror="this.style.display='none'">` : "";
+}
+// 다음 고객번호(사서함) — 기존 OSS##### 최대값 +1, 없으면 OSS10001
+function nextMailboxCode(members) {
+  let max = 10000;
+  (members || []).forEach((m) => { const mt = /^OSS(\d+)$/.exec((m.mailbox_code || "").trim()); if (mt) max = Math.max(max, Number(mt[1])); });
+  return "OSS" + (max + 1);
+}
 // 사토리 기본요율(항공 실측값, 해상은 동일값으로 두고 관리자가 조정) — "기본요율 불러오기"용
 const DEFAULT_RATES = [
   [0.5,1000,1000],[1,1150,1150],[1.5,1300,1300],[2,1450,1450],[2.5,1600,1600],
@@ -352,7 +365,7 @@ async function loadMembers() {
       ? `<select class="m-grade" data-id="${m.id}">${GRADES.map((g) => `<option ${m.grade === g ? "selected" : ""}>${g}</option>`).join("")}</select>`
       : esc(m.grade);
     const mailboxCell = isMaster
-      ? `<input class="m-mailbox" data-id="${m.id}" value="${esc(m.mailbox_code || "")}" placeholder="고객번호" style="width:88px;" />`
+      ? `<input class="m-mailbox" data-id="${m.id}" value="${esc(m.mailbox_code || "")}" placeholder="고객번호" style="width:76px;" />${m.mailbox_code ? "" : `<button class="btn btn-small m-mailbox-auto" data-id="${m.id}" type="button" style="margin-left:4px;padding:4px 8px;">자동</button>`}`
       : esc(m.mailbox_code || "-");
     const roleCell = isMaster
       ? `<select class="m-role" data-id="${m.id}">${ROLES.map(([v, l]) => `<option value="${v}" ${m.role === v ? "selected" : ""}>${l}</option>`).join("")}</select>`
@@ -389,6 +402,12 @@ async function loadMembers() {
   tb.querySelectorAll(".m-mailbox").forEach((inp) => inp.addEventListener("change", async () => {
     try { await window.OSS.setMailboxCode(inp.dataset.id, inp.value); inp.style.borderColor = "#1F9D6B"; }
     catch (e) { alert("고객번호 저장 실패: " + (e.message || e)); }
+  }));
+  tb.querySelectorAll(".m-mailbox-auto").forEach((btn) => btn.addEventListener("click", async () => {
+    const code = nextMailboxCode(members);
+    if (!confirm("이 회원에게 고객번호 " + code + " 를 발급할까요?")) return;
+    try { await window.OSS.setMailboxCode(btn.dataset.id, code); loadMembers(); }
+    catch (e) { alert("고객번호 발급 실패: " + (e.message || e)); }
   }));
   tb.querySelectorAll(".m-perm").forEach((cb) => cb.addEventListener("change", async () => {
     const id = cb.dataset.id;
@@ -446,7 +465,7 @@ function cardHtml(o) {
       <span class="kc-id">${o.flag ? (FLAG_DOT[o.flag] || "") + " " : ""}${esc(o.no)}</span>
       <span class="kc-type ${o.type}">${o.type === "purchase" ? "구매" : "배송"}</span>
     </div>
-    <div class="kc-name">${esc(o.name)}</div>
+    <div class="kc-name">${thumbHtml(o)}${esc(o.name)}</div>
     ${o.bundleId ? `<div class="kc-bundle">🔗 ${esc(o.bundleId)}</div>` : ""}
     ${o.raw && o.raw.tracking_no ? `<div class="kc-bundle">📦 ${esc(o.raw.tracking_no)}</div>` : ""}
     <div class="kc-cust">👤 ${esc(o.customer)}</div>
@@ -767,6 +786,7 @@ function renderDashboard() {
   const elKg = document.getElementById("kpiMonthGmv");
   if (elKg) elKg.textContent = "₩" + gmv.toLocaleString();
   renderDelayAlert(live);
+  renderTrendChart(live);
 
   // 문의 목록은 loadInquiries()가 채웁니다.
 }
@@ -794,6 +814,33 @@ function renderDelayAlert(live) {
     `<tr data-id="${x.o.id}" style="cursor:pointer;"><td>${esc(x.o.no)}</td><td>${esc(x.o.customer)} <span style="color:var(--muted);font-size:12px;">· ${labelOf(x.o.status)}</span></td><td style="color:var(--red);font-weight:700;white-space:nowrap;">${x.days}일째${x.estimated ? " (추정)" : ""}</td></tr>`
   ).join("");
   tb.querySelectorAll("tr[data-id]").forEach((tr) => tr.addEventListener("click", () => openModal(tr.dataset.id)));
+}
+
+// ===== 대시보드 미니 차트 (최근 14일 주문) =====
+function renderTrendChart(live) {
+  const box = document.getElementById("trendChart");
+  if (!box) return;
+  const days = [];
+  const now = new Date();
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 86400000);
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    days.push({ ymd: d.getFullYear() + "-" + mm + "-" + dd, label: mm + "/" + dd, cnt: 0, gmv: 0 });
+  }
+  const idx = {}; days.forEach((d, i) => { idx[d.ymd] = i; });
+  (live || []).forEach((o) => {
+    const i = idx[o.created_local];
+    if (i != null) { days[i].cnt++; days[i].gmv += Math.round((o.amount || 0) * perJpy()) + (Number(o.raw.shipping_fee) || 0); }
+  });
+  const total = days.reduce((s, d) => s + d.cnt, 0);
+  if (!total) { box.innerHTML = '<p class="form-note" style="text-align:center;margin:34px 0;">최근 14일간 주문이 없어요. 주문이 들어오면 여기에 그래프가 그려져요.</p>'; return; }
+  const maxCnt = Math.max(1, ...days.map((d) => d.cnt));
+  box.innerHTML = days.map((d) => {
+    const h = Math.round((d.cnt / maxCnt) * 100);
+    const title = d.label + " · " + d.cnt + "건 · ₩" + d.gmv.toLocaleString();
+    return `<div class="tc-col" title="${title}"><div class="tc-barwrap"><div class="tc-bar" style="height:${h}%;">${d.cnt ? '<span class="tc-val">' + d.cnt + '</span>' : ''}</div></div><div class="tc-lbl">${d.label}</div></div>`;
+  }).join("");
 }
 
 // ===== 정산·통계 =====
@@ -882,7 +929,7 @@ function renderOrderTable() {
     return 0;
   });
   tb.innerHTML = list.length
-    ? list.map((o) => `<tr data-id="${o.id}" style="cursor:pointer;"><td>${esc(o.no)}</td><td>${o.type === "purchase" ? "구매" : "배송"}</td><td>${esc(o.customer)}</td><td>${esc(o.name)}</td><td><span class="status-badge ${badgeClass(o.status)}">${labelOf(o.status)}</span></td><td>¥${(o.amount || 0).toLocaleString()}</td><td>${o.created}</td><td>${esc(o.raw.tracking_no || "-")}</td></tr>`).join("")
+    ? list.map((o) => `<tr data-id="${o.id}" style="cursor:pointer;"><td>${esc(o.no)}</td><td>${o.type === "purchase" ? "구매" : "배송"}</td><td>${esc(o.customer)}</td><td>${thumbHtml(o)}${esc(o.name)}</td><td><span class="status-badge ${badgeClass(o.status)}">${labelOf(o.status)}</span></td><td>¥${(o.amount || 0).toLocaleString()}</td><td>${o.created}</td><td>${esc(o.raw.tracking_no || "-")}</td></tr>`).join("")
     : '<tr><td colspan="8" class="empty">주문이 없습니다.</td></tr>';
   tb.querySelectorAll("tr[data-id]").forEach((tr) => tr.addEventListener("click", () => openModal(tr.dataset.id)));
   document.querySelectorAll("#orderTable th[data-sort]").forEach((th) => {
