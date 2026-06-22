@@ -193,3 +193,8 @@ body.admin-body { background: #eef1f6; --ac-line: #ffd8c6; --ac-ring: rgba(255,1
 .admin-main .data-table td { padding: 11px 14px; font-variant-numeric: tabular-nums; }
 .admin-main .data-table tr:hover td { background: var(--ac-hover); }
 .admin-main :is(input, select, textarea):not([type=checkbox]):not([type=radio]):focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px var(--ac-ring); }
+
+/* 대시보드 카드 클릭(드릴다운) + 칸반 칸 반짝 */
+.stat-card.clickable { cursor: pointer; transition: box-shadow .15s, transform .15s; }
+.stat-card.clickable:hover { box-shadow: 0 8px 20px rgba(17,24,39,.10); transform: translateY(-2px); }
+.kanban-col.col-flash { outline: 3px solid var(--orange); outline-offset: -3px; transition: outline-color .2s; }

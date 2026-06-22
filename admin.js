@@ -843,6 +843,39 @@ function renderTrendChart(live) {
   }).join("");
 }
 
+// ===== 대시보드 카드 클릭 → 해당 주문/정산으로 이동 (드릴다운) =====
+function dashGoOrders(statusKey, isException) {
+  const ob = document.querySelector('.admin-nav button[data-page="orders"]');
+  if (ob) ob.click();
+  setTimeout(function () {
+    const kw = document.getElementById("kanbanWrap"), tw = document.getElementById("orderTableWrap");
+    if (kw && kw.hidden) { // 표 보기 상태였으면 칸반으로 되돌림
+      VIEW = "kanban";
+      document.querySelectorAll(".view-toggle").forEach(function (x) { x.classList.toggle("active", x.dataset.view === "kanban"); });
+      kw.hidden = false; if (tw) tw.hidden = true; renderKanban();
+    }
+    const target = isException ? document.getElementById("kanbanException")
+      : statusKey ? document.querySelector('.kanban-col[data-status="' + statusKey + '"]')
+      : document.getElementById("kanbanNormal");
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+    if (statusKey || isException) {
+      const cols = isException ? target.querySelectorAll(".kanban-col") : [target];
+      cols.forEach(function (c) { c.classList.add("col-flash"); setTimeout(function () { c.classList.remove("col-flash"); }, 1600); });
+    }
+  }, 70);
+}
+(function setupDashboardLinks() {
+  function wire(id, fn) { const el = document.getElementById(id); const card = el && el.closest(".stat-card"); if (card) { card.classList.add("clickable"); card.setAttribute("title", "클릭하면 해당 목록으로 이동"); card.addEventListener("click", fn); } }
+  wire("statNew", function () { dashGoOrders("신규접수", false); });
+  wire("statWait", function () { dashGoOrders(null, false); });
+  wire("statAlert", function () { dashGoOrders(null, true); });
+  wire("statDone", function () { dashGoOrders("배송완료", false); });
+  const goSettle = function () { const b = document.querySelector('.admin-nav button[data-page="settle"]'); if (b) b.click(); };
+  wire("kpiMonthCnt", goSettle);
+  wire("kpiMonthGmv", goSettle);
+})();
+
 // ===== 정산·통계 =====
 function settleRange() {
   const period = (document.querySelector('input[name="settlePeriod"]:checked') || {}).value || "thisMonth";
