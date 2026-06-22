@@ -222,6 +222,7 @@ p { word-break: keep-all; }
 .footer-links a { color: rgba(255,255,255,.7); font-size: 13px; }
 .footer-links a:hover { color: #fff; text-decoration: underline; }
 .footer-copy { color: rgba(255,255,255,.5); font-size: 12.5px; }
+.footer-legal { font-size: 12px; line-height: 1.75; color: rgba(255,255,255,.45); margin: 0 0 14px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,.1); }
 @media (max-width: 760px) { .footer-cols { grid-template-columns: 1fr; gap: 24px; } }
 /* 법적 페이지 본문 */
 .legal-body { font-size: 15px; line-height: 1.9; color: var(--text); max-width: 900px; margin: 0 auto; }

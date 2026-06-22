@@ -96,10 +96,12 @@ if (menuToggle && mainMenu) {
   const biz = {
     company: "OSS (オッス)",
     desc: "일본 현지인이 직접 운영하는 구매대행 · 배송대행지",
-    email: "",
-    kakao: "@OSS (등록 예정)",
+    email: "ossohayo@gmail.com",
+    kakao: "@ossohayo",
     hours: "평일 10:00 ~ 22:00 (일본시간)",
-    bizline: "사업자 정보 등록 준비중",
+    bizline: "상호 안승스토어 · 대표 송상익 · 사업자등록번호 898-44-01017 · 통신판매업 신고 2026-울산중구-0039",
+    jpAddress: "〒577-0841 大阪府 東大阪市 足代 3-1-25 ハイムリップルパート3 102号 (Tel 070-1381-4638)",
+    legal: "OSS(オッス)에서 운영하는 구매대행·배송대행은 관세법 등 관련 규정을 준수하며, 「개인정보 보호법」을 준수합니다. 불법 물품은 취급하지 않으며, 분할배송·가격 허위신고 등 고객의 불법 요청에는 협조하지 않습니다. 고객님의 허위신고로 인한 불이익에 대해서는 책임지지 않습니다. 사이트 운영·환불·문의에 대한 책임은 안승스토어(OSS)에 귀속됩니다.",
   };
   function paint() {
     f.innerHTML =
@@ -114,6 +116,7 @@ if (menuToggle && mainMenu) {
           (biz.email ? '<p><i data-lucide="mail" class="ico-inline"></i> ' + biz.email + '</p>' : '') +
           '<p><i data-lucide="message-circle" class="ico-inline"></i> <a href="http://pf.kakao.com/_srxlxfX/chat" target="_blank" rel="noopener" style="color:inherit;">카카오톡 ' + biz.kakao + '</a></p>' +
           '<p><i data-lucide="clock" class="ico-inline"></i> ' + biz.hours + '</p>' +
+          (biz.jpAddress ? '<p><i data-lucide="map-pin" class="ico-inline"></i> 일본 배송센터<br><span style="font-size:12.5px;opacity:.8;">' + biz.jpAddress + '</span></p>' : '') +
         '</div>' +
         '<div class="footer-col">' +
           '<p class="footer-col-tit">바로가기</p>' +
@@ -124,7 +127,9 @@ if (menuToggle && mainMenu) {
           '<a href="contact.html">1:1 문의</a>' +
         '</div>' +
       '</div>' +
-      '<div class="footer-bottom"><div class="container footer-bottom-inner">' +
+      '<div class="footer-bottom"><div class="container">' +
+        (biz.legal ? '<p class="footer-legal">' + biz.legal + '</p>' : '') +
+        '<div class="footer-bottom-inner">' +
         '<nav class="footer-links">' +
           '<a href="index.html#about">회사소개</a>' +
           '<a href="terms.html">이용약관</a>' +
@@ -135,6 +140,7 @@ if (menuToggle && mainMenu) {
           '<a href="contact.html">1:1 문의</a>' +
         '</nav>' +
         '<span class="footer-copy">© 2026 OSS. All rights reserved.</span>' +
+        '</div>' +
       '</div></div>';
     if (window.lucide) lucide.createIcons();
   }
