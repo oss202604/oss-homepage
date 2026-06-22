@@ -40,10 +40,20 @@
     .oh-hero-side .oh-ph{border-radius:18px;}
     .oh-hero-full{display:block;margin-top:24px;height:400px;border-radius:24px;position:relative;overflow:hidden;text-decoration:none;}
     .oh-hero-full img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .oh-hero-carousel{position:relative;margin-top:24px;height:400px;border-radius:24px;overflow:hidden;}
+    .oh-hero-carousel .oh-slides{display:flex;height:100%;transition:transform .55s cubic-bezier(.4,0,.2,1);}
+    .oh-hero-carousel .oh-slide{min-width:100%;height:100%;position:relative;}
+    .oh-hero-carousel .oh-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .oh-arrow{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:none;background:rgba(20,12,6,.32);color:#fff;font-size:26px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;transition:background .15s;}
+    .oh-arrow:hover{background:rgba(20,12,6,.6);}
+    .oh-arrow.prev{left:14px;}.oh-arrow.next{right:14px;}
+    .oh-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:3;}
+    .oh-dot{width:9px;height:9px;border-radius:50%;border:none;background:rgba(255,255,255,.55);cursor:pointer;padding:0;transition:width .2s,background .2s;}
+    .oh-dot.on{background:#fff;width:22px;border-radius:5px;}
     .oh-evt-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
     .oh-evt{display:block;height:300px;border-radius:20px;position:relative;overflow:hidden;text-decoration:none;}
     .oh-evt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-    @media(max-width:760px){.oh-hero-full{height:230px;}.oh-evt-grid{grid-template-columns:1fr;}.oh-evt{height:190px;}}
+    @media(max-width:760px){.oh-hero-full{height:230px;}.oh-hero-carousel{height:200px;}.oh-arrow{width:38px;height:38px;font-size:22px;}.oh-evt-grid{grid-template-columns:1fr;}.oh-evt{height:190px;}}
     .oh-quicks{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:34px 0;}
     .oh-quick{display:flex;flex-direction:column;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:24px 12px;text-decoration:none;box-shadow:0 8px 30px rgba(40,26,16,.07);transition:transform .12s;}
     .oh-quick:hover{transform:translateY(-3px);}
@@ -114,9 +124,18 @@
 
   <main class="oh-wrap">
 
-    <!-- 히어로 -->
-    <!-- 히어로: 가로 꽉차는 전체 이미지 1장 (클릭 시 주문) -->
-    <a class="oh-ph oh-hero-full" href="order.html"><b>메인 히어로 이미지</b><span>2480 × 800 px · img/hero-main.png</span><img src="img/hero-main.png" alt="오쓰오하요 — 일본 구매대행·배송대행" onerror="this.remove()"></a>
+    <!-- 히어로 캐러셀: 4장, 자동 넘김(5초) + 좌우 화살표 + 하단 점 -->
+    <div class="oh-hero-carousel" id="heroCarousel">
+      <div class="oh-slides" id="heroSlides">
+        <a class="oh-ph oh-slide" href="order.html"><b>메인 히어로 ①</b><span>2480 × 800 px · img/hero-1.png</span><img src="img/hero-1.png" alt="오쓰오하요 배너 1" onerror="this.remove()"></a>
+        <a class="oh-ph oh-slide" href="order.html"><b>메인 히어로 ②</b><span>2480 × 800 px · img/hero-2.png</span><img src="img/hero-2.png" alt="오쓰오하요 배너 2" onerror="this.remove()"></a>
+        <a class="oh-ph oh-slide" href="order.html"><b>메인 히어로 ③</b><span>2480 × 800 px · img/hero-3.png</span><img src="img/hero-3.png" alt="오쓰오하요 배너 3" onerror="this.remove()"></a>
+        <a class="oh-ph oh-slide" href="order.html"><b>메인 히어로 ④</b><span>2480 × 800 px · img/hero-4.png</span><img src="img/hero-4.png" alt="오쓰오하요 배너 4" onerror="this.remove()"></a>
+      </div>
+      <button class="oh-arrow prev" id="heroPrev" type="button" aria-label="이전 배너">‹</button>
+      <button class="oh-arrow next" id="heroNext" type="button" aria-label="다음 배너">›</button>
+      <div class="oh-dots" id="heroDots"></div>
+    </div>
 
     <!-- 빠른메뉴 -->
     <div class="oh-quicks">
@@ -279,6 +298,23 @@
       document.getElementById('popX').addEventListener('click', hide);
       document.getElementById('popDim').addEventListener('click', hide);
     }());
+    // 히어로 캐러셀 (자동 넘김 5초 + 좌우 화살표 + 점, 호버 시 정지)
+    (function heroCarousel(){
+      var car=document.getElementById('heroCarousel'); if(!car) return;
+      var track=document.getElementById('heroSlides');
+      var n=track.children.length, i=0, timer=null;
+      var dotsWrap=document.getElementById('heroDots');
+      for(var d=0; d<n; d++){ var b=document.createElement('button'); b.type='button'; b.className='oh-dot'; b.setAttribute('aria-label',(d+1)+'번째 배너'); (function(idx){ b.addEventListener('click',function(){ go(idx); restart(); }); })(d); dotsWrap.appendChild(b); }
+      var dots=dotsWrap.children;
+      function go(to){ i=(to+n)%n; track.style.transform='translateX('+(-i*100)+'%)'; for(var k=0;k<n;k++){ dots[k].className='oh-dot'+(k===i?' on':''); } }
+      function next(){ go(i+1); } function prev(){ go(i-1); }
+      function start(){ timer=setInterval(next,5000); } function restart(){ clearInterval(timer); start(); }
+      document.getElementById('heroNext').addEventListener('click',function(){ next(); restart(); });
+      document.getElementById('heroPrev').addEventListener('click',function(){ prev(); restart(); });
+      car.addEventListener('mouseenter',function(){ clearInterval(timer); });
+      car.addEventListener('mouseleave',start);
+      go(0); start();
+    })();
   </script>
 </body>
 </html>
