@@ -68,8 +68,8 @@ if (menuToggle && mainMenu) {
   if (navEl && !navEl.getAttribute("data-sub")) {
     navEl.setAttribute("data-sub", "1");
     var SUBS = {
-      "order.html": [["order.html", "구매대행 신청"], ["order-lookup.html", "주문조회"]],
-      "delivery.html": [["delivery.html", "배송대행 신청"], ["guide.html#guide-center", "배송센터(배대지) 주소"]],
+      "order.html": [["order.html", "구매대행 신청"], ["guide.html#guide-purchase", "구매대행 신청방법"], ["order-lookup.html", "주문조회"]],
+      "delivery.html": [["delivery.html", "배송대행 신청"], ["guide.html#guide-delivery", "배송대행 신청방법"], ["guide.html#guide-center", "배송센터(배대지) 주소"]],
       "guide.html": [["guide.html", "이용안내"], ["faq.html", "자주 묻는 질문"], ["guide.html#guide-customs", "통관·관세 안내"], ["guide.html#guide-money", "예치금(머니충전)"]],
       "notice.html": [["notice.html", "공지사항"], ["faq.html", "자주 묻는 질문"], ["contact.html", "1:1 문의"]]
     };
