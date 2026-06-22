@@ -112,7 +112,7 @@ if (menuToggle && mainMenu) {
         '<div class="footer-col">' +
           '<p class="footer-col-tit">고객센터</p>' +
           (biz.email ? '<p><i data-lucide="mail" class="ico-inline"></i> ' + biz.email + '</p>' : '') +
-          '<p><i data-lucide="message-circle" class="ico-inline"></i> 카카오톡 ' + biz.kakao + '</p>' +
+          '<p><i data-lucide="message-circle" class="ico-inline"></i> <a href="http://pf.kakao.com/_srxlxfX/chat" target="_blank" rel="noopener" style="color:inherit;">카카오톡 ' + biz.kakao + '</a></p>' +
           '<p><i data-lucide="clock" class="ico-inline"></i> ' + biz.hours + '</p>' +
         '</div>' +
         '<div class="footer-col">' +
@@ -151,9 +151,10 @@ if (menuToggle && mainMenu) {
 (function renderChatFab() {
   if (document.querySelector(".chat-fab")) return;
   const a = document.createElement("a");
-  a.href = "contact.html";
+  a.href = "http://pf.kakao.com/_srxlxfX/chat";
+  a.target = "_blank"; a.rel = "noopener";
   a.className = "chat-fab";
-  a.title = "1:1 문의";
+  a.title = "카카오톡 문의";
   a.innerHTML = '<i data-lucide="message-circle"></i>';
   document.body.appendChild(a);
   if (window.lucide) lucide.createIcons();
