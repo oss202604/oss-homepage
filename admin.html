@@ -208,6 +208,17 @@
         </div>
 
         <div class="dash-panel" style="margin-bottom:24px;">
+          <h3>수수료 · 정책 설정</h3>
+          <p class="form-note" style="text-align:left;margin:0 0 16px;">구매대행 수수료율과 보관 정책입니다. 이용가이드 '수수료 안내' 페이지와 간편주문 견적에 즉시 반영됩니다.</p>
+          <div class="set-grid">
+            <label>구매대행 수수료 (%) <input id="setCommission" type="number" step="0.1" placeholder="예: 3" /></label>
+            <label>무료 보관일 (일) <input id="setFreeDays" type="number" placeholder="예: 30" /></label>
+            <label>보관료 (원/일, 무료기간 초과) <input id="setStorageDay" type="number" placeholder="0 = 무료" /></label>
+          </div>
+          <div class="set-actions"><button class="btn btn-primary" id="saveFee">수수료·정책 저장</button><span class="save-ok" id="feeSaved"></span></div>
+        </div>
+
+        <div class="dash-panel" style="margin-bottom:24px;">
           <h3>상단 띠배너 문구</h3>
           <p class="form-note" style="text-align:left;margin:0 0 12px;">모든 페이지 맨 위 띠에 표시됩니다. 비워두면 최신 공지가 자동으로 표시돼요. (예: 14시 전 입고분 당일 출고 / 설 연휴 배송 안내 / 이벤트)</p>
           <input id="setTopbar" placeholder="예: 14시 전 입고분 당일 출고 / 이벤트 안내" style="width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fbfcfe;" />

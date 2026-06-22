@@ -890,6 +890,10 @@ async function loadFx() {
     const fx = (await window.OSS.getSetting("exchange_rate")) || {};
     const v = (id, val) => { const e = document.getElementById(id); if (e && val != null) e.value = val; };
     v("setFxApplied", fx.applied); v("setFxGosi", fx.gosi); v("setFxDuty", fx.dutyFreeLimit);
+    const fee = (await window.OSS.getSetting("fee_policy")) || {};
+    v("setCommission", fee.commissionPct != null ? fee.commissionPct : 3);
+    v("setFreeDays", fee.freeStorageDays != null ? fee.freeStorageDays : 30);
+    v("setStorageDay", fee.storagePerDayKrw != null ? fee.storagePerDayKrw : 0);
   } catch (e) { console.error(e); }
 }
 document.getElementById("saveFx").addEventListener("click", async () => {
@@ -901,6 +905,18 @@ document.getElementById("saveFx").addEventListener("click", async () => {
       updatedAt: new Date().toISOString(),
     });
     FX_APPLIED = num("setFxApplied") || FX_APPLIED;
+    ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500);
+  } catch (e) { alert("저장 실패: " + (e.message || e)); }
+});
+
+document.getElementById("saveFee").addEventListener("click", async () => {
+  const num = (id) => { const x = Number(document.getElementById(id).value); return isFinite(x) ? x : 0; };
+  const ok = document.getElementById("feeSaved");
+  try {
+    await window.OSS.saveSetting("fee_policy", {
+      commissionPct: num("setCommission"), freeStorageDays: num("setFreeDays"), storagePerDayKrw: num("setStorageDay"),
+      updatedAt: new Date().toISOString(),
+    });
     ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500);
   } catch (e) { alert("저장 실패: " + (e.message || e)); }
 });
