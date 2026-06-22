@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=39" />
+  <link rel="stylesheet" href="styles.css?v=40" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 </head>
 <body>
@@ -69,7 +69,7 @@
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=16"></script>
-  <script src="script.js?v=33"></script>
+  <script src="script.js?v=35"></script>
   <script>
     (function () {
       const modal = document.getElementById("authModal");
@@ -125,6 +125,23 @@
         const pw = pwEl.value;
         if (!username) { popup(false, "아이디를 입력하세요", "로그인할 아이디를 입력해 주세요."); return; }
         if (!pw) { popup(false, "비밀번호를 입력하세요", "비밀번호를 입력해 주세요."); return; }
+
+        // 관리자(이메일) 로그인: 아이디 칸에 이메일(@ 포함)을 넣으면 이메일로 직접 로그인
+        if (username.includes("@")) {
+          btn.disabled = true; btn.innerHTML = '<span class="btn-spin"></span>로그인 중...';
+          try {
+            await window.OSS.adminSignIn(username, pw);
+            const aprof = await window.OSS.getMyProfile();
+            window.OSS.touchLogin();
+            popup(true, "로그인 성공", "환영합니다! 잠시 후 이동합니다.", dest(aprof ? aprof.role : "member"));
+          } catch (err) {
+            const m = (err && err.message) || "";
+            popup(false, /invalid login/i.test(m) ? "비밀번호가 틀렸어요" : "로그인 실패",
+              /invalid login/i.test(m) ? "이메일은 맞지만 비밀번호가 일치하지 않아요. 다시 입력해 주세요." : "로그인 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
+            btn.disabled = false; btn.textContent = "로그인";
+          }
+          return;
+        }
 
         btn.disabled = true; btn.innerHTML = '<span class="btn-spin"></span>로그인 중...';
         try {

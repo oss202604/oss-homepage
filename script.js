@@ -843,11 +843,19 @@ document.addEventListener("change", async (e) => {
     nav.querySelectorAll('a[href="login.html"], a[href="signup.html"]').forEach((a) => a.remove());
     const name = (p.name || p.username || "회원").replace(/[<>&]/g, "");
     const staff = p.role === "master" || p.role === "manager";
-    nav.insertAdjacentHTML("afterbegin",
-      `<a href="mypage.html" class="oss-greet">${name}님</a>` +
-      (staff ? `<a href="admin.html">관리자</a>` : "")
-    );
+    nav.insertAdjacentHTML("afterbegin", `<a href="mypage.html" class="oss-greet">${name}님</a>`);
     nav.insertAdjacentHTML("beforeend", `<a href="#" class="oss-logout">로그아웃</a>`);
+    // 관리자(staff)만: 검색 아이콘 옆에 '관리자' 버튼 표시 (손님·비로그인엔 안 보임)
+    if (staff) {
+      const icons = document.querySelector(".osshead-icons");
+      if (icons && !icons.querySelector(".osshead-admin")) {
+        const adm = document.createElement("a");
+        adm.className = "osshead-admin";
+        adm.href = "admin.html";
+        adm.textContent = "관리자";
+        icons.insertBefore(adm, icons.firstChild);
+      }
+    }
   }).catch(() => {});
 })();
 document.addEventListener("click", async (e) => {

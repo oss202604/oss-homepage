@@ -600,6 +600,8 @@ p { word-break: keep-all; }
 .osshead-icons { display: flex; align-items: center; gap: 6px; flex: none; }
 .osshead-ic { width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--text); border: none; background: none; cursor: pointer; padding: 0; }
 .osshead-ic:hover { background: var(--hero-bg); color: var(--orange); }
+.osshead-admin { font-size: 12.5px; font-weight: 700; color: var(--muted, #8a7f76); text-decoration: none; padding: 7px 12px; border: 1px solid var(--line, #e7ded7); border-radius: 999px; white-space: nowrap; transition: color .15s, border-color .15s; }
+.osshead-admin:hover { color: var(--orange); border-color: var(--orange); }
 .osshead-acct { position: relative; }
 .osshead-menu { position: absolute; right: 0; top: 48px; min-width: 152px; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 8px; display: none; z-index: 90; }
 .osshead-acct.open .osshead-menu { display: block; }
