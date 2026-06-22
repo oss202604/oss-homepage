@@ -514,14 +514,14 @@ p { word-break: keep-all; }
 .guide-nav-btn.active { background: var(--orange); color: #fff; }
 .guide-content { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 32px; min-height: 300px; min-width: 0; overflow-wrap: anywhere; }
 .guide-title { font-size: 22px; font-weight: 900; color: var(--navy); margin-bottom: 18px; padding-bottom: 14px; border-bottom: 2px solid var(--yellow); }
-.guide-body { font-size: 15px; color: var(--text); line-height: 1.85; word-break: break-word; overflow-wrap: anywhere; }
-.guide-body .gb-h { display: block; color: var(--navy); font-weight: 800; margin: 18px 0 4px; }
+.guide-body { font-size: 15px; color: var(--text); line-height: 1.7; word-break: break-word; overflow-wrap: anywhere; }
+.guide-body .gb-h { display: block; color: var(--navy); font-weight: 800; margin: 15px 0 5px; }
 .guide-body .gb-h:first-child { margin-top: 0; }
 .guide-body strong { color: var(--navy); font-weight: 800; }
-.guide-body .gb-check { display: flex; gap: 8px; align-items: flex-start; margin: 7px 0; line-height: 1.7; }
+.guide-body .gb-check { display: flex; gap: 8px; align-items: flex-start; margin: 4px 0; line-height: 1.6; }
 .guide-body .gb-check::before { content: "✓"; color: var(--orange); font-weight: 900; flex: none; }
-.guide-warning { background: #fff4f1; border-left: 4px solid #f04452; padding: 11px 14px; margin: 13px 0; border-radius: 8px; font-size: 14px; line-height: 1.7; }
-.guide-tip { background: #fff3ec; border-left: 4px solid var(--orange); padding: 11px 14px; margin: 13px 0; border-radius: 8px; font-size: 14px; line-height: 1.7; }
+.guide-warning { background: #fff4f1; border-left: 4px solid #f04452; padding: 10px 13px; margin: 9px 0; border-radius: 8px; font-size: 14px; line-height: 1.6; }
+.guide-tip { background: #fff3ec; border-left: 4px solid var(--orange); padding: 10px 13px; margin: 9px 0; border-radius: 8px; font-size: 14px; line-height: 1.6; }
 .fee-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0 6px; }
 .fee-table th, .fee-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; }
 .fee-table th { background: var(--hero-bg); color: var(--navy); font-weight: 700; white-space: nowrap; }
