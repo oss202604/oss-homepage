@@ -258,8 +258,7 @@
 
       window.OSS.getMyProfile().then(async (p) => {
         if (!p) { location.href = "login.html?need=1"; return; }
-        // 운영진이면 관리자페이지로
-        if (p.role === "master" || p.role === "manager") { location.href = "admin.html"; return; }
+        // 관리자도 마이페이지는 일반회원처럼 이용 — 관리자페이지는 헤더 '관리자' 버튼으로만 이동
 
         // 프로필 표시
         document.getElementById("myName").textContent = (p.name || p.username || "회원") + "님";

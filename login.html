@@ -112,12 +112,12 @@
       if (window.OSS && window.OSS.getMyProfile) {
         if (authCard) authCard.style.visibility = "hidden";
         window.OSS.getMyProfile().then((p) => {
-          if (p) location.href = (p.role === "master" || p.role === "manager") ? "admin.html" : "mypage.html";
+          if (p) location.href = "mypage.html";
           else if (authCard) authCard.style.visibility = "";
         }).catch(() => { if (authCard) authCard.style.visibility = ""; });
       }
 
-      function dest(role) { return (role === "master" || role === "manager") ? "admin.html" : "mypage.html"; }
+      function dest(role) { return "mypage.html"; }
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
