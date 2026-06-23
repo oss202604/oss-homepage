@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=44" />
+  <link rel="stylesheet" href="styles.css?v=45" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <style>
     .coupon-list{display:grid;gap:10px;}
@@ -115,6 +115,7 @@
             <button type="button" class="mp-amt" data-amt="50000">5만원</button>
             <button type="button" class="mp-amt" data-amt="100000">10만원</button>
             <button type="button" class="mp-amt" data-amt="300000">30만원</button>
+            <input type="text" id="depCustom" class="mp-amt-other" inputmode="numeric" placeholder="기타금액" aria-label="기타 금액 직접입력" />
           </div>
           <h3 class="mp-subtit">무통장입금 충전 신청 <span style="color:#1F9D6B;font-size:13px;font-weight:600;">(수수료 0%)</span></h3>
           <div class="address-card" style="text-align:left;">
@@ -571,12 +572,20 @@
     // 예치금 충전 금액 선택 버튼
     (function () {
       var sel = document.getElementById("depSel");
+      var custom = document.getElementById("depCustom");
+      function clearBtns() { document.querySelectorAll(".mp-amt").forEach(function (x) { x.classList.remove("on"); }); }
       document.querySelectorAll(".mp-amt").forEach(function (b) {
         b.addEventListener("click", function () {
-          document.querySelectorAll(".mp-amt").forEach(function (x) { x.classList.remove("on"); });
+          clearBtns();
           b.classList.add("on");
+          if (custom) custom.value = "";
           if (sel) sel.textContent = Number(b.dataset.amt).toLocaleString() + "원";
         });
+      });
+      if (custom) custom.addEventListener("input", function () {
+        var n = Number((custom.value || "").replace(/[^0-9]/g, ""));
+        clearBtns();
+        if (sel) sel.textContent = n > 0 ? n.toLocaleString() + "원" : "위에서 선택해 주세요";
       });
     })();
 
