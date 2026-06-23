@@ -32,10 +32,10 @@
             <button data-page="purchase">구매관리</button>
             <button data-page="warehouse">입고관리</button>
             <button data-page="shipping">배송관리</button>
-            <button data-page="stub" data-label="확인/사고/폐기" data-desc="확인요청·사고·폐기 처리 목록">확인/사고/폐기</button>
-            <button data-page="stub" data-label="반송/교환" data-desc="반송·교환 요청·반송비 결제·완료/불가 처리">반송/교환</button>
-            <button data-page="stub" data-label="배송완료" data-desc="배송완료된 주문 목록">배송완료</button>
-            <button data-page="stub" data-label="재고현황" data-desc="입고보관 중인 재고 목록">재고현황</button>
+            <button data-page="incident">확인/사고/폐기</button>
+            <button data-page="rtn">반송/교환</button>
+            <button data-page="shipped">배송완료</button>
+            <button data-page="stock">재고현황</button>
             <button data-page="log">로그</button>
             <button data-page="trash">휴지통</button>
           </div>
@@ -516,6 +516,46 @@
         </div>
       </section>
 
+      <!-- ===== 주문관리 > 확인·사고·폐기 ===== -->
+      <section class="admin-page" id="page-incident">
+        <h2 class="admin-page-title">확인 · 사고 · 폐기 <span style="font-size:14px;font-weight:400;color:var(--muted);">(문제 주문)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">보류·사고·폐기 상태 주문이에요. 주문번호를 누르면 상세창에서 처리·메모할 수 있어요.</p>
+        <div class="dash-panel"><div class="table-wrap"><table class="data-table">
+          <thead><tr><th>주문번호</th><th>고객</th><th>상품</th><th>상태</th><th>금액</th><th>등록일</th></tr></thead>
+          <tbody id="ov_incident_rows"><tr><td colspan="6" class="empty">메뉴를 열면 표시돼요.</td></tr></tbody>
+        </table></div></div>
+      </section>
+
+      <!-- ===== 주문관리 > 반송·교환 ===== -->
+      <section class="admin-page" id="page-rtn">
+        <h2 class="admin-page-title">반송 · 교환 <span style="font-size:14px;font-weight:400;color:var(--muted);">(반품/교환 요청)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">반품/교환 상태 주문이에요. 주문번호를 누르면 상세창에서 반송비·처리결과를 입력할 수 있어요.</p>
+        <div class="dash-panel"><div class="table-wrap"><table class="data-table">
+          <thead><tr><th>주문번호</th><th>고객</th><th>상품</th><th>상태</th><th>금액</th><th>등록일</th></tr></thead>
+          <tbody id="ov_rtn_rows"><tr><td colspan="6" class="empty">메뉴를 열면 표시돼요.</td></tr></tbody>
+        </table></div></div>
+      </section>
+
+      <!-- ===== 주문관리 > 배송완료(아카이브) ===== -->
+      <section class="admin-page" id="page-shipped">
+        <h2 class="admin-page-title">배송완료 <span style="font-size:14px;font-weight:400;color:var(--muted);">(완료 주문 보관)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">배송완료된 주문 목록이에요. 고객 문의·재조회용. (진행 중 출고 작업은 배송관리에서)</p>
+        <div class="dash-panel"><div class="table-wrap"><table class="data-table">
+          <thead><tr><th>주문번호</th><th>고객</th><th>상품</th><th>상태</th><th>금액</th><th>등록일</th></tr></thead>
+          <tbody id="ov_shipped_rows"><tr><td colspan="6" class="empty">메뉴를 열면 표시돼요.</td></tr></tbody>
+        </table></div></div>
+      </section>
+
+      <!-- ===== 주문관리 > 재고현황(보관 중) ===== -->
+      <section class="admin-page" id="page-stock">
+        <h2 class="admin-page-title">재고현황 <span style="font-size:14px;font-weight:400;color:var(--muted);">(센터 보관 중)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">창고 도착~발송 전까지 보관 중인 주문이에요. 보관일수 14일↑은 빨갛게 표시 — 장기 보관 점검용.</p>
+        <div class="dash-panel"><div class="table-wrap"><table class="data-table">
+          <thead><tr><th>주문번호</th><th>고객</th><th>상품</th><th>상태</th><th>럭넘버</th><th>입고일</th><th>보관일수</th></tr></thead>
+          <tbody id="stockRows"><tr><td colspan="7" class="empty">메뉴를 열면 표시돼요.</td></tr></tbody>
+        </table></div></div>
+      </section>
+
       <!-- ===== 주문관리 > 입고관리(창고) ===== -->
       <section class="admin-page" id="page-warehouse">
         <h2 class="admin-page-title">입고관리 <span style="font-size:14px;font-weight:400;color:var(--muted);">(창고 작업)</span></h2>
@@ -721,7 +761,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=21"></script>
-  <script src="admin.js?v=36"></script>
+  <script src="admin.js?v=37"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

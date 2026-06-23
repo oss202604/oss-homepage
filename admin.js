@@ -515,6 +515,8 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
     if (page === "purchase") renderPurchase();
     if (page === "warehouse") renderGroupWork("warehouse");
     if (page === "shipping") renderGroupWork("shipping");
+    if (page === "incident" || page === "rtn" || page === "shipped") renderOrderView(page);
+    if (page === "stock") renderStock();
   });
 });
 function renderStub(label, desc) {
@@ -687,6 +689,51 @@ async function gwBulk(key, newStatus) {
   wire("whToInbound", "warehouse", "입고완료"); wire("whToPack", "warehouse", "포장/측정");
   wire("shToReady", "shipping", "발송대기"); wire("shToShipping", "shipping", "배송중"); wire("shToDone", "shipping", "배송완료");
 })();
+
+// ===== 읽기형 주문뷰 (확인·사고·폐기 / 반송·교환 / 배송완료) =====
+const OV_CFG = {
+  incident: { statuses: ["보류", "사고/폐기"], empty: "보류·사고·폐기 주문이 없어요." },
+  rtn: { statuses: ["반품/교환"], empty: "반품/교환 주문이 없어요." },
+  shipped: { statuses: ["배송완료"], empty: "배송완료된 주문이 없어요." },
+};
+function renderOrderView(key) {
+  const cfg = OV_CFG[key];
+  const tb = document.getElementById("ov_" + key + "_rows");
+  if (!tb || !cfg) return;
+  const rows = ORDERS.filter((o) => !o.deleted && cfg.statuses.includes(o.status));
+  tb.innerHTML = rows.length ? rows.map((o) =>
+    '<tr><td class="ov-open" data-id="' + o.id + '" style="cursor:pointer;color:var(--blue);font-weight:700;">' + esc(o.no) + '</td>' +
+    '<td>' + esc(o.customer) + '</td>' +
+    '<td style="max-width:220px;white-space:normal;">' + esc(o.name) + '</td>' +
+    '<td><span class="status-badge ' + badgeClass(o.status) + '">' + esc(purLabel(o.status)) + '</span></td>' +
+    '<td style="white-space:nowrap;">¥' + (o.amount || 0).toLocaleString() + '</td>' +
+    '<td style="white-space:nowrap;">' + o.created + '</td></tr>'
+  ).join("") : '<tr><td colspan="6" class="empty">' + cfg.empty + '</td></tr>';
+  tb.querySelectorAll(".ov-open").forEach((td) => td.addEventListener("click", () => openModal(td.dataset.id)));
+}
+// ===== 재고현황 — 센터 보관 중(창고도착~발송대기) + 보관일수 =====
+function renderStock() {
+  const tb = document.getElementById("stockRows");
+  if (!tb) return;
+  const stockSt = ["창고도착", "입고완료", "일부입고", "포장/측정", "배송비결제대기", "배송비결제완료", "발송대기"];
+  const rows = ORDERS.filter((o) => !o.deleted && stockSt.includes(o.status));
+  const now = Date.now();
+  tb.innerHTML = rows.length ? rows.map((o) => {
+    const r = o.raw; const sd = (r.status_dates && typeof r.status_dates === "object") ? r.status_dates : {};
+    const inDate = sd["입고완료"] || sd["일부입고"] || sd["창고도착"] || r.created_at;
+    let days = -1, daysTxt = "-";
+    if (inDate) { days = Math.floor((now - new Date(inDate).getTime()) / 86400000); daysTxt = days >= 0 ? days + "일" : "-"; }
+    const inStr = inDate ? String(inDate).replace("T", " ").slice(0, 10) : "-";
+    return '<tr><td class="stock-open" data-id="' + o.id + '" style="cursor:pointer;color:var(--blue);font-weight:700;">' + esc(o.no) + '</td>' +
+      '<td>' + esc(o.customer) + '</td>' +
+      '<td style="max-width:200px;white-space:normal;">' + esc(o.name) + '</td>' +
+      '<td><span class="status-badge ' + badgeClass(o.status) + '">' + esc(purLabel(o.status)) + '</span></td>' +
+      '<td>' + esc(r.rack_no || "-") + '</td>' +
+      '<td style="white-space:nowrap;">' + inStr + '</td>' +
+      '<td style="white-space:nowrap;font-weight:700;' + (days >= 14 ? "color:var(--red);" : "") + '">' + daysTxt + '</td></tr>';
+  }).join("") : '<tr><td colspan="7" class="empty">보관 중인 재고가 없어요.</td></tr>';
+  tb.querySelectorAll(".stock-open").forEach((td) => td.addEventListener("click", () => openModal(td.dataset.id)));
+}
 
 // ===== 결제관리 (예치금/적립금 충전·차감·환불 + 원장 + 결제내역) =====
 let PAY_MEMBER = null;
