@@ -513,6 +513,8 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
     if (page === "log") renderLog();
     if (page === "trash") renderTrash();
     if (page === "purchase") renderPurchase();
+    if (page === "warehouse") renderGroupWork("warehouse");
+    if (page === "shipping") renderGroupWork("shipping");
   });
 });
 function renderStub(label, desc) {
@@ -604,6 +606,86 @@ async function purBulkStatus(newStatus) {
   if (all) all.addEventListener("change", () => { document.querySelectorAll(".pur-chk").forEach((c) => { c.checked = all.checked; }); updatePurSel(); });
   const b1 = document.getElementById("purToBuying"); if (b1) b1.addEventListener("click", () => purBulkStatus("구매중"));
   const b2 = document.getElementById("purToDone"); if (b2) b2.addEventListener("click", () => purBulkStatus("구매완료"));
+})();
+
+// ===== 입고/배송 관리 (group "입고"·"출고", 구매관리와 같은 패턴, 공용) =====
+const GW_CFG = {
+  warehouse: { group: "입고", pre: "wh", fields: [{ f: "weight_kg", t: "number", ph: "무게kg", w: 75 }, { f: "rack_no", t: "text", ph: "럭넘버", w: 90 }] },
+  shipping: { group: "출고", pre: "sh", fields: [{ f: "courier", t: "text", ph: "택배사", w: 90 }, { f: "tracking_no", t: "text", ph: "송장번호", w: 130 }] },
+};
+const GW_FILTER = { warehouse: "all", shipping: "all" };
+function gwSel(key) {
+  const cfg = GW_CFG[key];
+  const el = document.getElementById(cfg.pre + "SelCnt");
+  if (el) el.textContent = document.querySelectorAll("#page-" + key + " .gw-chk:checked").length;
+}
+function renderGroupWork(key) {
+  const cfg = GW_CFG[key]; const pre = cfg.pre;
+  const wrap = document.getElementById(pre + "Filters");
+  const tb = document.getElementById(pre + "Rows");
+  if (!tb) return;
+  const groupStatuses = NORMAL.filter((s) => s.group === cfg.group);
+  const keys = groupStatuses.map((s) => s.key);
+  if (wrap && !wrap.dataset.built) {
+    wrap.dataset.built = "1";
+    const chips = [["all", "전체"]].concat(groupStatuses.map((s) => [s.key, s.label]));
+    wrap.innerHTML = chips.map((c) => '<button class="btn btn-small pur-chip" data-k="' + c[0] + '" type="button">' + esc(c[1]) + '</button>').join("");
+    wrap.querySelectorAll(".pur-chip").forEach((b) => b.addEventListener("click", () => { GW_FILTER[key] = b.dataset.k; renderGroupWork(key); }));
+  }
+  if (wrap) wrap.querySelectorAll(".pur-chip").forEach((b) => b.classList.toggle("active", b.dataset.k === GW_FILTER[key]));
+  const flt = GW_FILTER[key];
+  const rows = ORDERS.filter((o) => !o.deleted && (flt === "all" ? keys.includes(o.status) : o.status === flt));
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="' + (5 + cfg.fields.length) + '" class="empty">해당 단계 주문이 없어요.</td></tr>'; gwSel(key); return; }
+  tb.innerHTML = rows.map((o) => {
+    const r = o.raw;
+    let cells = "";
+    cfg.fields.forEach((fd) => {
+      const v = r[fd.f] != null ? r[fd.f] : "";
+      cells += '<td><input class="pur-inp gw-inp" data-id="' + o.id + '" data-f="' + fd.f + '" data-t="' + fd.t + '"' + (fd.t === "number" ? ' type="number"' : "") + ' value="' + esc(String(v)) + '" placeholder="' + fd.ph + '" style="width:' + fd.w + 'px;"></td>';
+    });
+    return '<tr data-id="' + o.id + '">' +
+      '<td><input type="checkbox" class="gw-chk" data-id="' + o.id + '" style="width:16px;height:16px;"></td>' +
+      '<td class="gw-open" style="cursor:pointer;color:var(--blue);font-weight:700;">' + esc(o.no) + '</td>' +
+      '<td>' + esc(o.customer) + '</td>' +
+      '<td><span class="status-badge ' + badgeClass(o.status) + '">' + esc(purLabel(o.status)) + '</span></td>' +
+      cells +
+      '<td style="white-space:nowrap;">' + o.created + '</td>' +
+    '</tr>';
+  }).join("");
+  tb.querySelectorAll(".gw-inp").forEach((inp) => inp.addEventListener("change", async () => {
+    const o = ORDERS.find((x) => x.id === inp.dataset.id); if (!o) return;
+    const f = inp.dataset.f;
+    const val = inp.dataset.t === "number" ? (inp.value !== "" ? Number(inp.value) : null) : inp.value.trim();
+    try { const patch = {}; patch[f] = val; await window.OSS.updateApplication(o.id, patch); o.raw[f] = val; inp.style.borderColor = "#1F9D6B"; }
+    catch (e) { inp.style.borderColor = "var(--red)"; alert("저장 실패: " + (e.message || e)); }
+  }));
+  tb.querySelectorAll(".gw-open").forEach((td) => td.addEventListener("click", () => openModal(td.closest("tr").dataset.id)));
+  tb.querySelectorAll(".gw-chk").forEach((c) => c.addEventListener("change", () => gwSel(key)));
+  gwSel(key);
+}
+async function gwBulk(key, newStatus) {
+  const checked = [].slice.call(document.querySelectorAll("#page-" + key + " .gw-chk:checked"));
+  const msg = document.getElementById(GW_CFG[key].pre + "Msg");
+  if (!checked.length) { if (msg) msg.textContent = "주문을 먼저 선택하세요."; return; }
+  if (!confirm(checked.length + "건을 '" + newStatus + "'(으)로 바꿀까요?")) return;
+  if (msg) msg.textContent = "처리 중…";
+  let ok = 0;
+  for (const c of checked) {
+    const o = ORDERS.find((x) => x.id === c.dataset.id); if (!o) continue;
+    const sd = (o.raw.status_dates && typeof o.raw.status_dates === "object") ? Object.assign({}, o.raw.status_dates) : {};
+    if (!sd[newStatus]) sd[newStatus] = new Date().toISOString();
+    try { await window.OSS.updateApplication(o.id, { status: newStatus, status_dates: sd }); o.status = newStatus; o.raw.status = newStatus; o.raw.status_dates = sd; ok++; } catch (e) {}
+  }
+  if (msg) msg.textContent = "✓ " + ok + "건 변경됨";
+  renderKanban(); renderDashboard(); renderGroupWork(key);
+  setTimeout(() => { if (msg) msg.textContent = ""; }, 3000);
+}
+(function bindGroupWork() {
+  function wireAll(key, allId) { const all = document.getElementById(allId); if (all) all.addEventListener("change", () => { document.querySelectorAll("#page-" + key + " .gw-chk").forEach((c) => { c.checked = all.checked; }); gwSel(key); }); }
+  wireAll("warehouse", "whAllChk"); wireAll("shipping", "shAllChk");
+  const wire = (id, key, st) => { const b = document.getElementById(id); if (b) b.addEventListener("click", () => gwBulk(key, st)); };
+  wire("whToInbound", "warehouse", "입고완료"); wire("whToPack", "warehouse", "포장/측정");
+  wire("shToReady", "shipping", "발송대기"); wire("shToShipping", "shipping", "배송중"); wire("shToDone", "shipping", "배송완료");
 })();
 
 // ===== 결제관리 (예치금/적립금 충전·차감·환불 + 원장 + 결제내역) =====
