@@ -129,7 +129,6 @@ if (menuToggle && mainMenu) {
       '</div>' +
       '<div class="footer-bottom"><div class="container">' +
         (biz.legal ? '<p class="footer-legal">' + biz.legal + '</p>' : '') +
-        '<p class="footer-fx">오쓰 적용환율 : 100엔 = ₩1,000 <small>(1엔 = 10원)</small></p>' +
         '<div class="footer-bottom-inner">' +
         '<span class="footer-copy">© 2026 OSS. All rights reserved.</span>' +
         '</div>' +
@@ -153,9 +152,8 @@ if (menuToggle && mainMenu) {
   a.target = "_blank"; a.rel = "noopener";
   a.className = "chat-fab";
   a.title = "카카오톡 문의";
-  a.innerHTML = '<i data-lucide="message-circle"></i>';
+  a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>';
   document.body.appendChild(a);
-  if (window.lucide) lucide.createIcons();
 })();
 
 // ===== 푸터 위 사이트맵 가로 한 줄 (회사소개·약관·공지 등) =====
