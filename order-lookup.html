@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=47" />
+  <link rel="stylesheet" href="styles.css?v=48" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 </head>
 <body>
@@ -44,7 +44,7 @@
         <h3 style="font-size:17px;color:var(--navy);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--yellow);">조회 결과</h3>
         <div class="table-wrap">
           <table class="data-table">
-            <thead><tr><th>주문번호</th><th>유형</th><th>상태</th><th>금액</th><th>접수일</th></tr></thead>
+            <thead><tr><th>주문번호</th><th>유형</th><th>상태</th><th>상품금액</th><th>배송비(2차)</th><th>접수일</th></tr></thead>
             <tbody id="lkRows"></tbody>
           </table>
         </div>
@@ -71,8 +71,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=17"></script>
-  <script src="script.js?v=38"></script>
+  <script src="supabase.js?v=18"></script>
+  <script src="script.js?v=39"></script>
   <script>
     function badgeClass(s) {
       if (s === "신규접수") return "status-new";
@@ -125,14 +125,30 @@
         if (!rows.length) {
           err.textContent = "조회 결과가 없습니다. 주문번호와 전화번호를 확인해 주세요.";
         } else {
-          document.getElementById("lkRows").innerHTML = rows.map(r =>
-            `<tr>
+          document.getElementById("lkRows").innerHTML = rows.map(r => {
+            var ship = Number(r.shipping_fee) || 0;
+            var coup = Number(r.coupon_amount) || 0;
+            var shipCell;
+            if (ship > 0) {
+              if (coup > 0) {
+                var fin = Math.max(0, ship - coup);
+                shipCell = '<span style="color:#888;text-decoration:line-through;">₩' + ship.toLocaleString() + '</span>'
+                  + '<br><span style="font-size:11px;color:#1F9D6B;">쿠폰 −₩' + coup.toLocaleString() + '</span>'
+                  + '<br><b style="color:var(--blue);">₩' + fin.toLocaleString() + '</b>';
+              } else {
+                shipCell = '<b>₩' + ship.toLocaleString() + '</b>';
+              }
+            } else {
+              shipCell = '<span style="font-size:12px;color:#aaa;">측정 전</span>' + (coup > 0 ? '<br><span style="font-size:11px;color:#1F9D6B;">쿠폰 ₩' + coup.toLocaleString() + ' 적용예정</span>' : '');
+            }
+            return `<tr>
               <td>${r.order_no || "-"}</td>
               <td>${r.type === "purchase" ? "구매대행" : "배송대행"}</td>
               <td><span class="status-badge ${badgeClass(r.status)}">${r.status}</span>${stepLabel(r.status)}</td>
               <td>¥${(r.subtotal || 0).toLocaleString()}<br><span style="font-size:11px;color:#888;">약 ₩${((r.subtotal || 0) * 10).toLocaleString()}</span></td>
+              <td>${shipCell}</td>
               <td>${(r.created_at || "").slice(0,10)}</td>
-            </tr>`).join("");
+            </tr>`; }).join("");
           resultBox.hidden = false;
         }
       } catch (e2) {

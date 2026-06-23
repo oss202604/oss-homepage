@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=47" />
+  <link rel="stylesheet" href="styles.css?v=48" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 </head>
 <body>
@@ -251,6 +251,12 @@
           <label class="checkbox full"><input type="checkbox" name="agree" required /><span>개인정보 수집·이용(주문 처리 목적)에 동의합니다. <span class="req">*</span></span></label>
         </fieldset>
 
+        <fieldset class="form-block" id="couponFieldset" style="display:none;">
+          <legend>6. 쿠폰</legend>
+          <label class="checkbox full"><input type="checkbox" name="useCoupon" id="useCoupon" /><span id="couponLabel">보유한 배송비 할인쿠폰 사용하기</span></label>
+          <p class="form-note" style="text-align:left;margin:6px 0 0;">쿠폰을 선택하면 <b>2차 배송비 결제</b> 때 할인 금액이 자동으로 적용돼요. (한 주문에 1장)</p>
+        </fieldset>
+
         <div class="step-actions step-actions-row">
           <button type="button" class="btn btn-dark" id="backToStep1">← 이전 단계</button>
           <button type="submit" class="btn btn-primary">구매대행 신청하기</button>
@@ -296,8 +302,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=17"></script>
-  <script src="script.js?v=38"></script>
+  <script src="supabase.js?v=18"></script>
+  <script src="script.js?v=39"></script>
   <script>
     (function () {
       if (!(window.OSS && OSS.getMyProfile)) return;
@@ -307,6 +313,17 @@
       OSS.getMyProfile().then(function (p) {
         if (!p) return;
         if (saveWrap) saveWrap.style.display = '';
+        // 보유 활성쿠폰 → 쿠폰 사용 옵션 노출 (1차결제 때 체크 → 2차 자동할인)
+        if (OSS.fetchMyCoupons) OSS.fetchMyCoupons().then(function (cs) {
+          var now = Date.now();
+          var act = (cs || []).filter(function (c) { return c.status === 'active' && (!c.expires_at || new Date(c.expires_at).getTime() > now); });
+          if (!act.length) return;
+          var c = act[0];
+          window.__ossActiveCoupon = { id: c.id, amount: Number(c.amount) || 0 };
+          var lab = document.getElementById('couponLabel');
+          if (lab) lab.innerHTML = '보유한 <b>배송비 할인쿠폰 ₩' + (Number(c.amount) || 0).toLocaleString() + '</b> 사용하기';
+          var fs = document.getElementById('couponFieldset'); if (fs) fs.style.display = '';
+        }).catch(function () {});
         if (OSS.listMyAddresses) OSS.listMyAddresses().then(function (list) {
           if (!list || !list.length) return;
           list.forEach(function (a, i) { var o = document.createElement('option'); o.value = i; o.textContent = (a.label ? '[' + a.label + '] ' : '') + (a.receiver_name || '') + ' · ' + (a.address || '').slice(0, 16); sel.appendChild(o); });

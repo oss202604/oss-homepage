@@ -249,6 +249,12 @@ async function updateMyProfile(name, phone, email, addrZip, addrMain, addrDetail
   if (error) throw error;
 }
 
+// 내 환불계좌 저장/수정 (은행·계좌·예금주)
+async function updateMyRefund(bank, account, holder) {
+  const { error } = await sb.rpc("oss_update_my_refund", { p_bank: bank || null, p_account: account || null, p_holder: holder || null });
+  if (error) throw error;
+}
+
 // 마지막 로그인 시각 갱신 (실패해도 무시)
 async function touchLogin() {
   try { await sb.rpc("oss_touch_login"); } catch (e) {}
@@ -319,6 +325,13 @@ async function deleteCoupon(id) {
   const { error } = await sb.from("coupons").delete().eq("id", id);
   if (error) throw error;
 }
+// 회원: 주문에 쿠폰 예약(1차결제 때 "쿠폰 쓸게요"). 정산 때 사장님이 최종 used 처리.
+// 반환값 = 할인액(원). 0이면 예약 실패(이미 사용/만료 등).
+async function reserveCoupon(couponId, orderNo) {
+  const { data, error } = await sb.rpc("oss_reserve_coupon", { p_coupon_id: couponId, p_order_no: orderNo });
+  if (error) throw error;
+  return Number(data) || 0;
+}
 
 // ---- 구매후기 (회원만 작성, 사장님 승인 후 게시) ----
 async function submitReview(fields) {
@@ -332,17 +345,44 @@ async function submitReview(fields) {
     rating: Math.max(1, Math.min(5, Number(fields.rating) || 5)),
     body: String(fields.body || "").trim(),
     order_no: fields.order_no || null,
+    image_url: fields.image_url || null,
     status: "pending",
   };
   const { error } = await sb.from("reviews").insert([payload]);
   if (error) throw error;
   return true;
 }
-// 사이트 노출용 (승인된 후기)
+// 후기 수정 (본인 것만 · 수정하면 재승인 대기)
+async function updateMyReview(id, fields) {
+  const { error } = await sb.rpc("oss_update_my_review", {
+    p_id: id,
+    p_rating: Math.max(1, Math.min(5, Number(fields.rating) || 5)),
+    p_body: String(fields.body || "").trim(),
+    p_image_url: fields.image_url || null,
+  });
+  if (error) throw error;
+}
+// 후기 사진 업로드 (Storage: product-images 버킷의 reviews/ 경로 재사용)
+async function uploadReviewImage(file) {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const path = "reviews/" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext;
+  const { error } = await sb.storage.from("product-images").upload(path, file, { cacheControl: "3600", upsert: false });
+  if (error) throw error;
+  const { data } = sb.storage.from("product-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+// 사이트 노출용 (승인된 후기) — 이름은 maskName으로 가려 표시
 async function fetchApprovedReviews(limit) {
-  const { data, error } = await sb.from("reviews").select("author_name,rating,body,created_at,approved_at").eq("status", "approved").order("approved_at", { ascending: false }).limit(limit || 12);
+  const { data, error } = await sb.from("reviews").select("author_name,rating,body,image_url,created_at,approved_at").eq("status", "approved").order("approved_at", { ascending: false }).limit(limit || 12);
   if (error) throw error;
   return data || [];
+}
+// 이름 마스킹: 첫 글자만 보이고 나머지는 * (송상익 → 송**, 송익 → 송*, 남궁민수 → 남***)
+function maskName(name) {
+  var s = String(name == null ? "" : name).trim();
+  if (!s) return "고객";
+  if (s.length === 1) return s + "*";
+  return s[0] + "*".repeat(s.length - 1);
 }
 // 내가 쓴 후기 (마이페이지 — 상태 확인)
 async function fetchMyReviews() {
@@ -414,8 +454,81 @@ async function setDefaultAddress(id) {
   if (error) throw error;
 }
 
+// ============================================================
+// 💳 PG(카드) 결제 어댑터 — "전부 준비, API키 주면 잠금해제"
+// ------------------------------------------------------------
+// 사용법: PG사 계약 후 아래 3가지만 채우고 enabled=true 로 바꾸면
+//         사이트 전체(예치금 충전·주문 결제)의 카드결제가 즉시 작동합니다.
+//   1) OSS_PG.enabled  = true
+//   2) OSS_PG.storeId  = "store-..."      (PG사/포트원 상점 ID)
+//   3) OSS_PG.channelKey = "channel-..."  (결제 채널 키)
+// 기본 연동은 포트원(PortOne) v2 기준 — 토스·나이스·KG이니시스·카카오페이 등
+// 어떤 PG를 골라도 포트원 채널설정만 바꾸면 되어 한 번에 준비됨.
+// ⚠️ 잠금(enabled=false) 동안엔 카드버튼을 눌러도 "준비중" 안내만 뜨고,
+//    무통장입금/예치금 결제는 정상 작동합니다.
+// ============================================================
+const OSS_PG = {
+  enabled: false,            // ← PG 계약 완료 후 true 로
+  provider: "portone",       // portone(권장) | toss | nice ...
+  storeId: "",               // ← 발급받은 상점 ID
+  channelKey: "",            // ← 발급받은 채널 키
+  sdkUrl: "https://cdn.portone.io/v2/browser-sdk.js",
+};
+function isPgEnabled() { return !!(OSS_PG.enabled && OSS_PG.storeId && OSS_PG.channelKey); }
+
+// 포트원 SDK 1회 로드 (enabled일 때만 실제 로드)
+let _pgSdkPromise = null;
+function _loadPgSdk() {
+  if (window.PortOne) return Promise.resolve(window.PortOne);
+  if (_pgSdkPromise) return _pgSdkPromise;
+  _pgSdkPromise = new Promise(function (resolve, reject) {
+    const s = document.createElement("script");
+    s.src = OSS_PG.sdkUrl; s.async = true;
+    s.onload = function () { resolve(window.PortOne); };
+    s.onerror = function () { reject(new Error("결제 모듈을 불러오지 못했어요.")); };
+    document.head.appendChild(s);
+  });
+  return _pgSdkPromise;
+}
+
+// 카드결제 실행. opts = { amount, orderName, orderNo, customerName, payMethod }
+// 반환: { ok:true, payment } | { ok:false, locked:true } | { ok:false, error }
+async function payByCard(opts) {
+  opts = opts || {};
+  if (!isPgEnabled()) {
+    // 🔒 잠금 상태 — 무통장입금/예치금으로 안내
+    return { ok: false, locked: true, message: "카드 결제는 준비 중이에요. 지금은 무통장입금 또는 예치금으로 결제해 주세요." };
+  }
+  try {
+    const PortOne = await _loadPgSdk();
+    const paymentId = "oss-" + (opts.orderNo || "pay") + "-" + Date.now();
+    const res = await PortOne.requestPayment({
+      storeId: OSS_PG.storeId,
+      channelKey: OSS_PG.channelKey,
+      paymentId: paymentId,
+      orderName: opts.orderName || "OSS 결제",
+      totalAmount: Number(opts.amount) || 0,
+      currency: "CURRENCY_KRW",
+      payMethod: opts.payMethod || "CARD",
+      customer: { fullName: opts.customerName || "" },
+      customData: { orderNo: opts.orderNo || "" },
+    });
+    if (res && res.code != null) return { ok: false, error: res.message || "결제가 취소되었어요." };
+    // TODO(서버검증): 운영 시 결제건 위변조 방지를 위해 서버(Edge Function)에서
+    //   포트원 결제내역 조회 API로 amount/status 재확인 후 주문확정 처리 권장.
+    return { ok: true, payment: res, paymentId: paymentId };
+  } catch (e) {
+    return { ok: false, error: e.message || String(e) };
+  }
+}
+
 window.OSS = {
   sb,
+  // 💳 PG
+  OSS_PG,
+  isPgEnabled,
+  payByCard,
+  maskName,
   submitApplication,
   lookupOrder,
   requestBundle,
@@ -451,6 +564,7 @@ window.OSS = {
   getMyProfile,
   myOrders,
   updateMyProfile,
+  updateMyRefund,
   touchLogin,
   changePassword,
   // 마스터: 회원관리
@@ -466,8 +580,11 @@ window.OSS = {
   unuseCoupon,
   issueCoupon,
   deleteCoupon,
+  reserveCoupon,
   // 구매후기
   submitReview,
+  updateMyReview,
+  uploadReviewImage,
   fetchApprovedReviews,
   fetchMyReviews,
   listReviews,

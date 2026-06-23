@@ -286,6 +286,12 @@
         <div><label class="oq-label">주소 (도로명 + 상세)</label><input class="oq-input" id="fAddr" placeholder="주소 검색 후 상세주소를 이어서 입력" /></div>
         <div><label class="oq-label">요청사항 (선택)</label><textarea class="oq-input" id="fMemo" placeholder="합배송 요청, 재포장 요청 등 자유롭게 적어주세요"></textarea></div>
         <div id="fSaveAddrWrap" style="display:none;grid-column:1/-1;"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);cursor:pointer;"><input type="checkbox" id="fSaveAddr" style="width:auto;" /> 이 배송지를 내 주소지로 저장 (최대 3개)</label></div>
+        <div id="fCouponWrap" style="display:none;grid-column:1/-1;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);cursor:pointer;background:var(--o-tint);border:1px solid var(--o-line2);border-radius:13px;padding:13px;">
+            <input type="checkbox" id="fUseCoupon" style="width:auto;" /> <span id="fCouponLabel">보유한 배송비 할인쿠폰 사용하기</span>
+          </label>
+          <span class="oq-help"><i data-lucide="info"></i> 쿠폰을 선택하면 <b>2차 배송비 결제</b> 때 자동으로 할인돼요. (한 주문에 1장)</span>
+        </div>
       </div>
       <p class="oq-err" id="err2"></p>
       <div class="oq-foot">
@@ -372,7 +378,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=17"></script>
+  <script src="supabase.js?v=18"></script>
   <script>
   (function () {
     var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -589,6 +595,8 @@
       if (bp.products.some(function (p) { return !p.category; })) { err.textContent = "각 상품의 품목 분류를 선택해 주세요 (통관 신고에 필요해요)."; return; }
       var btn = this; btn.disabled = true; btn.textContent = "접수 중...";
       var orderNo = genOrderNo();
+      var useCoup = $("#fUseCoupon");
+      var coup = (useCoup && useCoup.checked && window.__oqCoupon) ? window.__oqCoupon : null;
       var payload = {
         order_no: orderNo, type: "delivery", status: "신규접수",
         source: SOURCE, channel: CHANNEL, ship_method: ship,
@@ -596,9 +604,12 @@
         receiver_name: name, receiver_phone: phone,
         customs_code: customs, zipcode: zip, address: addr, memo: memo,
         member_grade: MY_GRADE,
-        products: bp.products, subtotal: bp.subtotal
+        products: bp.products, subtotal: bp.subtotal,
+        coupon_id: coup ? coup.id : null,
+        coupon_amount: coup ? coup.amount : null
       };
       OSS.submitApplication(payload).then(function () {
+        if (coup && OSS.reserveCoupon) { OSS.reserveCoupon(coup.id, orderNo).catch(function () {}); }
         window.__oqDone = true;
         $("#panel2").classList.remove("active"); $("#oqSteps").hidden = true;
         $("#doneNo").textContent = orderNo;
@@ -629,6 +640,16 @@
       OSS.getMyProfile().then(function (p) {
         if (!p) return;
         var sw = $("#fSaveAddrWrap"); if (sw) sw.style.display = "";
+        if (OSS.fetchMyCoupons) OSS.fetchMyCoupons().then(function (cs) {
+          var now = Date.now();
+          var act = (cs || []).filter(function (c) { return c.status === "active" && (!c.expires_at || new Date(c.expires_at).getTime() > now); });
+          if (!act.length) return;
+          var c = act[0];
+          window.__oqCoupon = { id: c.id, amount: Number(c.amount) || 0 };
+          var lab = $("#fCouponLabel"); if (lab) lab.innerHTML = "보유한 <b>배송비 할인쿠폰 ₩" + (Number(c.amount) || 0).toLocaleString() + "</b> 사용하기";
+          var cw = $("#fCouponWrap"); if (cw) cw.style.display = "";
+          icons();
+        }).catch(function () {});
         if (!OSS.listMyAddresses) return;
         OSS.listMyAddresses().then(function (list) {
           if (!list || !list.length) return;

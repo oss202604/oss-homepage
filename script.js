@@ -502,7 +502,15 @@ if (form && modal) {
       due_date: data.get("dueDate") || "",
       memo: data.get("memo") || "",
       member_grade: MY_GRADE,
+      coupon_id: _couponPick() ? _couponPick().id : null,
+      coupon_amount: _couponPick() ? _couponPick().amount : null,
     };
+  }
+  // 쿠폰 사용 체크 시 선택된 쿠폰 반환 (없으면 null)
+  function _couponPick() {
+    var chk = document.getElementById("useCoupon");
+    if (chk && chk.checked && window.__ossActiveCoupon) return window.__ossActiveCoupon;
+    return null;
   }
 
   form.addEventListener("submit", async (e) => {
@@ -527,6 +535,11 @@ if (form && modal) {
       if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "접수 중..."; }
       try {
         await window.OSS.submitApplication(buildPayload(orderNo));
+        // 쿠폰 사용 체크 시 → 이 주문에 쿠폰 예약(2차결제 때 자동할인). 실패해도 주문은 진행.
+        var _cp = _couponPick();
+        if (_cp && window.OSS.reserveCoupon) {
+          try { await window.OSS.reserveCoupon(_cp.id, orderNo); } catch (ce) { console.warn("쿠폰 예약 실패", ce); }
+        }
       } catch (err) {
         console.error(err);
         alert("접수 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.\n(" + (err.message || err) + ")");
@@ -707,6 +720,7 @@ if (form && modal) {
     grid.innerHTML = list.map((r) => `<div class="review-card">
       <div class="review-stars">${"★".repeat(Math.max(1, Math.min(5, Number(r.rating) || 5)))}</div>
       <p class="review-text">${esc(r.text)}</p>
+      ${r.image ? `<img class="review-photo" src="${esc(r.image)}" alt="후기 사진" loading="lazy" />` : ""}
       <p class="review-author">${esc(r.author || "고객님")}</p>
     </div>`).join("");
   }
@@ -718,8 +732,9 @@ if (form && modal) {
     else empty();
   }
   if (window.OSS && window.OSS.fetchApprovedReviews) {
+    var mask = (window.OSS && window.OSS.maskName) ? window.OSS.maskName : function (n) { return n || "고객"; };
     window.OSS.fetchApprovedReviews(12).then((rows) => {
-      if (Array.isArray(rows) && rows.length) render(rows.map((r) => ({ author: r.author_name, rating: r.rating, text: r.body })));
+      if (Array.isArray(rows) && rows.length) render(rows.map((r) => ({ author: mask(r.author_name), rating: r.rating, text: r.body, image: r.image_url })));
       else loadFromSetting();
     }).catch(loadFromSetting);
   } else { loadFromSetting(); }

@@ -258,7 +258,9 @@ async function loadReviews() {
       const btn = (r.status === "approved")
         ? '<button class="btn btn-small" data-rv-hide="' + r.id + '">숨김</button>'
         : '<button class="btn btn-small btn-primary" data-rv-ok="' + r.id + '">승인</button>';
-      return '<tr><td>' + esc(r.author_name || "회원") + '</td><td style="white-space:nowrap;color:#F1A23A;">' + "★".repeat(r.rating || 5) + '</td><td style="max-width:280px;white-space:normal;word-break:break-word;">' + esc(r.body || "") + '</td><td>' + esc(r.order_no || "-") + '</td><td>' + (r.created_at || "").slice(0, 10) + '</td><td>' + st + '</td><td style="white-space:nowrap;">' + btn + ' <button class="btn btn-small" data-rv-del="' + r.id + '" style="color:var(--red);">삭제</button></td></tr>';
+      const photo = r.image_url ? '<br><a href="' + esc(r.image_url) + '" target="_blank" rel="noopener"><img src="' + esc(r.image_url) + '" alt="후기사진" style="max-width:120px;max-height:120px;border-radius:8px;border:1px solid #e5e5e5;margin-top:6px;object-fit:cover;" /></a>' : "";
+      const editedTag = r.updated_at ? ' <span style="font-size:11px;color:#C77A12;">(수정됨)</span>' : "";
+      return '<tr><td>' + esc(r.author_name || "회원") + '</td><td style="white-space:nowrap;color:#F1A23A;">' + "★".repeat(r.rating || 5) + '</td><td style="max-width:280px;white-space:normal;word-break:break-word;">' + esc(r.body || "") + editedTag + photo + '</td><td>' + esc(r.order_no || "-") + '</td><td>' + (r.created_at || "").slice(0, 10) + '</td><td>' + st + '</td><td style="white-space:nowrap;">' + btn + ' <button class="btn btn-small" data-rv-del="' + r.id + '" style="color:var(--red);">삭제</button></td></tr>';
     }).join("");
   } catch (e) { tb.innerHTML = '<tr><td colspan="7" class="empty">불러오기 실패: ' + esc(e.message || e) + '</td></tr>'; }
 }

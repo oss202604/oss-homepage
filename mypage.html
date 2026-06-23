@@ -7,21 +7,31 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=47" />
+  <link rel="stylesheet" href="styles.css?v=48" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <style>
     .coupon-list{display:grid;gap:10px;}
     .coupon{display:flex;justify-content:space-between;align-items:center;border:1.5px dashed #FBE0CF;border-radius:14px;padding:14px 16px;background:linear-gradient(135deg,#FFF6EF,#FFEFF2);}
     .coupon.used,.coupon.expired{opacity:.5;filter:grayscale(.4);}
+    .coupon.reserved{border-style:solid;border-color:#9AD6BC;background:linear-gradient(135deg,#F0FBF6,#EAF7FF);}
     .coupon-amt{font-size:20px;font-weight:800;color:#F15E1C;display:flex;flex-direction:column;line-height:1.2;}
     .coupon-amt span{font-size:12px;font-weight:600;color:#8C8178;margin-top:3px;}
     .coupon-meta{text-align:right;display:flex;flex-direction:column;gap:4px;}
     .coupon-state{font-size:13px;font-weight:700;color:#171310;}
+    .coupon.reserved .coupon-state{color:#1F9D6B;}
+    .coupon-order{font-size:11px;color:#5C5048;background:#fff;border:1px solid #E3D8CF;border-radius:8px;padding:1px 7px;align-self:flex-end;}
     .coupon-exp{font-size:11.5px;color:#A99B91;}
     .rv-item{border:1px solid #EFE3DA;border-radius:12px;padding:12px 14px;margin-bottom:8px;}
     .rv-top{font-size:14px;color:#F1A23A;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
     .rv-item p{margin:0 0 4px;font-size:13.5px;color:#171310;line-height:1.6;word-break:break-word;}
+    .rv-photo{max-width:140px;max-height:140px;border-radius:10px;border:1px solid #EFE3DA;object-fit:cover;display:block;margin:6px 0;}
+    .rv-bot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px;}
     .rv-date{font-size:11.5px;color:#A99B91;}
+    .rv-edit{font-size:12px;border:1px solid #E3D8CF;background:#fff;border-radius:8px;padding:4px 12px;cursor:pointer;font-family:inherit;color:#5C5048;}
+    .rv-edit:hover{background:#FFF3EC;border-color:#F6C99B;color:#C24E18;}
+    .rv-photo-prev{margin:8px 0;position:relative;display:inline-block;}
+    .rv-photo-prev img{max-width:160px;max-height:160px;border-radius:10px;border:1px solid #EFE3DA;object-fit:cover;display:block;}
+    .rv-photo-del{margin-top:6px;font-size:12px;border:1px solid #F6C2C8;background:#FFF0F1;color:#C0392B;border-radius:8px;padding:5px 11px;cursor:pointer;font-family:inherit;}
     .rv-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;}
     .rv-badge.ok{background:#E6F8F0;color:#1F9D6B;}
     .rv-badge.wait{background:#FFF3E0;color:#C77A12;}
@@ -126,8 +136,8 @@
           </div>
           <h3 class="mp-subtit">신용카드 충전 <span style="color:#999;font-size:13px;font-weight:600;">(수수료 3.4%)</span></h3>
           <div class="address-card" style="text-align:left;">
-            <p style="margin:0 0 10px;color:#888;">카드 결제(PG)는 준비 중이에요. 곧 제공되며, 지금은 무통장입금으로 충전해 주세요.</p>
-            <button type="button" class="btn btn-primary" disabled style="opacity:.5;cursor:not-allowed;">신용카드 충전 (준비중)</button>
+            <p id="depCardNote" style="margin:0 0 10px;color:#888;">카드 결제(PG)는 준비 중이에요. 곧 제공되며, 지금은 무통장입금으로 충전해 주세요.</p>
+            <button type="button" class="btn btn-primary" id="depCardBtn">신용카드로 충전하기</button>
           </div>
           <h3 style="font-size:15px;margin:22px 0 8px;">충전·사용 내역</h3>
           <div class="table-wrap">
@@ -185,8 +195,9 @@
 
         <!-- 구매후기 -->
         <div class="mypage-block" id="reviews">
-          <h2 class="mypage-title">구매후기 작성</h2>
+          <h2 class="mypage-title" id="rvFormTitle">구매후기 작성</h2>
           <form class="order-form" id="reviewForm">
+            <input type="hidden" id="rvEditId" value="" />
             <div class="form-row">
               <label>별점
                 <select id="rvRating">
@@ -200,7 +211,14 @@
               <label>주문번호 (선택)<input type="text" id="rvOrder" placeholder="OSS-..." /></label>
             </div>
             <label>후기 내용<textarea id="rvBody" rows="4" placeholder="상품·배송·응대 등 솔직한 후기를 남겨주세요. 사장님 확인 후 사이트에 게시됩니다"></textarea></label>
-            <button type="submit" class="btn btn-primary">후기 등록</button>
+            <label>사진 첨부 <span class="ro-note">(선택 · 1장)</span>
+              <input type="file" id="rvPhoto" accept="image/*" />
+            </label>
+            <div id="rvPhotoPrev" class="rv-photo-prev" hidden><img id="rvPhotoImg" alt="첨부사진 미리보기" /><button type="button" id="rvPhotoDel" class="rv-photo-del">사진 삭제</button></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button type="submit" class="btn btn-primary" id="rvSubmitBtn">후기 등록</button>
+              <button type="button" class="btn btn-small" id="rvCancelBtn" hidden>수정 취소</button>
+            </div>
             <p id="rvMsg" style="margin-top:8px;font-size:13px;min-height:16px;"></p>
           </form>
           <h3 style="margin:20px 0 8px;font-size:15px;">내가 쓴 후기</h3>
@@ -273,6 +291,17 @@
             <p id="pfMsg" style="margin-top:8px;font-size:13px;min-height:16px;"></p>
           </form>
           <hr style="border:none;border-top:1px solid #EFE3DA;margin:22px 0;" />
+          <h3 style="font-size:15px;margin-bottom:10px;">환불 계좌 <span class="ro-note">(주문 취소·환불 시 입금받을 계좌)</span></h3>
+          <form class="order-form" id="refundForm">
+            <div class="form-row">
+              <label>은행<input type="text" id="rfBank" placeholder="예: 국민은행" /></label>
+              <label>예금주<input type="text" id="rfHolder" placeholder="홍길동" /></label>
+            </div>
+            <label>계좌번호<input type="text" id="rfAccount" inputmode="numeric" placeholder="- 없이 숫자만" /></label>
+            <button type="submit" class="btn btn-primary">환불계좌 저장</button>
+            <p id="rfMsg" style="margin-top:8px;font-size:13px;min-height:16px;"></p>
+          </form>
+          <hr style="border:none;border-top:1px solid #EFE3DA;margin:22px 0;" />
           <h3 style="font-size:15px;margin-bottom:10px;">비밀번호 변경</h3>
           <form class="order-form" id="pwForm">
             <div class="form-row">
@@ -303,8 +332,8 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=17"></script>
-  <script src="script.js?v=38"></script>
+  <script src="supabase.js?v=18"></script>
+  <script src="script.js?v=39"></script>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script>
     (function () {
@@ -336,6 +365,9 @@
         var pfZ = document.getElementById("pfZip"); if (pfZ) pfZ.value = p.addr_zip || "";
         var pfA2 = document.getElementById("pfAddr"); if (pfA2) pfA2.value = p.addr_main || "";
         var pfAd = document.getElementById("pfAddrDetail"); if (pfAd) pfAd.value = p.addr_detail || "";
+        var rfB = document.getElementById("rfBank"); if (rfB) rfB.value = p.refund_bank || "";
+        var rfH = document.getElementById("rfHolder"); if (rfH) rfH.value = p.refund_holder || "";
+        var rfA = document.getElementById("rfAccount"); if (rfA) rfA.value = p.refund_account || "";
         var depB = document.getElementById("depBal"); if (depB) depB.textContent = Number(p.deposit || 0).toLocaleString() + "원";
         var wDep = document.getElementById("walDeposit"); if (wDep) wDep.innerHTML = Number(p.deposit || 0).toLocaleString() + "<em>원</em>";
         var wPt = document.getElementById("walPoint"); if (wPt) wPt.innerHTML = Number(p.points || 0).toLocaleString() + "<em>원</em>";
@@ -430,34 +462,89 @@
           }).join("");
         }
 
-        // 쿠폰함
+        // 쿠폰함 (사용가능 / 사용예정(예약) / 사용완료 — 사용이력 표시)
         try {
           const coupons = await window.OSS.fetchMyCoupons();
-          var _wc = document.getElementById("walCoupon"); if (_wc) _wc.innerHTML = coupons.filter(function (c) { return c.status !== "used"; }).length + "<em>개</em>";
+          var _wc = document.getElementById("walCoupon"); if (_wc) _wc.innerHTML = coupons.filter(function (c) { return c.status === "active"; }).length + "<em>개</em>";
           const cl = document.getElementById("couponList");
           const now = Date.now();
           if (cl) cl.innerHTML = coupons.length ? coupons.map((c) => {
             const exp = c.expires_at ? new Date(c.expires_at) : null;
             const expired = exp && exp.getTime() < now;
             const used = c.status === "used";
-            const state = used ? "사용완료" : (expired ? "기간만료" : "사용가능");
-            const cls = used ? "used" : (expired ? "expired" : "ok");
+            const reserved = c.status === "reserved";
+            let state, cls;
+            if (used) { state = "사용완료"; cls = "used"; }
+            else if (reserved) { state = "사용예정"; cls = "reserved"; }
+            else if (expired) { state = "기간만료"; cls = "expired"; }
+            else { state = "사용가능"; cls = "ok"; }
+            const ord = c.used_order_no ? `<span class="coupon-order">주문 ${esc(c.used_order_no)}</span>` : "";
+            const dateLine = used && c.used_at ? ("사용일 " + fmtDate(c.used_at)) : ("~ " + fmtDate(c.expires_at));
             return `<div class="coupon ${cls}">
               <div class="coupon-amt">₩${Number(c.amount || 0).toLocaleString()}<span>배송비 할인</span></div>
-              <div class="coupon-meta"><span class="coupon-state">${state}</span><span class="coupon-exp">~ ${fmtDate(c.expires_at)}</span></div>
+              <div class="coupon-meta"><span class="coupon-state">${state}</span>${ord}<span class="coupon-exp">${dateLine}</span></div>
             </div>`;
           }).join("") : '<p class="empty">보유한 쿠폰이 없어요.</p>';
         } catch (e) { const cl = document.getElementById("couponList"); if (cl) cl.innerHTML = '<p class="empty">쿠폰을 불러오지 못했어요. 새로고침해 주세요.</p>'; }
 
-        // 내가 쓴 후기 + 작성
+        // ── 내가 쓴 후기 + 작성/수정 (사진 첨부 가능) ──
+        let myReviewsCache = [];
+        let rvCurrentImage = "";   // 폼에 현재 들어있는 사진 URL (수정 시 기존 사진 유지용)
+        const rvPhotoInput = document.getElementById("rvPhoto");
+        const rvPhotoPrev = document.getElementById("rvPhotoPrev");
+        const rvPhotoImg = document.getElementById("rvPhotoImg");
+        const rvEditId = document.getElementById("rvEditId");
+        const rvSubmitBtn = document.getElementById("rvSubmitBtn");
+        const rvCancelBtn = document.getElementById("rvCancelBtn");
+        const rvFormTitle = document.getElementById("rvFormTitle");
+
+        function showPhotoPrev(url) {
+          rvCurrentImage = url || "";
+          if (url) { rvPhotoImg.src = url; rvPhotoPrev.hidden = false; }
+          else { rvPhotoImg.removeAttribute("src"); rvPhotoPrev.hidden = true; }
+        }
+        if (rvPhotoInput) rvPhotoInput.addEventListener("change", function () {
+          const f = rvPhotoInput.files && rvPhotoInput.files[0];
+          if (f) showPhotoPrev(URL.createObjectURL(f));
+        });
+        document.getElementById("rvPhotoDel").addEventListener("click", function () {
+          if (rvPhotoInput) rvPhotoInput.value = "";
+          showPhotoPrev("");
+        });
+        function resetReviewForm() {
+          rf.reset(); rvEditId.value = ""; rvCurrentImage = ""; showPhotoPrev("");
+          if (rvPhotoInput) rvPhotoInput.value = "";
+          rvFormTitle.textContent = "구매후기 작성";
+          rvSubmitBtn.textContent = "후기 등록";
+          rvCancelBtn.hidden = true;
+        }
+        if (rvCancelBtn) rvCancelBtn.addEventListener("click", resetReviewForm);
+        window.editMyReview = function (id) {
+          const r = myReviewsCache.find(function (x) { return String(x.id) === String(id); });
+          if (!r) return;
+          rvEditId.value = r.id;
+          document.getElementById("rvRating").value = String(r.rating || 5);
+          document.getElementById("rvOrder").value = r.order_no || "";
+          document.getElementById("rvBody").value = r.body || "";
+          showPhotoPrev(r.image_url || "");
+          if (rvPhotoInput) rvPhotoInput.value = "";
+          rvFormTitle.textContent = "구매후기 수정";
+          rvSubmitBtn.textContent = "수정 저장";
+          rvCancelBtn.hidden = false;
+          document.getElementById("reviews").scrollIntoView({ behavior: "smooth", block: "start" });
+        };
+
         async function loadMyReviews() {
           try {
             const rv = await window.OSS.fetchMyReviews();
+            myReviewsCache = rv || [];
             const box = document.getElementById("myReviewList");
             if (!box) return;
             box.innerHTML = rv.length ? rv.map((r) => {
               const st = r.status === "approved" ? '<span class="rv-badge ok">게시중</span>' : (r.status === "rejected" ? '<span class="rv-badge no">미게시</span>' : '<span class="rv-badge wait">승인대기</span>');
-              return `<div class="rv-item"><div class="rv-top">${"★".repeat(r.rating || 5)} ${st}</div><p>${esc(r.body)}</p><span class="rv-date">${fmtDate(r.created_at)}</span></div>`;
+              const photo = r.image_url ? `<img class="rv-photo" src="${esc(r.image_url)}" alt="후기사진" />` : "";
+              const edited = r.updated_at ? ' · 수정됨' : '';
+              return `<div class="rv-item"><div class="rv-top">${"★".repeat(r.rating || 5)} ${st}</div><p>${esc(r.body)}</p>${photo}<div class="rv-bot"><span class="rv-date">${fmtDate(r.created_at)}${edited}</span><button type="button" class="rv-edit" onclick="editMyReview('${r.id}')">수정</button></div></div>`;
             }).join("") : '<p class="empty">아직 작성한 후기가 없어요.</p>';
           } catch (e) {}
         }
@@ -468,12 +555,25 @@
           const body = document.getElementById("rvBody").value.trim();
           const rvMsg = document.getElementById("rvMsg");
           if (body.length < 5) { rvMsg.style.color = "#c0392b"; rvMsg.textContent = "후기 내용을 5자 이상 적어주세요."; return; }
+          rvSubmitBtn.disabled = true;
+          const origTxt = rvSubmitBtn.textContent; rvSubmitBtn.textContent = "저장 중...";
           try {
-            await window.OSS.submitReview({ rating: document.getElementById("rvRating").value, body, order_no: document.getElementById("rvOrder").value.trim() });
-            rvMsg.style.color = "#1F9D6B"; rvMsg.textContent = "✓ 후기가 등록됐어요. 사장님 확인 후 게시됩니다";
-            rf.reset();
+            // 새 사진 선택 시 업로드 → URL. 없으면 기존 사진(rvCurrentImage) 유지/삭제.
+            let imageUrl = rvCurrentImage || null;
+            const f = rvPhotoInput && rvPhotoInput.files && rvPhotoInput.files[0];
+            if (f) imageUrl = await window.OSS.uploadReviewImage(f);
+            const payload = { rating: document.getElementById("rvRating").value, body, order_no: document.getElementById("rvOrder").value.trim(), image_url: imageUrl };
+            if (rvEditId.value) {
+              await window.OSS.updateMyReview(Number(rvEditId.value), payload);
+              rvMsg.style.color = "#1F9D6B"; rvMsg.textContent = "✓ 후기가 수정됐어요. 사장님 재확인 후 게시됩니다";
+            } else {
+              await window.OSS.submitReview(payload);
+              rvMsg.style.color = "#1F9D6B"; rvMsg.textContent = "✓ 후기가 등록됐어요. 사장님 확인 후 게시됩니다";
+            }
+            resetReviewForm();
             loadMyReviews();
-          } catch (err) { rvMsg.style.color = "#c0392b"; rvMsg.textContent = "등록 실패: " + (err.message || err); }
+          } catch (err) { rvMsg.style.color = "#c0392b"; rvMsg.textContent = "저장 실패: " + (err.message || err); }
+          rvSubmitBtn.disabled = false; rvSubmitBtn.textContent = origTxt;
         });
 
         // 저장된 배송지
@@ -544,6 +644,21 @@
           } catch (err) { if (pm) { pm.style.color = "#c0392b"; pm.textContent = "저장 실패 — 다시 시도해 주세요."; } }
         });
 
+        // 환불계좌 저장
+        const rff = document.getElementById("refundForm");
+        if (rff) rff.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          var rm = document.getElementById("rfMsg");
+          try {
+            await window.OSS.updateMyRefund(
+              document.getElementById("rfBank").value.trim(),
+              document.getElementById("rfAccount").value.trim(),
+              document.getElementById("rfHolder").value.trim()
+            );
+            if (rm) { rm.style.color = "#1F9D6B"; rm.textContent = "✓ 환불계좌가 저장됐어요."; }
+          } catch (err) { if (rm) { rm.style.color = "#c0392b"; rm.textContent = "저장 실패 — 다시 시도해 주세요."; } }
+        });
+
         // 비밀번호 변경
         const pwf = document.getElementById("pwForm");
         if (pwf) pwf.addEventListener("submit", async (e) => {
@@ -587,6 +702,35 @@
         clearBtns();
         if (sel) sel.textContent = n > 0 ? n.toLocaleString() + "원" : "위에서 선택해 주세요";
       });
+
+      // 선택된 충전금액(원) 읽기
+      function pickedAmount() {
+        if (custom && custom.value) { var n = Number(custom.value.replace(/[^0-9]/g, "")); if (n > 0) return n; }
+        var on = document.querySelector(".mp-amt.on");
+        return on ? Number(on.dataset.amt) : 0;
+      }
+
+      // 신용카드 충전 (PG 어댑터 — 잠금 상태면 안내만)
+      var cardBtn = document.getElementById("depCardBtn");
+      var cardNote = document.getElementById("depCardNote");
+      var pgOn = !!(window.OSS && window.OSS.isPgEnabled && window.OSS.isPgEnabled());
+      if (cardBtn) {
+        if (!pgOn) { cardBtn.classList.add("btn-locked"); cardBtn.innerHTML = "신용카드로 충전하기 <span class='lock-badge'>준비중</span>"; }
+        else if (cardNote) { cardNote.textContent = "충전할 금액을 선택한 뒤 카드로 결제하세요."; }
+        cardBtn.addEventListener("click", async function () {
+          var amt = pickedAmount();
+          if (amt <= 0) { alert("먼저 충전할 금액을 선택해 주세요."); return; }
+          if (!(window.OSS && window.OSS.payByCard)) { alert("결제 모듈을 불러오지 못했어요."); return; }
+          cardBtn.disabled = true;
+          var res = await window.OSS.payByCard({ amount: amt, orderName: "예치금 충전 " + amt.toLocaleString() + "원", orderNo: "DEP" });
+          cardBtn.disabled = false;
+          if (res.locked) { alert(res.message); return; }
+          if (!res.ok) { alert("결제가 완료되지 않았어요: " + (res.error || "")); return; }
+          // TODO(서버): 카드결제 성공 → Edge Function에서 결제검증 후 profiles.deposit 증액.
+          //   (클라이언트 단독 증액은 위변조 위험이라 PG 연동 시 서버검증으로 처리)
+          alert("결제가 접수됐어요. 예치금 반영은 결제확인 후 처리됩니다.");
+        });
+      }
     })();
 
     // 마이페이지 사이드 메뉴 = 탭 전환 (클릭한 섹션만 표시)
