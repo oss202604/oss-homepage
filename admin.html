@@ -36,8 +36,8 @@
             <button data-page="stub" data-label="반송/교환" data-desc="반송·교환 요청·반송비 결제·완료/불가 처리">반송/교환</button>
             <button data-page="stub" data-label="배송완료" data-desc="배송완료된 주문 목록">배송완료</button>
             <button data-page="stub" data-label="재고현황" data-desc="입고보관 중인 재고 목록">재고현황</button>
-            <button data-page="stub" data-label="로그" data-desc="관리자 작업 이력(activity_log) 전체 보기">로그</button>
-            <button data-page="stub" data-label="휴지통" data-desc="삭제된 주문 복원 (현재는 전체리스트 화면의 🗑휴지통 버튼)">휴지통</button>
+            <button data-page="log">로그</button>
+            <button data-page="trash">휴지통</button>
           </div>
         </li>
 
@@ -191,7 +191,7 @@
           <button class="btn btn-small view-toggle active" data-view="table" type="button">표</button>
           <select id="orderStatusFilter" style="padding:8px 11px;border:1px solid var(--line);border-radius:4px;font-family:inherit;font-size:13px;background:#fff;"></select>
           <span id="orderFilterChip" style="display:none;align-items:center;gap:6px;font-size:13px;background:#FFF8F2;border:1px solid #F6C99B;border-radius:4px;padding:4px 10px;">상태: <b></b> <button id="orderFilterClear" type="button" style="border:none;background:none;cursor:pointer;color:var(--red);font-weight:700;font-size:14px;line-height:1;">✕</button></span>
-          <button class="btn btn-small" id="trashToggle" type="button">🗑 휴지통 (<span id="trashCount">0</span>)</button>
+          <!-- 휴지통 버튼은 주문관리>휴지통 메뉴(page-trash)로 이동 -->
         </div>
 
         <div id="kanbanWrap" hidden>
@@ -211,15 +211,7 @@
           </div>
         </div>
 
-        <div class="dash-panel" id="trashPanel" hidden style="margin-top:22px;">
-          <h3>🗑 휴지통 <span style="font-size:13px;font-weight:400;color:var(--muted);">(삭제된 주문 · 복원 가능)</span></h3>
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead><tr><th>주문번호</th><th>고객</th><th>상품</th><th>관리</th></tr></thead>
-              <tbody id="trashRows"></tbody>
-            </table>
-          </div>
-        </div>
+        <!-- 휴지통은 주문관리>휴지통 메뉴(page-trash)로 이동 -->
       </section>
 
       <!-- ===== 회원관리 ===== -->
@@ -524,6 +516,34 @@
         </div>
       </section>
 
+      <!-- ===== 주문관리 > 로그 ===== -->
+      <section class="admin-page" id="page-log">
+        <h2 class="admin-page-title">로그 <span style="font-size:14px;font-weight:400;color:var(--muted);">(관리자 작업 이력)</span></h2>
+        <div class="dash-panel">
+          <p class="form-note" style="text-align:left;margin:0 0 12px;">주문 상태변경·메모·송장 등 모든 관리 작업이 기록돼요 (세무·감사용). 최근 300건.</p>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>일시</th><th>기기</th><th>작성자</th><th>주문</th><th>작업</th><th>상세</th></tr></thead>
+              <tbody id="logRows"><tr><td colspan="6" class="empty">로그 메뉴를 열면 표시돼요.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 주문관리 > 휴지통 ===== -->
+      <section class="admin-page" id="page-trash">
+        <h2 class="admin-page-title">휴지통 <span style="font-size:14px;font-weight:400;color:var(--muted);">(삭제된 주문 · 복원 가능)</span></h2>
+        <div class="dash-panel" id="trashPanel">
+          <p class="form-note" style="text-align:left;margin:0 0 12px;">삭제된 주문은 영구삭제하지 않고 보관돼요 (세무·감사). '복원'으로 되살릴 수 있어요.</p>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>주문번호</th><th>고객</th><th>상품</th><th>관리</th></tr></thead>
+              <tbody id="trashRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- ===== 준비중(스텁) 공용 화면 ===== -->
       <section class="admin-page" id="page-stub">
         <h2 class="admin-page-title" id="stubTitle">준비중</h2>
@@ -634,7 +654,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=21"></script>
-  <script src="admin.js?v=33"></script>
+  <script src="admin.js?v=34"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

@@ -510,11 +510,27 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
     if (pg) pg.classList.add("active");
     if (page === "settle" && SETTLE_ROWS === null) renderSettle(); // 첫 진입 시 이번달 자동집계
     if (page === "stub") renderStub(btn.dataset.label, btn.dataset.desc);
+    if (page === "log") renderLog();
+    if (page === "trash") renderTrash();
   });
 });
 function renderStub(label, desc) {
   const t = document.getElementById("stubTitle"); if (t) t.textContent = label || "준비중";
   const d = document.getElementById("stubDesc"); if (d) d.textContent = desc || "";
+}
+// 로그(관리자 작업 이력) — activity_log 전체 보기
+async function renderLog() {
+  const tb = document.getElementById("logRows");
+  if (!tb) return;
+  tb.innerHTML = '<tr><td colspan="6" class="empty">불러오는 중…</td></tr>';
+  try {
+    const list = await window.OSS.fetchActivityLog(300);
+    tb.innerHTML = list.length ? list.map((e) => {
+      const dev = e.device === "phone" ? "📱 폰" : "💻 PC";
+      const t = (e.created_at || "").replace("T", " ").slice(0, 16);
+      return '<tr><td style="white-space:nowrap;">' + t + '</td><td>' + dev + '</td><td>' + esc(e.actor || "-") + '</td><td>' + esc(e.order_no || "-") + '</td><td>' + esc(e.action || "") + '</td><td style="white-space:normal;">' + esc(e.detail || "") + '</td></tr>';
+    }).join("") : '<tr><td colspan="6" class="empty">작업 기록이 없어요.</td></tr>';
+  } catch (e) { tb.innerHTML = '<tr><td colspan="6" class="empty">불러오기 실패: ' + esc(e.message || e) + '</td></tr>'; }
 }
 
 // ===== 결제관리 (예치금/적립금 충전·차감·환불 + 원장 + 결제내역) =====
