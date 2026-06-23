@@ -106,8 +106,8 @@
             <button data-page="stub" data-label="품목분류(HS·관세율)" data-desc="HS코드 카탈로그·통관품명·관세율·부가세율">품목분류(HS·관세율)</button>
             <button data-page="stub" data-label="관세청 고시환율" data-desc="주차별 공식환율(USD·JPY) — 관·부가세 계산 기준">관세청 고시환율</button>
             <button data-page="stub" data-label="송장 대역대" data-desc="택배사별 송장번호 풀 — 국내송장 자동발번">송장 대역대</button>
-            <button data-page="stub" data-label="업무시간·휴무" data-desc="지역별 영업시간·휴무일 달력">업무시간·휴무</button>
-            <button data-page="stub" data-label="결제수단·메모 카테고리" data-desc="거래유형별 결제수단 목록·관리자 메모 카테고리">결제수단·메모 카테고리</button>
+            <button data-page="bizhours">업무시간·휴무</button>
+            <button data-page="paymethods">결제수단·메모 카테고리</button>
           </div>
         </li>
       </ul>
@@ -740,6 +740,52 @@
         </div>
       </section>
 
+      <!-- ===== 환경설정 > 결제수단·메모 카테고리 ===== -->
+      <section class="admin-page" id="page-paymethods">
+        <h2 class="admin-page-title">결제수단 · 메모 카테고리</h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">주문 상세창 결제수단 드롭다운과 관리자 메모에 쓰는 목록이에요. <b>한 줄에 하나씩</b> 입력하세요. (저장 후 새로고침하면 주문창에 반영)</p>
+        <div class="dash-panel">
+          <div style="display:flex;gap:16px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:200px;">
+              <label style="display:block;font-weight:700;font-size:14px;margin-bottom:6px;">상품 결제수단</label>
+              <textarea id="pmGoods" rows="7" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;"></textarea>
+            </div>
+            <div style="flex:1;min-width:200px;">
+              <label style="display:block;font-weight:700;font-size:14px;margin-bottom:6px;">배송비 결제수단</label>
+              <textarea id="pmShip" rows="7" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;"></textarea>
+            </div>
+            <div style="flex:1;min-width:200px;">
+              <label style="display:block;font-weight:700;font-size:14px;margin-bottom:6px;">관리자 메모 카테고리</label>
+              <textarea id="pmMemo" rows="7" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;"></textarea>
+            </div>
+          </div>
+          <div class="set-actions" style="margin-top:14px;">
+            <button class="btn btn-primary btn-small" id="pmSave" type="button">저장</button>
+            <span class="save-ok" id="pmMsg"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 환경설정 > 업무시간·휴무 ===== -->
+      <section class="admin-page" id="page-bizhours">
+        <h2 class="admin-page-title">업무시간 · 휴무</h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">고객센터·안내에 표시할 영업시간/휴무 정보예요.</p>
+        <div class="dash-panel" style="max-width:560px;">
+          <label style="display:block;font-weight:700;font-size:14px;margin:0 0 6px;">평일 영업시간</label>
+          <input id="bhWeekday" placeholder="예: 평일 10:00~18:00 (점심 12~13시)" style="width:100%;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;margin-bottom:12px;">
+          <label style="display:block;font-weight:700;font-size:14px;margin:0 0 6px;">주말·공휴일</label>
+          <input id="bhWeekend" placeholder="예: 주말·공휴일 휴무" style="width:100%;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;margin-bottom:12px;">
+          <label style="display:block;font-weight:700;font-size:14px;margin:0 0 6px;">휴무 안내</label>
+          <input id="bhHoliday" placeholder="예: 일본 현지 공휴일은 배송이 지연될 수 있어요" style="width:100%;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;margin-bottom:12px;">
+          <label style="display:block;font-weight:700;font-size:14px;margin:0 0 6px;">비고</label>
+          <textarea id="bhNote" rows="3" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;"></textarea>
+          <div class="set-actions" style="margin-top:14px;">
+            <button class="btn btn-primary btn-small" id="bhSave" type="button">저장</button>
+            <span class="save-ok" id="bhMsg"></span>
+          </div>
+        </div>
+      </section>
+
       <!-- ===== 준비중(스텁) 공용 화면 ===== -->
       <section class="admin-page" id="page-stub">
         <h2 class="admin-page-title" id="stubTitle">준비중</h2>
@@ -866,7 +912,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=23"></script>
-  <script src="admin.js?v=40"></script>
+  <script src="admin.js?v=41"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

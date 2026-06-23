@@ -33,8 +33,8 @@ const ALL_STATUS = [...NORMAL, ...EXCEPTION];
 const STATUS_GROUPS = ["구매", "입고", "출고", "예외"];
 
 // 결제수단 콤보(드롭다운 + 직접입력) — datalist 대신 select라 항상 전체 목록 보이고 다시 고를 수 있음
-const PAY_OPTS = ["메루카리카드", "라쿠텐카드", "페이페이", "현금", "아멕스"];
-const SHIP_PAY_OPTS = ["무통장", "신용카드", "가상계좌", "예치금"];
+let PAY_OPTS = ["메루카리카드", "라쿠텐카드", "페이페이", "현금", "아멕스"];   // 환경설정>결제수단에서 덮어씀
+let SHIP_PAY_OPTS = ["무통장", "신용카드", "가상계좌", "예치금"];              // 〃
 function fillSelectCombo(selId, customId, baseOpts, val) {
   const sel = document.getElementById(selId), cust = document.getElementById(customId);
   if (!sel) return;
@@ -524,6 +524,8 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
     if (page === "salesrep") renderSalesReport();
     if (page === "vatrep") renderVatReport();
     if (page === "cntrep") renderCountReport();
+    if (page === "paymethods") loadPayMethods();
+    if (page === "bizhours") loadBizHours();
   });
 });
 function renderStub(label, desc) {
@@ -899,6 +901,44 @@ function closeMemberModal() { const m = document.getElementById("memberModal"); 
   const c = document.getElementById("mdClose"); if (c) c.addEventListener("click", closeMemberModal);
   const bg = document.getElementById("memberModal");
   if (bg) bg.addEventListener("click", (e) => { if (e.target === bg) closeMemberModal(); });
+})();
+
+// ===== 환경설정 — 결제수단·메모 카테고리 / 업무시간·휴무 (settings 저장) =====
+async function loadPayMethods() {
+  let v = null; try { v = await window.OSS.getSetting("pay_methods"); } catch (e) {}
+  v = v || {};
+  const G = document.getElementById("pmGoods"), S = document.getElementById("pmShip"), M = document.getElementById("pmMemo");
+  if (G) G.value = (v.goods && v.goods.length ? v.goods : PAY_OPTS).join("\n");
+  if (S) S.value = (v.shipping && v.shipping.length ? v.shipping : SHIP_PAY_OPTS).join("\n");
+  if (M) M.value = (v.memo && v.memo.length ? v.memo : ["일반", "VIP고객", "주의고객", "환불요청", "기타"]).join("\n");
+}
+(function bindPayMethods() {
+  const b = document.getElementById("pmSave");
+  if (!b) return;
+  b.addEventListener("click", async () => {
+    const lines = (id) => { const el = document.getElementById(id); return el ? el.value.split("\n").map((s) => s.trim()).filter(Boolean) : []; };
+    const val = { goods: lines("pmGoods"), shipping: lines("pmShip"), memo: lines("pmMemo") };
+    const msg = document.getElementById("pmMsg");
+    try { await window.OSS.saveSetting("pay_methods", val); if (msg) msg.textContent = "✓ 저장됐어요 (주문창엔 새로고침 후 반영)"; }
+    catch (e) { alert("저장 실패: " + (e.message || e)); }
+  });
+})();
+async function loadBizHours() {
+  let v = null; try { v = await window.OSS.getSetting("business_hours"); } catch (e) {}
+  v = v || {};
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ""; };
+  set("bhWeekday", v.weekday); set("bhWeekend", v.weekend); set("bhHoliday", v.holiday); set("bhNote", v.note);
+}
+(function bindBizHours() {
+  const b = document.getElementById("bhSave");
+  if (!b) return;
+  b.addEventListener("click", async () => {
+    const gv = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
+    const val = { weekday: gv("bhWeekday"), weekend: gv("bhWeekend"), holiday: gv("bhHoliday"), note: gv("bhNote") };
+    const msg = document.getElementById("bhMsg");
+    try { await window.OSS.saveSetting("business_hours", val); if (msg) msg.textContent = "✓ 저장됐어요"; }
+    catch (e) { alert("저장 실패: " + (e.message || e)); }
+  });
 })();
 
 // ===== 결제관리 (예치금/적립금 충전·차감·환불 + 원장 + 결제내역) =====
@@ -1963,6 +2003,11 @@ async function loadFx() {
     COMMISSION_PCT = Number(fee.commissionPct) || 3;   // 정산 추정 수수료에 사용
     DELAY_DAYS = Number(fee.delayDays) || 7;            // 대시보드 지연 경보 기준일
     if (fx.applied) FX_APPLIED = Number(fx.applied) || FX_APPLIED;
+    const pm = await window.OSS.getSetting("pay_methods");   // 환경설정>결제수단 → 주문모달 드롭다운 반영
+    if (pm) {
+      if (pm.goods && pm.goods.length) PAY_OPTS = pm.goods;
+      if (pm.shipping && pm.shipping.length) SHIP_PAY_OPTS = pm.shipping;
+    }
   } catch (e) { console.error(e); }
 }
 document.getElementById("saveFx").addEventListener("click", async () => {
