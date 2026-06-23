@@ -1128,6 +1128,14 @@ function matchSearch(o) {
   return [o.no, o.customer, o.name, r.applicant_phone, r.receiver_name, r.receiver_phone, r.tracking_no]
     .some((v) => (v || "").toString().toLowerCase().includes(q));
 }
+const ORD_ADV = { type: "", from: "", to: "" };  // 주문 표 상세필터(유형·기간) — 미설정 시 통과
+function advPass(o) {
+  if (ORD_ADV.type && o.type !== ORD_ADV.type) return false;
+  const d = o.created_local || o.created || "";
+  if (ORD_ADV.from && d < ORD_ADV.from) return false;
+  if (ORD_ADV.to && d > ORD_ADV.to) return false;
+  return true;
+}
 const FLAG_DOT = { red: "🔴", orange: "🟠", green: "🟢", blue: "🔵" };
 
 // ----- 칸반 렌더 -----
@@ -1769,7 +1777,7 @@ function settleCsv() {
 function renderOrderTable() {
   const tb = document.getElementById("orderTableRows");
   if (!tb) return;
-  const list = ORDERS.filter((o) => !o.deleted && matchSearch(o) && (!STATUS_FILTER || o.status === STATUS_FILTER)).slice().sort((a, b) => {
+  const list = ORDERS.filter((o) => !o.deleted && matchSearch(o) && advPass(o) && (!STATUS_FILTER || o.status === STATUS_FILTER)).slice().sort((a, b) => {
     let av, bv;
     if (SORT.key === "amount") { av = Number(a.amount) || 0; bv = Number(b.amount) || 0; }
     else { av = a.created || ""; bv = b.created || ""; }
@@ -1816,6 +1824,12 @@ function renderOrderTable() {
     if (SORT.key === k) SORT.dir *= -1; else { SORT.key = k; SORT.dir = -1; }
     renderOrderTable();
   }));
+  const advType = document.getElementById("ordAdvType"), advFrom = document.getElementById("ordAdvFrom"), advTo = document.getElementById("ordAdvTo"), advClr = document.getElementById("ordAdvClear");
+  function advApply() { if (advType) ORD_ADV.type = advType.value; if (advFrom) ORD_ADV.from = advFrom.value; if (advTo) ORD_ADV.to = advTo.value; VIEW = "table"; const kw = document.getElementById("kanbanWrap"), tw = document.getElementById("orderTableWrap"); if (kw) kw.hidden = true; if (tw) tw.hidden = false; document.querySelectorAll(".view-toggle").forEach((x) => x.classList.toggle("active", x.dataset.view === "table")); renderOrderTable(); }
+  if (advType) advType.addEventListener("change", advApply);
+  if (advFrom) advFrom.addEventListener("change", advApply);
+  if (advTo) advTo.addEventListener("change", advApply);
+  if (advClr) advClr.addEventListener("click", () => { ORD_ADV.type = ""; ORD_ADV.from = ""; ORD_ADV.to = ""; if (advType) advType.value = ""; if (advFrom) advFrom.value = ""; if (advTo) advTo.value = ""; renderOrderTable(); });
   const csv = document.getElementById("orderCsvBtn");
   if (csv) csv.addEventListener("click", () => {
     const list = ORDERS.filter((o) => !o.deleted && matchSearch(o));
