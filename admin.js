@@ -503,6 +503,126 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
   });
 });
 
+// ===== 결제관리 (예치금/적립금 충전·차감·환불 + 원장 + 결제내역) =====
+let PAY_MEMBER = null;
+function payFmt(n) { return "₩" + (Number(n) || 0).toLocaleString(); }
+async function payMemberSearch() {
+  const box = document.getElementById("payMemberResult");
+  const led = document.getElementById("payLedger");
+  const q = (document.getElementById("payMemSearch").value || "").trim().toLowerCase();
+  if (led) led.innerHTML = "";
+  if (!q) { box.innerHTML = '<p class="form-note" style="text-align:left;">회원 아이디 또는 이름으로 검색하세요.</p>'; return; }
+  box.innerHTML = '<p class="form-note" style="text-align:left;">검색 중…</p>';
+  try {
+    const members = await window.OSS.listMembers();
+    const hit = members.filter((m) => (m.username || "").toLowerCase().includes(q) || (m.name || "").toLowerCase().includes(q));
+    if (!hit.length) { box.innerHTML = '<p class="form-note" style="text-align:left;">일치하는 회원이 없어요.</p>'; return; }
+    if (hit.length > 1) {
+      box.innerHTML = '<p class="form-note" style="text-align:left;">여러 명이에요 — 선택하세요:</p>' + hit.map((m) => `<button class="btn btn-small pay-pick" data-id="${m.id}" type="button" style="margin:3px;">${esc(m.name || "")} (${esc(m.username || "")})</button>`).join("");
+      box.querySelectorAll(".pay-pick").forEach((b) => b.addEventListener("click", () => { PAY_MEMBER = hit.find((m) => m.id === b.dataset.id); renderPayMember(); }));
+      return;
+    }
+    PAY_MEMBER = hit[0];
+    renderPayMember();
+  } catch (e) { box.innerHTML = '<p class="form-note" style="text-align:left;color:var(--red);">검색 실패: ' + esc(e.message || e) + '</p>'; }
+}
+function renderPayMember() {
+  const box = document.getElementById("payMemberResult");
+  const m = PAY_MEMBER;
+  if (!box || !m) return;
+  const refund = (m.refund_bank || m.refund_account) ? esc((m.refund_bank || "") + " " + (m.refund_account || "") + " " + (m.refund_holder || "")) : "<span style='color:var(--muted)'>미등록</span>";
+  box.innerHTML =
+    '<div style="border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff;">' +
+      '<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">' +
+        '<b style="font-size:15px;">' + esc(m.name || "") + ' <span style="color:var(--muted);font-weight:400;">(' + esc(m.username || "") + ')</span></b>' +
+        '<span>예치금 <b style="color:var(--blue);">' + payFmt(m.deposit) + '</b></span>' +
+        '<span>적립금 <b style="color:var(--blue);">' + payFmt(m.points) + '</b></span>' +
+        '<span style="font-size:12.5px;color:var(--muted);">환불계좌: ' + refund + '</span>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
+        '<select id="payKind" style="height:38px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;"><option value="deposit">예치금</option><option value="points">적립금</option></select>' +
+        '<input id="payAmt" type="number" min="0" step="100" placeholder="금액₩" style="width:120px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;" />' +
+        '<input id="payReason" placeholder="사유(예: 무통장충전·후기적립)" style="width:200px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;" />' +
+        '<button class="btn btn-small btn-primary" id="payCharge" type="button">＋ 충전/지급</button>' +
+        '<button class="btn btn-small" id="payDeduct" type="button">－ 차감</button>' +
+        '<button class="btn btn-small" id="payRefund" type="button" style="color:var(--red);border-color:#f6c2c8;">환불(예치금↓)</button>' +
+        '<span class="save-ok" id="payMsg"></span>' +
+      '</div>' +
+    '</div>';
+  document.getElementById("payCharge").addEventListener("click", () => payAdjust(1, false));
+  document.getElementById("payDeduct").addEventListener("click", () => payAdjust(-1, false));
+  document.getElementById("payRefund").addEventListener("click", () => payAdjust(-1, true));
+  renderPayLedger();
+}
+async function payAdjust(sign, isRefund) {
+  const m = PAY_MEMBER; if (!m) return;
+  const msg = document.getElementById("payMsg");
+  let kind = document.getElementById("payKind").value;
+  let reason = (document.getElementById("payReason").value || "").trim();
+  const amt = Math.abs(Number(document.getElementById("payAmt").value) || 0);
+  if (!amt) { if (msg) msg.textContent = "금액을 입력하세요."; return; }
+  if (isRefund) { kind = "deposit"; reason = reason || "환불"; }
+  const kLabel = kind === "deposit" ? "예치금" : "적립금";
+  const aLabel = isRefund ? "환불" : (sign > 0 ? "충전/지급" : "차감");
+  if (!confirm(m.name + " 님 " + kLabel + " " + aLabel + " ₩" + amt.toLocaleString() + " 처리할까요?" + (isRefund ? "\n(예치금에서 차감돼요. 실제 송금은 환불계좌로 직접 보내주세요.)" : ""))) return;
+  if (msg) msg.textContent = "처리 중…";
+  try {
+    const newBal = await window.OSS.adjustBalance(m.id, kind, sign * amt, reason || null, null);
+    if (kind === "deposit") m.deposit = newBal; else m.points = newBal;
+    renderPayMember();
+    const mm = document.getElementById("payMsg"); if (mm) { mm.textContent = "✓ 완료 (잔액 " + payFmt(newBal) + ")"; setTimeout(() => { mm.textContent = ""; }, 3500); }
+  } catch (e) { if (msg) msg.textContent = "실패: " + (e.message || e); }
+}
+async function renderPayLedger() {
+  const led = document.getElementById("payLedger");
+  const m = PAY_MEMBER; if (!led || !m) return;
+  led.innerHTML = '<p class="form-note" style="text-align:left;margin-top:12px;">원장 불러오는 중…</p>';
+  try {
+    const rows = await window.OSS.fetchLedger(m.id, null);
+    led.innerHTML = '<div class="table-wrap" style="margin-top:12px;"><table class="data-table"><thead><tr><th>일시</th><th>종류</th><th>증감</th><th>잔액</th><th>사유</th><th>주문</th></tr></thead><tbody>' +
+      (rows.length ? rows.map((r) => {
+        const disp = (r.delta > 0 ? "＋" : "－") + payFmt(Math.abs(r.delta));
+        const col = r.delta > 0 ? "var(--blue)" : "var(--red)";
+        return '<tr><td>' + (r.created_at || "").replace("T", " ").slice(0, 16) + '</td><td>' + (r.kind === "deposit" ? "예치금" : "적립금") + '</td><td style="color:' + col + ';font-weight:700;white-space:nowrap;">' + disp + '</td><td>' + payFmt(r.balance_after) + '</td><td>' + esc(r.reason || "-") + '</td><td>' + esc(r.order_no || "-") + '</td></tr>';
+      }).join("") : '<tr><td colspan="6" class="empty">내역이 없어요.</td></tr>') +
+      '</tbody></table></div>';
+  } catch (e) { led.innerHTML = '<p class="form-note" style="text-align:left;color:var(--red);">원장 불러오기 실패: ' + esc(e.message || e) + '</p>'; }
+}
+function payRowData(o) {
+  const r = o.raw;
+  const goodsWon = Math.round((Number(r.subtotal) || 0) * perJpy());
+  const ship = Number(r.shipping_fee) || 0;
+  const dep = Number(r.deposit_used) || 0, pt = Number(r.points_used) || 0, cp = Number(r.coupon_amount) || 0;
+  return { goodsWon: goodsWon, ship: ship, dep: dep, pt: pt, cp: cp, final: Math.max(0, ship - dep - pt - cp), method: r.ship_pay_method || r.pay_card || "" };
+}
+function payHasPayment(o) { const r = o.raw; return !o.deleted && (Number(r.settle_krw) || Number(r.shipping_fee) || Number(r.deposit_used) || Number(r.points_used) || Number(r.subtotal)); }
+function renderPayList() {
+  const tb = document.getElementById("payRows");
+  if (!tb) return;
+  const rows = ORDERS.filter(payHasPayment);
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="11" class="empty">결제 데이터가 있는 주문이 없어요.</td></tr>'; return; }
+  tb.innerHTML = rows.map((o) => {
+    const d = payRowData(o);
+    return '<tr data-id="' + o.id + '" style="cursor:pointer;"><td>' + esc(o.no) + '</td><td>' + esc(o.customer) + '</td><td>' + (o.type === "purchase" ? "구매" : "배송") + '</td><td>' + payFmt(d.goodsWon) + '</td><td>' + payFmt(d.ship) + '</td><td>' + (d.dep ? payFmt(d.dep) : "-") + '</td><td>' + (d.pt ? payFmt(d.pt) : "-") + '</td><td>' + (d.cp ? payFmt(d.cp) : "-") + '</td><td><b>' + payFmt(d.final) + '</b></td><td>' + esc(d.method || "-") + '</td><td>' + esc(o.status) + '</td></tr>';
+  }).join("");
+  tb.querySelectorAll("tr[data-id]").forEach((tr) => tr.addEventListener("click", () => openModal(tr.dataset.id)));
+}
+(function bindPayments() {
+  const searchBtn = document.getElementById("payMemSearchBtn");
+  if (searchBtn) searchBtn.addEventListener("click", payMemberSearch);
+  const searchInp = document.getElementById("payMemSearch");
+  if (searchInp) searchInp.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); payMemberSearch(); } });
+  const csv = document.getElementById("payCsvBtn");
+  if (csv) csv.addEventListener("click", () => {
+    const rows = ORDERS.filter(payHasPayment);
+    const head = ["주문번호", "고객", "유형", "상품가원", "배송비원", "예치금사용", "적립금사용", "쿠폰", "실결제원", "결제수단", "상태"];
+    const body = rows.map((o) => { const d = payRowData(o); return [o.no, o.customer, o.type === "purchase" ? "구매" : "배송", d.goodsWon, d.ship, d.dep, d.pt, d.cp, d.final, d.method, o.status]; });
+    downloadCsv("결제내역.csv", [head].concat(body));
+  });
+  const pb = document.querySelector('.admin-nav button[data-page="payments"]');
+  if (pb) pb.addEventListener("click", renderPayList);
+})();
+
 // 설정 하위 탭 — 한 번에 한 그룹만 보이게 (배송센터·환율·수수료=기본 / 요율·등급 / 띠배너·메인배너=홈 / 안내·후기·FAQ=콘텐츠)
 (function setSubtabs() {
   const tabs = document.querySelectorAll(".set-subtab");
