@@ -57,16 +57,16 @@
           <p class="mypage-grade" id="myGrade"></p>
         </div>
         <div class="mp-wallet">
-          <div class="mp-wallet-row"><span class="lab">적립금</span><span class="val" id="walPoint">0<em>원·준비중</em></span></div>
+          <div class="mp-wallet-row"><span class="lab">적립금</span><span class="val" id="walPoint">0<em>원</em></span></div>
           <div class="mp-wallet-row"><span class="lab">쿠폰</span><span class="val" id="walCoupon">0<em>개</em></span></div>
-          <div class="mp-wallet-row"><span class="lab">예치금</span><span class="val" id="walDeposit">0<em>원·준비중</em></span></div>
-          <!-- TODO: 예치금 충전은 PG 결제 연동 후 활성화 -->
-          <button type="button" class="mp-charge" id="walChargeBtn" disabled title="결제 연동 후 제공됩니다">예치금 충전 (준비중)</button>
+          <div class="mp-wallet-row"><span class="lab">예치금</span><span class="val" id="walDeposit">0<em>원</em></span></div>
         </div>
         <ul class="mypage-menu">
           <li><a href="#dashboard" class="active">신청 현황</a></li>
           <li><a href="#orders">구매대행 내역</a></li>
           <li><a href="#shipping">배송대행 내역</a></li>
+          <li><a href="#deposit">예치금</a></li>
+          <li><a href="#points">적립금</a></li>
           <li><a href="#coupons">쿠폰함</a></li>
           <li><a href="#reviews">구매후기</a></li>
           <li><a href="#address">배대지 주소</a></li>
@@ -94,6 +94,44 @@
             <div class="mp-stats" id="dashExcept"></div>
           </div>
           <div id="dashResult" class="mp-dash-result"><p class="mp-dash-hint">위 상태를 누르면 해당 주문이 여기에 바로 표시돼요.</p></div>
+        </div>
+
+        <!-- 예치금 -->
+        <div class="mypage-block" id="deposit">
+          <h2 class="mypage-title">예치금 충전·내역</h2>
+          <div class="address-card" style="text-align:left;">
+            <p style="font-size:15px;margin:0;"><b>현재 예치금</b> &nbsp;<span style="color:var(--orange);font-weight:800;">0원</span></p>
+            <p class="form-note" style="margin:8px 0 0;">예치금을 미리 충전해두면 주문하실 때 <b>상품가·배송비 결제가 바로</b> 돼요. (무통장입금)</p>
+          </div>
+          <h3 style="font-size:15px;margin:22px 0 8px;">무통장입금으로 충전 신청</h3>
+          <div class="address-card" style="text-align:left;">
+            <p style="margin:0 0 8px;">아래 계좌로 원하시는 금액을 입금하신 뒤, <b>카카오톡으로 입금자명·금액</b>을 알려주시면 사장님이 확인 후 예치금에 충전해드려요.</p>
+            <p style="margin:0 0 14px;font-size:16px;"><b>농협 302-2154-8330-21</b> &nbsp;<span style="color:#888;">예금주 송상익</span></p>
+            <a href="http://pf.kakao.com/_srxlxfX/chat" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-block;">카카오톡으로 충전 신청 →</a>
+          </div>
+          <h3 style="font-size:15px;margin:22px 0 8px;">충전·사용 내역</h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>일시</th><th>구분</th><th>금액</th><th>잔액</th></tr></thead>
+              <tbody><tr><td colspan="4" class="empty">충전·사용 내역이 없어요.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 적립금 -->
+        <div class="mypage-block" id="points">
+          <h2 class="mypage-title">적립금 내역</h2>
+          <div class="address-card" style="text-align:left;">
+            <p style="font-size:15px;margin:0;"><b>사용 가능 적립금</b> &nbsp;<span style="color:var(--orange);font-weight:800;">0원</span></p>
+            <p class="form-note" style="margin:8px 0 0;">적립금은 <b>주문 적립·이벤트</b>로 쌓이고, 주문하실 때 현금처럼 쓸 수 있어요. <span style="color:#888;">(적립 시작 준비 중)</span></p>
+          </div>
+          <h3 style="font-size:15px;margin:22px 0 8px;">적립·사용 내역</h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>일시</th><th>내용</th><th>적립/사용</th><th>잔액</th></tr></thead>
+              <tbody><tr><td colspan="4" class="empty">적립금 내역이 없어요.</td></tr></tbody>
+            </table>
+          </div>
         </div>
         <!-- 주문 내역 -->
         <div class="mypage-block" id="orders">
