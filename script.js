@@ -114,9 +114,9 @@ if (menuToggle && mainMenu) {
         '</div>' +
         '<div class="footer-col">' +
           '<p class="footer-col-tit">고객센터</p>' +
-          (biz.email ? '<p><svg class="ico-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> ' + biz.email + '</p>' : '') +
-          '<p><svg class="ico-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> <a href="http://pf.kakao.com/_srxlxfX/chat" target="_blank" rel="noopener" style="color:inherit;">카카오톡 ' + biz.kakao + '</a></p>' +
-          '<p><svg class="ico-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + biz.hours + '</p>' +
+          (biz.email ? '<p><span class="ico-inline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span> ' + biz.email + '</p>' : '') +
+          '<p><span class="ico-inline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span> <a href="http://pf.kakao.com/_srxlxfX/chat" target="_blank" rel="noopener" style="color:inherit;">카카오톡 ' + biz.kakao + '</a></p>' +
+          '<p><span class="ico-inline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> ' + biz.hours + '</p>' +
         '</div>' +
         '<div class="footer-col">' +
           '<p class="footer-col-tit">바로가기</p>' +
