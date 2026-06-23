@@ -492,16 +492,30 @@ document.getElementById("adminLogout").addEventListener("click", async (e) => {
   location.href = "admin-login.html";
 });
 
-// ----- 메뉴 전환 -----
+// ----- 메뉴 전환 (대분류 접기/펼치기 + 소분류 페이지 전환 + 준비중 스텁) -----
 document.querySelectorAll(".admin-nav button").forEach((btn) => {
   btn.addEventListener("click", () => {
+    if (btn.classList.contains("nav-group")) { // 대분류 헤더 → 하위 토글
+      const li = btn.closest(".nav-group-li");
+      if (li) li.classList.toggle("collapsed");
+      return;
+    }
+    const page = btn.dataset.page;
+    if (!page) return;
     document.querySelectorAll(".admin-nav button").forEach((b) => b.classList.remove("active"));
     document.querySelectorAll(".admin-page").forEach((p) => p.classList.remove("active"));
     btn.classList.add("active");
-    document.getElementById("page-" + btn.dataset.page).classList.add("active");
-    if (btn.dataset.page === "settle" && SETTLE_ROWS === null) renderSettle(); // 첫 진입 시 이번달 자동집계
+    const grp = btn.closest(".nav-group-li"); if (grp) grp.classList.remove("collapsed"); // 선택한 소분류의 대분류 펼침
+    const pg = document.getElementById("page-" + page);
+    if (pg) pg.classList.add("active");
+    if (page === "settle" && SETTLE_ROWS === null) renderSettle(); // 첫 진입 시 이번달 자동집계
+    if (page === "stub") renderStub(btn.dataset.label, btn.dataset.desc);
   });
 });
+function renderStub(label, desc) {
+  const t = document.getElementById("stubTitle"); if (t) t.textContent = label || "준비중";
+  const d = document.getElementById("stubDesc"); if (d) d.textContent = desc || "";
+}
 
 // ===== 결제관리 (예치금/적립금 충전·차감·환불 + 원장 + 결제내역) =====
 let PAY_MEMBER = null;

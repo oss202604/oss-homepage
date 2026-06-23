@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=48" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="admin.css?v=22" />
+  <link rel="stylesheet" href="admin.css?v=23" />
 </head>
 <body class="admin-body">
   <!-- 상단 바 -->
@@ -25,12 +25,91 @@
     <aside class="admin-sidebar">
       <ul class="admin-nav">
         <li><button class="active" data-page="dashboard"><span class="ico"><i data-lucide="layout-dashboard"></i></span> 대시보드</button></li>
-        <li><button data-page="orders"><span class="ico"><i data-lucide="package"></i></span> 주문관리</button></li>
-        <li><button data-page="members"><span class="ico"><i data-lucide="users"></i></span> 회원관리</button></li>
-        <li><button data-page="payments"><span class="ico"><i data-lucide="wallet"></i></span> 결제관리</button></li>
-        <li><button data-page="board"><span class="ico"><i data-lucide="megaphone"></i></span> 공지·문의</button></li>
-        <li><button data-page="settle"><span class="ico"><i data-lucide="calculator"></i></span> 정산</button></li>
-        <li><button data-page="settings"><span class="ico"><i data-lucide="settings"></i></span> 설정</button></li>
+
+        <li class="nav-group-li"><button class="nav-group" type="button"><span class="ico"><i data-lucide="package"></i></span> 주문관리</button>
+          <div class="nav-sub">
+            <button data-page="orders">전체리스트</button>
+            <button data-page="stub" data-label="구매관리" data-desc="사입 처리 — 승인대기·결제대기·결제완료·송금요청·구매완료 상태별 목록 + 트래킹/오더번호 인라인 등록 + 선택 일괄 구매완료">구매관리</button>
+            <button data-page="stub" data-label="입고관리" data-desc="창고 작업 — 도착스캔·입고작업·창고도착·일부입고·입고완료·입고보관·포장/무게측정 + 일괄 입고·사진·인수라벨/송장 출력">입고관리</button>
+            <button data-page="stub" data-label="배송관리" data-desc="발송 단계 — 발송대기·발송완료 + 송장 발급/출력">배송관리</button>
+            <button data-page="stub" data-label="확인/사고/폐기" data-desc="확인요청·사고·폐기 처리 목록">확인/사고/폐기</button>
+            <button data-page="stub" data-label="반송/교환" data-desc="반송·교환 요청·반송비 결제·완료/불가 처리">반송/교환</button>
+            <button data-page="stub" data-label="배송완료" data-desc="배송완료된 주문 목록">배송완료</button>
+            <button data-page="stub" data-label="재고현황" data-desc="입고보관 중인 재고 목록">재고현황</button>
+            <button data-page="stub" data-label="로그" data-desc="관리자 작업 이력(activity_log) 전체 보기">로그</button>
+            <button data-page="stub" data-label="휴지통" data-desc="삭제된 주문 복원 (현재는 전체리스트 화면의 🗑휴지통 버튼)">휴지통</button>
+          </div>
+        </li>
+
+        <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="wallet"></i></span> 결제관리</button>
+          <div class="nav-sub">
+            <button data-page="payments">결제내역·원장</button>
+            <button data-page="stub" data-label="예치금 내역" data-desc="예치금 충전·차감 원장 (현재는 결제관리>회원검색에서 회원별 원장 확인)">예치금 내역</button>
+            <button data-page="stub" data-label="적립금 내역" data-desc="적립금 지급·차감 원장">적립금 내역</button>
+            <button data-page="stub" data-label="예치금 환불" data-desc="예치금 환불 처리·내역 (현재는 결제관리>회원검색 환불버튼)">예치금 환불</button>
+          </div>
+        </li>
+
+        <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="users"></i></span> 회원관리</button>
+          <div class="nav-sub">
+            <button data-page="members">회원 목록</button>
+            <button data-page="stub" data-label="회원 메세지" data-desc="회원에게 알림·쪽지 발송 + 발송내역">회원 메세지</button>
+            <button data-page="stub" data-label="탈퇴내역" data-desc="탈퇴 회원 내역">탈퇴내역</button>
+          </div>
+        </li>
+
+        <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="megaphone"></i></span> 컨텐츠관리</button>
+          <div class="nav-sub">
+            <button data-page="board">공지·문의·후기</button>
+            <button data-page="stub" data-label="게시판" data-desc="내부게시판·게시물·댓글·신고내역·게시판 유형 관리">게시판</button>
+            <button data-page="stub" data-label="팝업" data-desc="레이어 팝업 관리">팝업</button>
+            <button data-page="stub" data-label="메일·SMS" data-desc="메일·SMS 발송 + 발송내역">메일·SMS</button>
+          </div>
+        </li>
+
+        <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="shopping-bag"></i></span> 구매상품</button>
+          <div class="nav-sub">
+            <button data-page="stub" data-label="기본설정" data-desc="NEW·BEST 아이콘 등 자체 판매상품 기본설정">기본설정</button>
+            <button data-page="stub" data-label="카테고리" data-desc="추천상품 카테고리 관리">카테고리</button>
+            <button data-page="stub" data-label="상품관리" data-desc="메인 노출용 추천상품 등록·관리">상품관리</button>
+          </div>
+        </li>
+
+        <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="ticket"></i></span> 프로모션</button>
+          <div class="nav-sub">
+            <button data-page="stub" data-label="배송비 쿠폰" data-desc="배송비 회원쿠폰·단독쿠폰 (현재는 회원관리>혜택관리에서 발급)">배송비 쿠폰</button>
+            <button data-page="stub" data-label="구매대행 쿠폰" data-desc="구매대행 수수료 할인쿠폰">구매대행 쿠폰</button>
+            <button data-page="stub" data-label="쿠폰코드·신규가입" data-desc="쿠폰코드 발급·신규가입 자동발급 설정">쿠폰코드·신규가입</button>
+          </div>
+        </li>
+
+        <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="image"></i></span> 배너관리</button>
+          <div class="nav-sub">
+            <button data-page="stub" data-label="메인 배너" data-desc="홈 메인 배너 (현재는 설정>홈 화면에서 관리)">메인 배너</button>
+            <button data-page="stub" data-label="추천 쇼핑몰" data-desc="홈 일본 인기 쇼핑몰 로고 그룹">추천 쇼핑몰</button>
+            <button data-page="stub" data-label="메루카리 추천" data-desc="메루카리 추천 카테고리 배너">메루카리 추천</button>
+          </div>
+        </li>
+
+        <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="bar-chart-3"></i></span> 정산·통계</button>
+          <div class="nav-sub">
+            <button data-page="settle">정산 요약</button>
+            <button data-page="stub" data-label="부가세 신고자료" data-desc="배송센터·기간별 부가세 신고용 엑셀">부가세 신고자료</button>
+            <button data-page="stub" data-label="매출 리포트" data-desc="구매대행·배송대행·반송비 매출 엑셀">매출 리포트</button>
+            <button data-page="stub" data-label="가입·건수 리포트" data-desc="회원가입·배송신청건수·회원별 신청건수 엑셀">가입·건수 리포트</button>
+          </div>
+        </li>
+
+        <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="settings"></i></span> 환경설정</button>
+          <div class="nav-sub">
+            <button data-page="settings">기본·요금·콘텐츠 설정</button>
+            <button data-page="stub" data-label="품목분류(HS·관세율)" data-desc="HS코드 카탈로그·통관품명·관세율·부가세율">품목분류(HS·관세율)</button>
+            <button data-page="stub" data-label="관세청 고시환율" data-desc="주차별 공식환율(USD·JPY) — 관·부가세 계산 기준">관세청 고시환율</button>
+            <button data-page="stub" data-label="송장 대역대" data-desc="택배사별 송장번호 풀 — 국내송장 자동발번">송장 대역대</button>
+            <button data-page="stub" data-label="업무시간·휴무" data-desc="지역별 영업시간·휴무일 달력">업무시간·휴무</button>
+            <button data-page="stub" data-label="결제수단·메모 카테고리" data-desc="거래유형별 결제수단 목록·관리자 메모 카테고리">결제수단·메모 카테고리</button>
+          </div>
+        </li>
       </ul>
     </aside>
 
@@ -437,6 +516,16 @@
           </div>
         </div>
       </section>
+
+      <!-- ===== 준비중(스텁) 공용 화면 ===== -->
+      <section class="admin-page" id="page-stub">
+        <h2 class="admin-page-title" id="stubTitle">준비중</h2>
+        <div class="dash-panel">
+          <p style="font-size:15px;color:var(--navy);font-weight:700;margin:0 0 10px;">🚧 이 화면은 곧 만들 예정이에요</p>
+          <p class="form-note" id="stubDesc" style="text-align:left;font-size:14px;line-height:1.7;margin:0 0 14px;"></p>
+          <p class="form-note" style="text-align:left;color:var(--muted);margin:0;">사토리 관리자 기능을 우리 코드로 하나씩 옮기는 중이에요. 이 메뉴 차례가 되면 여기에 실제 기능이 들어갑니다. (사양서: <code>_사토리-관리자-분석.md</code>)</p>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -538,7 +627,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=21"></script>
-  <script src="admin.js?v=32"></script>
+  <script src="admin.js?v=33"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>
