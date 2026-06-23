@@ -387,7 +387,7 @@ async function fetchAllLedger(kind, limit) {
 // 회원 1명 잔액·이름 조회 (주문창에서 예치금/적립금 잔액 힌트용)
 async function getMemberById(userId) {
   if (!userId) return null;
-  const { data, error } = await sb.from("profiles").select("id,name,username,deposit,points").eq("id", userId).maybeSingle();
+  const { data, error } = await sb.from("profiles").select("id,name,username,phone,email,mailbox_code,grade,deposit,points,created_at").eq("id", userId).maybeSingle();
   if (error) return null;
   return data || null;
 }

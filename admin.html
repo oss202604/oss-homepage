@@ -848,9 +848,25 @@
   </div>
 
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- 회원 상세 모달 -->
+  <div id="memberModal" hidden style="position:fixed;inset:0;background:rgba(20,25,35,.5);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;">
+    <div style="background:#fff;border-radius:14px;max-width:680px;width:100%;padding:24px;box-shadow:0 16px 48px rgba(0,0,0,.25);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 id="mdTitle" style="margin:0;font-size:18px;">회원 상세</h3>
+        <button id="mdClose" class="btn btn-small" type="button">✕ 닫기</button>
+      </div>
+      <div id="mdInfo" style="font-size:14px;line-height:1.8;margin-bottom:18px;padding:14px;background:#FAF6F2;border-radius:10px;"></div>
+      <h4 style="margin:0 0 8px;font-size:15px;">주문 이력 <span id="mdOrderCnt" style="color:var(--muted);font-weight:400;font-size:13px;"></span></h4>
+      <div class="table-wrap" style="max-height:340px;overflow:auto;"><table class="data-table">
+        <thead><tr><th>주문번호</th><th>유형</th><th>상태</th><th>상품가¥</th><th>등록일</th></tr></thead>
+        <tbody id="mdOrders"></tbody>
+      </table></div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=22"></script>
-  <script src="admin.js?v=39"></script>
+  <script src="supabase.js?v=23"></script>
+  <script src="admin.js?v=40"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

@@ -416,7 +416,7 @@ async function loadMembers() {
     else if (m.role === "manager") permCell = esc(PERMS.filter(([k]) => perm[k]).map(([, l]) => l).join(", ") || "-");
     else permCell = "-";
     return `<tr>
-      <td>${esc(m.username || "-")}</td>
+      <td><button type="button" class="m-detail" data-id="${m.id}" style="background:none;border:none;color:var(--blue);font-weight:700;cursor:pointer;font-family:inherit;font-size:inherit;padding:0;text-decoration:underline;">${esc(m.username || "-")}</button></td>
       <td>${esc(m.name || "-")}</td>
       <td>${esc(m.phone || "-")}</td>
       <td>${esc(m.email || "-")}</td>
@@ -430,6 +430,7 @@ async function loadMembers() {
     </tr>`;
   }).join("");
 
+  tb.querySelectorAll(".m-detail").forEach((b) => b.addEventListener("click", () => openMemberDetail(b.dataset.id)));
   if (!isMaster) return; // 매니저는 편집 불가
   tb.querySelectorAll(".m-role").forEach((sel) => sel.addEventListener("change", async () => {
     try { await window.OSS.setMemberRole(sel.dataset.id, sel.value); loadMembers(); }
@@ -868,6 +869,36 @@ function countReportCsv() {
   wire("salesRun", "salesCsvBtn", renderSalesReport, salesReportCsv);
   wire("vatRun", "vatCsvBtn", renderVatReport, vatReportCsv);
   wire("cntRun", "cntCsvBtn", renderCountReport, countReportCsv);
+})();
+
+// ===== 회원 상세보기 (회원 클릭 → 기본정보 + 잔액 + 주문이력) =====
+async function openMemberDetail(id) {
+  const modal = document.getElementById("memberModal"); if (!modal) return;
+  let m = null;
+  try { m = await window.OSS.getMemberById(id); } catch (e) {}
+  if (!m) { alert("회원 정보를 불러오지 못했어요."); return; }
+  const t = document.getElementById("mdTitle"); if (t) t.textContent = (m.name || m.username || "회원") + " 님 상세";
+  const info = document.getElementById("mdInfo");
+  if (info) info.innerHTML =
+    '<b>아이디</b> ' + esc(m.username || "-") + ' &nbsp;·&nbsp; <b>이름</b> ' + esc(m.name || "-") + ' &nbsp;·&nbsp; <b>연락처</b> ' + esc(m.phone || "-") + '<br>' +
+    '<b>이메일</b> ' + esc(m.email || "-") + ' &nbsp;·&nbsp; <b>고객번호</b> ' + esc(m.mailbox_code || "-") + ' &nbsp;·&nbsp; <b>등급</b> ' + esc(m.grade || "-") + ' &nbsp;·&nbsp; <b>가입</b> ' + ((m.created_at || "").slice(0, 10) || "-") + '<br>' +
+    '<b>예치금</b> <span style="color:var(--blue);font-weight:700;">₩' + Number(m.deposit || 0).toLocaleString() + '</span> &nbsp;·&nbsp; <b>적립금</b> <span style="color:#1F9D6B;font-weight:700;">₩' + Number(m.points || 0).toLocaleString() + '</span>';
+  const my = ORDERS.filter((o) => o.raw && o.raw.user_id === id);
+  const cntEl = document.getElementById("mdOrderCnt"); if (cntEl) cntEl.textContent = "(" + my.length + "건)";
+  const tb = document.getElementById("mdOrders");
+  if (tb) {
+    tb.innerHTML = my.length
+      ? my.map((o) => '<tr data-id="' + o.id + '" style="cursor:pointer;"><td style="color:var(--blue);font-weight:700;">' + esc(o.no) + '</td><td>' + (o.type === "purchase" ? "구매" : "배송") + '</td><td><span class="status-badge ' + badgeClass(o.status) + '">' + esc(purLabel(o.status)) + '</span></td><td>¥' + (o.amount || 0).toLocaleString() + '</td><td style="white-space:nowrap;">' + o.created + '</td></tr>').join("")
+      : '<tr><td colspan="5" class="empty">주문 이력이 없어요.</td></tr>';
+    tb.querySelectorAll("tr[data-id]").forEach((tr) => tr.addEventListener("click", () => { closeMemberModal(); openModal(tr.dataset.id); }));
+  }
+  modal.hidden = false;
+}
+function closeMemberModal() { const m = document.getElementById("memberModal"); if (m) m.hidden = true; }
+(function bindMemberModal() {
+  const c = document.getElementById("mdClose"); if (c) c.addEventListener("click", closeMemberModal);
+  const bg = document.getElementById("memberModal");
+  if (bg) bg.addEventListener("click", (e) => { if (e.target === bg) closeMemberModal(); });
 })();
 
 // ===== 결제관리 (예치금/적립금 충전·차감·환불 + 원장 + 결제내역) =====
