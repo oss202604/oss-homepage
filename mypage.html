@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=40" />
+  <link rel="stylesheet" href="styles.css?v=41" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <style>
     .coupon-list{display:grid;gap:10px;}
@@ -81,6 +81,12 @@
         <!-- 신청 현황 대시보드 -->
         <div class="mypage-block" id="dashboard">
           <h2 class="mypage-title">신청 현황</h2>
+          <table class="mp-summary">
+            <tbody>
+              <tr><th>회원등급</th><td id="sumGrade">-</td><th>고객번호</th><td id="sumMailbox">-</td></tr>
+              <tr><th>진행중 주문</th><td id="sumActive">0건</td><th>결제 대기</th><td id="sumUnpaid">0건</td></tr>
+            </tbody>
+          </table>
           <div class="mp-dash-group">
             <h4>구매대행 <span class="cnt" id="dashCntPurchase">0건</span></h4>
             <div class="mp-stats" id="dashPurchase"></div>
@@ -319,6 +325,15 @@
         const purchases = orders.filter((o) => o.type !== "delivery");
         const deliveries = orders.filter((o) => o.type === "delivery");
 
+        // 신청현황 요약표 바인딩
+        (function () {
+          var sG = document.getElementById("sumGrade"); if (sG) sG.textContent = (p.grade ? p.grade + " 회원" : "일반 회원");
+          var sM = document.getElementById("sumMailbox"); if (sM) sM.textContent = p.mailbox_code || "발급 전";
+          var done = ["배송완료", "취소", "반품/교환", "사고/폐기"];
+          var sA = document.getElementById("sumActive"); if (sA) sA.textContent = orders.filter(function (o) { return done.indexOf(o.status) < 0; }).length + "건";
+          var sU = document.getElementById("sumUnpaid"); if (sU) sU.textContent = orders.filter(function (o) { return o.status === "결제대기"; }).length + "건";
+        })();
+
         // ── 신청 현황 대시보드 (상태별 건수 · 클릭 시 바로 아래에 해당 주문 펼침) ──
         (function buildDash() {
           var P = ["신규접수", "결제대기", "구매중", "입고완료", "포장/측정", "배송중", "배송완료"];
@@ -535,7 +550,7 @@
       }
       links.forEach(function (a) {
         if (a.id === "logoutBtn") return;
-        a.addEventListener("click", function (e) { e.preventDefault(); show(a.getAttribute("href")); window.scrollTo({ top: 0, behavior: "smooth" }); });
+        a.addEventListener("click", function (e) { e.preventDefault(); show(a.getAttribute("href")); });
       });
       var initial = "#dashboard";
       try { if (location.hash && document.querySelector(".mypage-block" + location.hash)) initial = location.hash; } catch (e) {}
