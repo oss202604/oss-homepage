@@ -103,9 +103,9 @@
         <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="settings"></i></span> 환경설정</button>
           <div class="nav-sub">
             <button data-page="settings">기본·요금·콘텐츠 설정</button>
-            <button data-page="stub" data-label="품목분류(HS·관세율)" data-desc="HS코드 카탈로그·통관품명·관세율·부가세율">품목분류(HS·관세율)</button>
-            <button data-page="stub" data-label="관세청 고시환율" data-desc="주차별 공식환율(USD·JPY) — 관·부가세 계산 기준">관세청 고시환율</button>
-            <button data-page="stub" data-label="송장 대역대" data-desc="택배사별 송장번호 풀 — 국내송장 자동발번">송장 대역대</button>
+            <button data-page="hscodes">품목분류(HS·관세율)</button>
+            <button data-page="customsfx">관세청 고시환율</button>
+            <button data-page="invpool">송장 대역대</button>
             <button data-page="bizhours">업무시간·휴무</button>
             <button data-page="paymethods">결제수단·메모 카테고리</button>
           </div>
@@ -786,6 +786,45 @@
         </div>
       </section>
 
+      <!-- ===== 환경설정 > 품목분류(HS·관세율) ===== -->
+      <section class="admin-page" id="page-hscodes">
+        <h2 class="admin-page-title">품목분류 <span style="font-size:14px;font-weight:400;color:var(--muted);">(HS코드·관세율)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">자주 쓰는 통관 품목분류표예요. 주문 상세창 HS코드 입력·예상세액 참고용. (관세율·부가세율은 관세청 기준으로 직접 입력)</p>
+        <div class="dash-panel">
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>HS코드</th><th>통관품명</th><th>관세율%</th><th>부가세율%</th><th>관리</th></tr></thead>
+            <tbody id="hscodesRows"></tbody>
+          </table></div>
+          <div class="set-actions" style="margin-top:12px;"><button class="btn btn-small" id="hscodesAdd" type="button">+ 행 추가</button><button class="btn btn-small btn-primary" id="hscodesSave" type="button">저장</button><span class="save-ok" id="hscodesMsg"></span></div>
+        </div>
+      </section>
+
+      <!-- ===== 환경설정 > 관세청 고시환율 ===== -->
+      <section class="admin-page" id="page-customsfx">
+        <h2 class="admin-page-title">관세청 고시환율 <span style="font-size:14px;font-weight:400;color:var(--muted);">(주차별 공식환율)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">관·부가세 계산 기준이 되는 주차별 공식환율이에요. (관세청 고시 기준 직접 입력 — 매주 갱신)</p>
+        <div class="dash-panel">
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>적용주차</th><th>USD(원)</th><th>JPY 100엔(원)</th><th>관리</th></tr></thead>
+            <tbody id="customsfxRows"></tbody>
+          </table></div>
+          <div class="set-actions" style="margin-top:12px;"><button class="btn btn-small" id="customsfxAdd" type="button">+ 행 추가</button><button class="btn btn-small btn-primary" id="customsfxSave" type="button">저장</button><span class="save-ok" id="customsfxMsg"></span></div>
+        </div>
+      </section>
+
+      <!-- ===== 환경설정 > 송장 대역대 ===== -->
+      <section class="admin-page" id="page-invpool">
+        <h2 class="admin-page-title">송장 대역대 <span style="font-size:14px;font-weight:400;color:var(--muted);">(국내송장 번호 풀)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">택배사별 국내송장 번호 범위예요. '다음발번'부터 순서대로 발급에 활용. (계약된 송장 대역을 직접 입력)</p>
+        <div class="dash-panel">
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>택배사</th><th>접두</th><th>시작번호</th><th>끝번호</th><th>다음발번</th><th>관리</th></tr></thead>
+            <tbody id="invpoolRows"></tbody>
+          </table></div>
+          <div class="set-actions" style="margin-top:12px;"><button class="btn btn-small" id="invpoolAdd" type="button">+ 행 추가</button><button class="btn btn-small btn-primary" id="invpoolSave" type="button">저장</button><span class="save-ok" id="invpoolMsg"></span></div>
+        </div>
+      </section>
+
       <!-- ===== 준비중(스텁) 공용 화면 ===== -->
       <section class="admin-page" id="page-stub">
         <h2 class="admin-page-title" id="stubTitle">준비중</h2>
@@ -912,7 +951,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=23"></script>
-  <script src="admin.js?v=41"></script>
+  <script src="admin.js?v=42"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

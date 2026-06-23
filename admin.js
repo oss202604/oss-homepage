@@ -526,6 +526,7 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
     if (page === "cntrep") renderCountReport();
     if (page === "paymethods") loadPayMethods();
     if (page === "bizhours") loadBizHours();
+    if (page === "hscodes" || page === "customsfx" || page === "invpool") tblLoad(page);
   });
 });
 function renderStub(label, desc) {
@@ -938,6 +939,50 @@ async function loadBizHours() {
     const msg = document.getElementById("bhMsg");
     try { await window.OSS.saveSetting("business_hours", val); if (msg) msg.textContent = "✓ 저장됐어요"; }
     catch (e) { alert("저장 실패: " + (e.message || e)); }
+  });
+})();
+
+// ===== 환경설정 — 행추가형 표 편집기 (HS코드 / 고시환율 / 송장대역) 공용 =====
+const TBL_CFG = {
+  hscodes: { key: "hs_codes", cols: [{ f: "code", ph: "6101.20", w: 120 }, { f: "name", ph: "의류", w: 160 }, { f: "duty", type: "number", ph: "13", w: 90 }, { f: "vat", type: "number", ph: "10", w: 90 }] },
+  customsfx: { key: "customs_fx", cols: [{ f: "week", ph: "2026-06 4주", w: 140 }, { f: "usd", type: "number", ph: "1380", w: 110 }, { f: "jpy", type: "number", ph: "920", w: 120 }] },
+  invpool: { key: "invoice_pool", cols: [{ f: "courier", ph: "CJ대한통운", w: 130 }, { f: "prefix", ph: "6", w: 70 }, { f: "from", type: "number", ph: "100000", w: 120 }, { f: "to", type: "number", ph: "199999", w: 120 }, { f: "next", type: "number", ph: "100000", w: 120 }] },
+};
+const TBL_DATA = {};
+function tblRender(pre) {
+  const cfg = TBL_CFG[pre]; const tb = document.getElementById(pre + "Rows");
+  if (!tb || !cfg) return;
+  const rows = TBL_DATA[pre] || [];
+  tb.innerHTML = rows.length
+    ? rows.map((r, i) => '<tr>' + cfg.cols.map((c) => '<td><input class="pur-inp" data-i="' + i + '" data-f="' + c.f + '"' + (c.type === "number" ? ' type="number"' : '') + ' value="' + esc(r[c.f] != null ? String(r[c.f]) : "") + '" placeholder="' + (c.ph || "") + '" style="width:' + (c.w || 100) + 'px;"></td>').join("") + '<td><button class="btn btn-small tbl-del" data-i="' + i + '" type="button" style="color:var(--red);padding:4px 8px;">삭제</button></td></tr>').join("")
+    : '<tr><td colspan="' + (cfg.cols.length + 1) + '" class="empty">"+ 행 추가"로 입력하세요.</td></tr>';
+  tb.querySelectorAll(".pur-inp").forEach((inp) => inp.addEventListener("change", () => {
+    const i = Number(inp.dataset.i), f = inp.dataset.f;
+    if (!TBL_DATA[pre] || !TBL_DATA[pre][i]) return;
+    TBL_DATA[pre][i][f] = inp.type === "number" ? (inp.value !== "" ? Number(inp.value) : null) : inp.value;
+  }));
+  tb.querySelectorAll(".tbl-del").forEach((b) => b.addEventListener("click", () => { TBL_DATA[pre].splice(Number(b.dataset.i), 1); tblRender(pre); }));
+}
+async function tblLoad(pre) {
+  const cfg = TBL_CFG[pre]; if (!cfg) return;
+  let v = null; try { v = await window.OSS.getSetting(cfg.key); } catch (e) {}
+  TBL_DATA[pre] = Array.isArray(v) ? v : [];
+  tblRender(pre);
+}
+(function bindTableEditors() {
+  Object.keys(TBL_CFG).forEach((pre) => {
+    const add = document.getElementById(pre + "Add");
+    if (add) add.addEventListener("click", () => {
+      if (!TBL_DATA[pre]) TBL_DATA[pre] = [];
+      const row = {}; TBL_CFG[pre].cols.forEach((c) => { row[c.f] = ""; });
+      TBL_DATA[pre].push(row); tblRender(pre);
+    });
+    const save = document.getElementById(pre + "Save");
+    if (save) save.addEventListener("click", async () => {
+      const msg = document.getElementById(pre + "Msg");
+      try { await window.OSS.saveSetting(TBL_CFG[pre].key, TBL_DATA[pre] || []); if (msg) msg.textContent = "✓ 저장됐어요"; }
+      catch (e) { alert("저장 실패: " + (e.message || e)); }
+    });
   });
 })();
 
