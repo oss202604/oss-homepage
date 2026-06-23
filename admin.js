@@ -517,6 +517,9 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
     if (page === "shipping") renderGroupWork("shipping");
     if (page === "incident" || page === "rtn" || page === "shipped") renderOrderView(page);
     if (page === "stock") renderStock();
+    if (page === "deplog") renderLedgerLog("deposit", "depLogRows", false);
+    if (page === "pointlog") renderLedgerLog("points", "pointLogRows", false);
+    if (page === "refund") renderLedgerLog("deposit", "refundRows", true);
   });
 });
 function renderStub(label, desc) {
@@ -733,6 +736,28 @@ function renderStock() {
       '<td style="white-space:nowrap;font-weight:700;' + (days >= 14 ? "color:var(--red);" : "") + '">' + daysTxt + '</td></tr>';
   }).join("") : '<tr><td colspan="7" class="empty">보관 중인 재고가 없어요.</td></tr>';
   tb.querySelectorAll(".stock-open").forEach((td) => td.addEventListener("click", () => openModal(td.dataset.id)));
+}
+// ===== 결제관리 — 전체 회원 예치금/적립금 원장 (예치금 내역·적립금 내역·환불) =====
+async function renderLedgerLog(kind, tbId, refundOnly) {
+  const tb = document.getElementById(tbId);
+  if (!tb) return;
+  tb.innerHTML = '<tr><td colspan="7" class="empty">불러오는 중…</td></tr>';
+  try {
+    let list = await window.OSS.fetchAllLedger(kind, 300);
+    if (refundOnly) list = list.filter((e) => (e.reason || "").indexOf("환불") >= 0);
+    tb.innerHTML = list.length ? list.map((e) => {
+      const t = (e.created_at || "").replace("T", " ").slice(0, 16);
+      const d = Number(e.delta || 0);
+      const col = d > 0 ? "#1F9D6B" : (d < 0 ? "var(--red)" : "var(--muted)");
+      return '<tr><td style="white-space:nowrap;">' + t + '</td>' +
+        '<td>' + esc(e.member || "-") + '</td>' +
+        '<td style="white-space:nowrap;font-weight:700;color:' + col + ';">' + (d > 0 ? "+" : "") + d.toLocaleString() + '원</td>' +
+        '<td style="white-space:nowrap;">' + Number(e.balance_after || 0).toLocaleString() + '원</td>' +
+        '<td>' + esc(e.reason || "-") + '</td>' +
+        '<td>' + esc(e.order_no || "-") + '</td>' +
+        '<td>' + esc(e.created_by || "-") + '</td></tr>';
+    }).join("") : '<tr><td colspan="7" class="empty">' + (refundOnly ? "환불 내역이 없어요." : "내역이 없어요.") + '</td></tr>';
+  } catch (e) { tb.innerHTML = '<tr><td colspan="7" class="empty">불러오기 실패: ' + esc(e.message || e) + '</td></tr>'; }
 }
 
 // ===== 결제관리 (예치금/적립금 충전·차감·환불 + 원장 + 결제내역) =====

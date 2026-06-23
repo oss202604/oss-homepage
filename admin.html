@@ -44,9 +44,9 @@
         <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="wallet"></i></span> 결제관리</button>
           <div class="nav-sub">
             <button data-page="payments">결제내역·원장</button>
-            <button data-page="stub" data-label="예치금 내역" data-desc="예치금 충전·차감 원장 (현재는 결제관리>회원검색에서 회원별 원장 확인)">예치금 내역</button>
-            <button data-page="stub" data-label="적립금 내역" data-desc="적립금 지급·차감 원장">적립금 내역</button>
-            <button data-page="stub" data-label="예치금 환불" data-desc="예치금 환불 처리·내역 (현재는 결제관리>회원검색 환불버튼)">예치금 환불</button>
+            <button data-page="deplog">예치금 내역</button>
+            <button data-page="pointlog">적립금 내역</button>
+            <button data-page="refund">예치금 환불</button>
           </div>
         </li>
 
@@ -277,6 +277,36 @@
             </table>
           </div>
         </div>
+      </section>
+
+      <!-- ===== 결제관리 > 예치금 내역 ===== -->
+      <section class="admin-page" id="page-deplog">
+        <h2 class="admin-page-title">예치금 내역 <span style="font-size:14px;font-weight:400;color:var(--muted);">(전체 회원 충전·차감 원장)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">모든 회원의 예치금 증감 기록이에요. 충전(+)·사용/환불(−). 회원별 조정·충전은 「결제내역·원장」 탭에서.</p>
+        <div class="dash-panel"><div class="table-wrap"><table class="data-table">
+          <thead><tr><th>일시</th><th>회원</th><th>증감</th><th>잔액</th><th>사유</th><th>주문</th><th>처리자</th></tr></thead>
+          <tbody id="depLogRows"><tr><td colspan="7" class="empty">메뉴를 열면 표시돼요.</td></tr></tbody>
+        </table></div></div>
+      </section>
+
+      <!-- ===== 결제관리 > 적립금 내역 ===== -->
+      <section class="admin-page" id="page-pointlog">
+        <h2 class="admin-page-title">적립금 내역 <span style="font-size:14px;font-weight:400;color:var(--muted);">(전체 회원 지급·차감 원장)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">모든 회원의 적립금 증감 기록이에요. 지급(+)·사용(−). 회원별 조정은 「결제내역·원장」 탭에서.</p>
+        <div class="dash-panel"><div class="table-wrap"><table class="data-table">
+          <thead><tr><th>일시</th><th>회원</th><th>증감</th><th>잔액</th><th>사유</th><th>주문</th><th>처리자</th></tr></thead>
+          <tbody id="pointLogRows"><tr><td colspan="7" class="empty">메뉴를 열면 표시돼요.</td></tr></tbody>
+        </table></div></div>
+      </section>
+
+      <!-- ===== 결제관리 > 예치금 환불 ===== -->
+      <section class="admin-page" id="page-refund">
+        <h2 class="admin-page-title">예치금 환불 <span style="font-size:14px;font-weight:400;color:var(--muted);">(환불 처리 내역)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">예치금 원장 중 '환불' 사유 건만 모았어요. <b>실제 환불 처리</b>는 「결제내역·원장」 탭에서 회원을 검색해 환불 버튼으로 진행하세요 (사유에 '환불' 입력).</p>
+        <div class="dash-panel"><div class="table-wrap"><table class="data-table">
+          <thead><tr><th>일시</th><th>회원</th><th>증감</th><th>잔액</th><th>사유</th><th>주문</th><th>처리자</th></tr></thead>
+          <tbody id="refundRows"><tr><td colspan="7" class="empty">메뉴를 열면 표시돼요.</td></tr></tbody>
+        </table></div></div>
       </section>
 
       <!-- ===== 공지·문의 ===== -->
@@ -760,8 +790,8 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=21"></script>
-  <script src="admin.js?v=37"></script>
+  <script src="supabase.js?v=22"></script>
+  <script src="admin.js?v=38"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

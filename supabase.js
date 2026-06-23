@@ -369,6 +369,21 @@ async function fetchLedger(userId, kind) {
   if (error) throw error;
   return data || [];
 }
+// 전체 회원 원장 (관리자 결제관리>예치금/적립금 내역) — 회원명 매핑 포함
+async function fetchAllLedger(kind, limit) {
+  let q = sb.from("member_ledger").select("*").order("created_at", { ascending: false }).limit(limit || 300);
+  if (kind) q = q.eq("kind", kind);
+  const { data: led, error } = await q;
+  if (error) throw error;
+  const rows = led || [];
+  const ids = Array.from(new Set(rows.map((r) => r.user_id).filter(Boolean)));
+  const names = {};
+  if (ids.length) {
+    const { data: profs } = await sb.from("profiles").select("id,username,name").in("id", ids);
+    (profs || []).forEach((p) => { names[p.id] = p.username || p.name || p.id; });
+  }
+  return rows.map((r) => Object.assign({}, r, { member: names[r.user_id] || "-" }));
+}
 // 회원 1명 잔액·이름 조회 (주문창에서 예치금/적립금 잔액 힌트용)
 async function getMemberById(userId) {
   if (!userId) return null;
@@ -628,6 +643,7 @@ window.OSS = {
   getOrderCoupon,
   adjustBalance,
   fetchLedger,
+  fetchAllLedger,
   getMemberById,
   // 구매후기
   submitReview,
