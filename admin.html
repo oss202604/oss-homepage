@@ -85,7 +85,7 @@
 
         <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="image"></i></span> 배너관리</button>
           <div class="nav-sub">
-            <button data-page="stub" data-label="메인 배너" data-desc="홈 메인 배너 (현재는 설정>홈 화면에서 관리)">메인 배너</button>
+            <button data-page="banners">메인 배너</button>
             <button data-page="stub" data-label="추천 쇼핑몰" data-desc="홈 일본 인기 쇼핑몰 로고 그룹">추천 쇼핑몰</button>
             <button data-page="stub" data-label="메루카리 추천" data-desc="메루카리 추천 카테고리 배너">메루카리 추천</button>
           </div>
@@ -419,17 +419,8 @@
           <div class="set-actions" style="margin-top:12px;"><button class="btn btn-primary" id="saveTopbar">띠배너 저장</button><span class="save-ok" id="topbarSaved"></span></div>
         </div>
 
-        <div class="dash-panel" data-setgroup="home" style="margin-bottom:24px;">
-          <h3>메인 배너 관리 <span style="font-size:13px;font-weight:400;color:var(--muted);">(홈 첫화면 큰 이미지)</span></h3>
-          <p class="form-note" style="text-align:left;margin:0 0 16px;">권장 2480×800px · png/jpeg/webp · 5MB 이하. 비워두면 홈에 기본 자리표시가 보여요. 여러 장 올리면 홈에서 자동으로 넘어가요.</p>
-          <div class="set-grid">
-            <label class="full">이미지 파일<input type="file" id="bnFile" accept="image/png,image/jpeg,image/webp" /></label>
-            <label class="full">클릭 시 이동 (선택)<input id="bnLink" placeholder="예: order.html (비우면 구매대행 신청으로)" /></label>
-            <label class="full">설명 (선택)<input id="bnAlt" placeholder="배너 설명 (이미지 깨질 때·접근성용)" /></label>
-          </div>
-          <div class="set-actions"><button class="btn btn-small btn-primary" id="bnAdd" type="button">배너 추가</button><span class="save-ok" id="bnMsg"></span></div>
-          <div id="bannerList" style="margin-top:12px;"></div>
-        </div>
+        <!-- 메인 배너 관리는 좌측 '배너관리' 메뉴로 이동했어요 -->
+
 
         <div class="dash-panel" data-setgroup="rates">
           <h3>배송비 요율표 (무게 이하 → 배송비)</h3>
@@ -514,6 +505,22 @@
             <button class="btn btn-primary" id="saveFaq">FAQ 저장</button>
             <span class="save-ok" id="faqSaved"></span>
           </div>
+        </div>
+      </section>
+
+      <!-- ===== 배너관리 ===== -->
+      <section class="admin-page" id="page-banners">
+        <h2 class="admin-page-title">배너관리 — 메인 배너</h2>
+        <div class="dash-panel" style="margin-bottom:24px;">
+          <h3>메인 배너 관리 <span style="font-size:13px;font-weight:400;color:var(--muted);">(홈 첫화면 큰 이미지)</span></h3>
+          <p class="form-note" style="text-align:left;margin:0 0 16px;">권장 2480×800px · png/jpeg/webp · 5MB 이하. 비워두면 홈에 기본 자리표시가 보여요. 여러 장 올리면 홈에서 자동으로 넘어가요.</p>
+          <div class="set-grid">
+            <label class="full">이미지 파일<input type="file" id="bnFile" accept="image/png,image/jpeg,image/webp" /></label>
+            <label class="full">클릭 시 이동 (선택)<input id="bnLink" placeholder="예: order.html (비우면 구매대행 신청으로)" /></label>
+            <label class="full">설명 (선택)<input id="bnAlt" placeholder="배너 설명 (이미지 깨질 때·접근성용)" /></label>
+          </div>
+          <div class="set-actions"><button class="btn btn-small btn-primary" id="bnAdd" type="button">배너 추가</button><span class="save-ok" id="bnMsg"></span></div>
+          <div id="bannerList" style="margin-top:12px;"></div>
         </div>
       </section>
 
