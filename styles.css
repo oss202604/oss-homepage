@@ -317,10 +317,10 @@ p { word-break: keep-all; }
 .qm-top svg { width: 18px; height: 18px; }
 .qm-top small { font-size: 10px; }
 
-/* ===== 채팅 버튼 ===== */
-.chat-fab { position: fixed; bottom: 24px; right: 110px; width: 58px; height: 58px; border-radius: 50%; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 10px 24px rgba(47,109,246,.4); z-index: 40; }
-.chat-fab:hover { transform: scale(1.08); }
-.chat-fab [data-lucide] { width: 26px; height: 26px; }
+/* ===== 카카오톡 상담 버튼 ===== */
+.chat-fab { position: fixed; bottom: 24px; right: 110px; width: 58px; height: 58px; border-radius: 50%; background: #FEE500; color: #3c1e1e; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(254,229,0,.5); z-index: 40; }
+.chat-fab:hover { transform: scale(1.08); background: #f5dc00; }
+.chat-fab-talk { font-size: 14px; font-weight: 900; letter-spacing: -0.5px; font-family: inherit; }
 .slider-arrow [data-lucide] { width: 26px; height: 26px; }
 .header-icon [data-lucide] { width: 20px; height: 20px; }
 
