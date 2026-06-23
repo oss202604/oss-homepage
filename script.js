@@ -129,6 +129,7 @@ if (menuToggle && mainMenu) {
       '</div>' +
       '<div class="footer-bottom"><div class="container">' +
         (biz.legal ? '<p class="footer-legal">' + biz.legal + '</p>' : '') +
+        '<p class="footer-fx">오쓰 적용환율 : 100엔 = ₩1,000 <small>(1엔 = 10원)</small></p>' +
         '<div class="footer-bottom-inner">' +
         '<nav class="footer-links">' +
           '<a href="index.html#about">회사소개</a>' +
@@ -183,7 +184,11 @@ if (menuToggle && mainMenu) {
     '<button class="qm-top" type="button" title="맨 위로"><i data-lucide="chevron-up" class="ico-inline"></i><br /><small>TOP</small></button>';
   document.body.appendChild(aside);
   aside.querySelector(".qm-top").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-  if (window.lucide) lucide.createIcons();
+  // 아이콘 렌더 — lucide가 늦게 로드돼도 뜨도록 재시도
+  function _qmIcons() { try { if (window.lucide && lucide.createIcons) lucide.createIcons(); } catch (e) {} }
+  _qmIcons();
+  if (document.readyState !== "complete") window.addEventListener("load", _qmIcons);
+  setTimeout(_qmIcons, 600);
 })();
 
 // ===== 고객센터 사이드바 (공지·문의·FAQ·후기 허브) =====

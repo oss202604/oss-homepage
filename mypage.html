@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=43" />
+  <link rel="stylesheet" href="styles.css?v=44" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <style>
     .coupon-list{display:grid;gap:10px;}
@@ -116,11 +116,17 @@
             <button type="button" class="mp-amt" data-amt="100000">10만원</button>
             <button type="button" class="mp-amt" data-amt="300000">30만원</button>
           </div>
+          <h3 class="mp-subtit">무통장입금 충전 신청 <span style="color:#1F9D6B;font-size:13px;font-weight:600;">(수수료 0%)</span></h3>
           <div class="address-card" style="text-align:left;">
             <p style="margin:0 0 6px;">선택 금액: <span id="depSel" style="color:var(--orange);font-weight:700;">위에서 선택해 주세요</span></p>
-            <p style="margin:0 0 6px;">아래 계좌로 입금 후 카카오톡으로 <b>입금자명·금액</b>을 알려주시면 확인 후 충전해드려요.</p>
+            <p style="margin:0 0 6px;">아래 계좌로 입금 후 카카오톡으로 입금자명·금액을 알려주시면 확인 후 충전해드려요.</p>
             <p style="margin:0 0 12px;">입금 계좌 <b>농협 302-2154-8330-21</b> 예금주 송상익</p>
             <a href="http://pf.kakao.com/_srxlxfX/chat" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-block;">카카오톡으로 충전 신청 →</a>
+          </div>
+          <h3 class="mp-subtit">신용카드 충전 <span style="color:#999;font-size:13px;font-weight:600;">(수수료 3.4%)</span></h3>
+          <div class="address-card" style="text-align:left;">
+            <p style="margin:0 0 10px;color:#888;">카드 결제(PG)는 준비 중이에요. 곧 제공되며, 지금은 무통장입금으로 충전해 주세요.</p>
+            <button type="button" class="btn btn-primary" disabled style="opacity:.5;cursor:not-allowed;">신용카드 충전 (준비중)</button>
           </div>
           <h3 style="font-size:15px;margin:22px 0 8px;">충전·사용 내역</h3>
           <div class="table-wrap">
@@ -297,7 +303,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=17"></script>
-  <script src="script.js?v=35"></script>
+  <script src="script.js?v=36"></script>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script>
     (function () {
