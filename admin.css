@@ -26,6 +26,9 @@ body.admin-body { background: #eef1f6; --ac-line: #ffd8c6; --ac-ring: rgba(255,1
 .admin-nav .nav-group-li.collapsed .nav-sub { display: none; }
 .admin-nav .nav-sub button { padding: 9px 18px 9px 42px; font-size: 13.5px; font-weight: 500; }
 .admin-nav .nav-sub button.active { background: var(--hero-bg); color: var(--blue-dark); font-weight: 700; border-left-color: var(--orange); }
+/* 구매관리(사입 처리) 인라인 편집·필터칩 */
+.pur-chip.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+.pur-inp { padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; font-family: inherit; font-size: 13px; background: #fff; }
 .admin-main { flex: 1; padding: 28px 32px; overflow-x: auto; }
 .admin-page { display: none; }
 .admin-page.active { display: block; }

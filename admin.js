@@ -512,6 +512,7 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
     if (page === "stub") renderStub(btn.dataset.label, btn.dataset.desc);
     if (page === "log") renderLog();
     if (page === "trash") renderTrash();
+    if (page === "purchase") renderPurchase();
   });
 });
 function renderStub(label, desc) {
@@ -532,6 +533,78 @@ async function renderLog() {
     }).join("") : '<tr><td colspan="6" class="empty">작업 기록이 없어요.</td></tr>';
   } catch (e) { tb.innerHTML = '<tr><td colspan="6" class="empty">불러오기 실패: ' + esc(e.message || e) + '</td></tr>'; }
 }
+
+// ===== 구매관리 (사입 처리) — group "구매" 주문 인라인편집 + 일괄 상태변경 =====
+let PUR_FILTER = "all";
+function purLabel(k) { return (ALL_STATUS.find((s) => s.key === k) || {}).label || k; }
+function updatePurSel() {
+  const el = document.getElementById("purSelCnt");
+  if (el) el.textContent = document.querySelectorAll(".pur-chk:checked").length;
+}
+function renderPurchase() {
+  const wrap = document.getElementById("purFilters");
+  const tb = document.getElementById("purRows");
+  if (!tb) return;
+  const buyKeys = NORMAL.filter((s) => s.group === "구매").map((s) => s.key);
+  if (wrap && !wrap.dataset.built) {
+    wrap.dataset.built = "1";
+    const chips = [["all", "전체"]].concat(NORMAL.filter((s) => s.group === "구매").map((s) => [s.key, s.label]));
+    wrap.innerHTML = chips.map((c) => '<button class="btn btn-small pur-chip" data-k="' + c[0] + '" type="button">' + esc(c[1]) + '</button>').join("");
+    wrap.querySelectorAll(".pur-chip").forEach((b) => b.addEventListener("click", () => { PUR_FILTER = b.dataset.k; renderPurchase(); }));
+  }
+  if (wrap) wrap.querySelectorAll(".pur-chip").forEach((b) => b.classList.toggle("active", b.dataset.k === PUR_FILTER));
+  const rows = ORDERS.filter((o) => !o.deleted && (PUR_FILTER === "all" ? buyKeys.includes(o.status) : o.status === PUR_FILTER));
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">구매 단계 주문이 없어요.</td></tr>'; updatePurSel(); return; }
+  tb.innerHTML = rows.map((o) => {
+    const r = o.raw;
+    return '<tr data-id="' + o.id + '">' +
+      '<td><input type="checkbox" class="pur-chk" data-id="' + o.id + '" style="width:16px;height:16px;"></td>' +
+      '<td class="pur-open" style="cursor:pointer;color:var(--blue);font-weight:700;">' + esc(o.no) + '</td>' +
+      '<td>' + esc(o.customer) + '</td>' +
+      '<td style="max-width:190px;white-space:normal;">' + esc(o.name) + '</td>' +
+      '<td><span class="status-badge ' + badgeClass(o.status) + '">' + esc(purLabel(o.status)) + '</span></td>' +
+      '<td><input class="pur-inp" data-id="' + o.id + '" data-f="buy_from" value="' + esc(r.buy_from || "") + '" placeholder="사입처" style="width:100px;"></td>' +
+      '<td><input class="pur-inp" type="number" data-id="' + o.id + '" data-f="buy_yen" value="' + (r.buy_yen != null ? r.buy_yen : "") + '" placeholder="¥" style="width:85px;"></td>' +
+      '<td><input class="pur-inp" data-id="' + o.id + '" data-f="local_order_no" value="' + esc(r.local_order_no || "") + '" placeholder="현지오더" style="width:115px;"></td>' +
+      '<td style="white-space:nowrap;">¥' + (o.amount || 0).toLocaleString() + '</td>' +
+      '<td style="white-space:nowrap;">' + o.created + '</td>' +
+    '</tr>';
+  }).join("");
+  tb.querySelectorAll(".pur-inp").forEach((inp) => inp.addEventListener("change", async () => {
+    const o = ORDERS.find((x) => x.id === inp.dataset.id); if (!o) return;
+    const f = inp.dataset.f;
+    const val = f === "buy_yen" ? (inp.value !== "" ? Number(inp.value) : null) : inp.value.trim();
+    try { const patch = {}; patch[f] = val; await window.OSS.updateApplication(o.id, patch); o.raw[f] = val; inp.style.borderColor = "#1F9D6B"; }
+    catch (e) { inp.style.borderColor = "var(--red)"; alert("저장 실패: " + (e.message || e)); }
+  }));
+  tb.querySelectorAll(".pur-open").forEach((td) => td.addEventListener("click", () => openModal(td.closest("tr").dataset.id)));
+  tb.querySelectorAll(".pur-chk").forEach((c) => c.addEventListener("change", updatePurSel));
+  updatePurSel();
+}
+async function purBulkStatus(newStatus) {
+  const checked = [].slice.call(document.querySelectorAll(".pur-chk:checked"));
+  const msg = document.getElementById("purMsg");
+  if (!checked.length) { if (msg) msg.textContent = "주문을 먼저 선택하세요."; return; }
+  if (!confirm(checked.length + "건을 '" + newStatus + "'(으)로 바꿀까요?")) return;
+  if (msg) msg.textContent = "처리 중…";
+  let ok = 0;
+  for (const c of checked) {
+    const o = ORDERS.find((x) => x.id === c.dataset.id); if (!o) continue;
+    const sd = (o.raw.status_dates && typeof o.raw.status_dates === "object") ? Object.assign({}, o.raw.status_dates) : {};
+    if (!sd[newStatus]) sd[newStatus] = new Date().toISOString();
+    try { await window.OSS.updateApplication(o.id, { status: newStatus, status_dates: sd }); o.status = newStatus; o.raw.status = newStatus; o.raw.status_dates = sd; ok++; }
+    catch (e) {}
+  }
+  if (msg) msg.textContent = "✓ " + ok + "건 변경됨";
+  renderKanban(); renderDashboard(); renderPurchase();
+  setTimeout(() => { const m = document.getElementById("purMsg"); if (m) m.textContent = ""; }, 3000);
+}
+(function bindPurchase() {
+  const all = document.getElementById("purAllChk");
+  if (all) all.addEventListener("change", () => { document.querySelectorAll(".pur-chk").forEach((c) => { c.checked = all.checked; }); updatePurSel(); });
+  const b1 = document.getElementById("purToBuying"); if (b1) b1.addEventListener("click", () => purBulkStatus("구매중"));
+  const b2 = document.getElementById("purToDone"); if (b2) b2.addEventListener("click", () => purBulkStatus("구매완료"));
+})();
 
 // ===== 결제관리 (예치금/적립금 충전·차감·환불 + 원장 + 결제내역) =====
 let PAY_MEMBER = null;
