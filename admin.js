@@ -895,9 +895,9 @@ async function openMemberDetail(id) {
       : '<tr><td colspan="5" class="empty">주문 이력이 없어요.</td></tr>';
     tb.querySelectorAll("tr[data-id]").forEach((tr) => tr.addEventListener("click", () => { closeMemberModal(); openModal(tr.dataset.id); }));
   }
-  modal.hidden = false;
+  modal.style.display = "flex";
 }
-function closeMemberModal() { const m = document.getElementById("memberModal"); if (m) m.hidden = true; }
+function closeMemberModal() { const m = document.getElementById("memberModal"); if (m) m.style.display = "none"; }
 (function bindMemberModal() {
   const c = document.getElementById("mdClose"); if (c) c.addEventListener("click", closeMemberModal);
   const bg = document.getElementById("memberModal");
