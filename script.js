@@ -175,6 +175,7 @@ if (menuToggle && mainMenu) {
   bar.setAttribute("aria-label", "사이트맵");
   bar.innerHTML = '<div class="footer-sitemap-in">' +
     links.map(function(x) { return '<a href="' + x[0] + '">' + x[1] + '</a>'; }).join("") +
+    '<span class="sitemap-fx">오쓰 적용환율 : 100엔 = ₩1,000 <small>(1엔 = 10원)</small></span>' +
     '</div>';
   var footer = document.querySelector(".site-footer");
   if (footer && footer.parentNode) footer.parentNode.insertBefore(bar, footer);
