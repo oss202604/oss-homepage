@@ -244,8 +244,8 @@ async function myOrders() {
 }
 
 // 내 기본정보 수정 (역할/등급은 못 바꿈)
-async function updateMyProfile(name, phone, email) {
-  const { error } = await sb.rpc("oss_update_my_profile", { p_name: name, p_phone: phone, p_email: email });
+async function updateMyProfile(name, phone, email, addrZip, addrMain, addrDetail) {
+  const { error } = await sb.rpc("oss_update_my_profile", { p_name: name, p_phone: phone, p_email: email, p_addr_zip: addrZip == null ? null : addrZip, p_addr_main: addrMain == null ? null : addrMain, p_addr_detail: addrDetail == null ? null : addrDetail });
   if (error) throw error;
 }
 

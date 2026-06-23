@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=42" />
+  <link rel="stylesheet" href="styles.css?v=43" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <style>
     .coupon-list{display:grid;gap:10px;}
@@ -105,13 +105,21 @@
         <div class="mypage-block" id="deposit">
           <h2 class="mypage-title">예치금 충전·내역</h2>
           <div class="address-card" style="text-align:left;">
-            <p style="font-size:15px;margin:0;"><b>현재 예치금</b> &nbsp;<span style="color:var(--orange);font-weight:800;">0원</span></p>
-            <p class="form-note" style="margin:8px 0 0;">예치금을 미리 충전해두면 주문하실 때 <b>상품가·배송비 결제가 바로</b> 돼요. (무통장입금)</p>
+            <p style="margin:0;">현재 예치금 <span id="depBal" style="color:var(--orange);font-weight:700;">0원</span></p>
+            <p class="form-note" style="margin:8px 0 0;">예치금을 미리 충전해두면 주문 시 상품가·배송비 결제가 바로 돼요. (무통장입금)</p>
           </div>
-          <h3 style="font-size:15px;margin:22px 0 8px;">무통장입금으로 충전 신청</h3>
+          <h3 class="mp-subtit">충전 금액 선택</h3>
+          <div class="mp-amt-grid">
+            <button type="button" class="mp-amt" data-amt="10000">1만원</button>
+            <button type="button" class="mp-amt" data-amt="30000">3만원</button>
+            <button type="button" class="mp-amt" data-amt="50000">5만원</button>
+            <button type="button" class="mp-amt" data-amt="100000">10만원</button>
+            <button type="button" class="mp-amt" data-amt="300000">30만원</button>
+          </div>
           <div class="address-card" style="text-align:left;">
-            <p style="margin:0 0 8px;">아래 계좌로 원하시는 금액을 입금하신 뒤, <b>카카오톡으로 입금자명·금액</b>을 알려주시면 사장님이 확인 후 예치금에 충전해드려요.</p>
-            <p style="margin:0 0 14px;font-size:16px;"><b>농협 302-2154-8330-21</b> &nbsp;<span style="color:#888;">예금주 송상익</span></p>
+            <p style="margin:0 0 6px;">선택 금액: <span id="depSel" style="color:var(--orange);font-weight:700;">위에서 선택해 주세요</span></p>
+            <p style="margin:0 0 6px;">아래 계좌로 입금 후 카카오톡으로 <b>입금자명·금액</b>을 알려주시면 확인 후 충전해드려요.</p>
+            <p style="margin:0 0 12px;">입금 계좌 <b>농협 302-2154-8330-21</b> 예금주 송상익</p>
             <a href="http://pf.kakao.com/_srxlxfX/chat" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-block;">카카오톡으로 충전 신청 →</a>
           </div>
           <h3 style="font-size:15px;margin:22px 0 8px;">충전·사용 내역</h3>
@@ -243,11 +251,19 @@
           <h2 class="mypage-title">회원 정보</h2>
           <form class="order-form" id="profileForm">
             <div class="form-row">
-              <label>이름<input type="text" name="name" id="pfName" placeholder="홍길동" /></label>
-              <label>휴대폰<input type="tel" name="phone" id="pfPhone" placeholder="010-0000-0000" /></label>
+              <label>한글이름 <span class="ro-note">(변경 불가)</span><input type="text" id="pfName" readonly /></label>
+              <label>아이디 <span class="ro-note">(변경 불가)</span><input type="text" id="pfUsername" readonly /></label>
             </div>
-            <label>이메일 <span style="font-weight:400;color:#999;font-size:.85em;">(로그인 계정 이메일 — 변경 불가)</span><input type="email" name="email" id="pfEmail" placeholder="example@email.com" readonly /></label>
+            <div class="form-row">
+              <label>고객번호 <span class="ro-note">(변경 불가)</span><input type="text" id="pfMailbox" readonly /></label>
+              <label>이메일 <span class="ro-note">(변경 불가)</span><input type="email" id="pfEmail" readonly /></label>
+            </div>
+            <label>휴대전화<input type="tel" id="pfPhone" placeholder="010-0000-0000" /></label>
+            <label>우편번호<span style="display:flex;gap:6px;"><input id="pfZip" placeholder="검색 →" readonly /><button type="button" id="pfZipBtn" class="btn btn-small" style="white-space:nowrap;">주소 검색</button></span></label>
+            <label>주소<input id="pfAddr" placeholder="주소 검색 후 자동 입력" /></label>
+            <label>상세주소<input id="pfAddrDetail" placeholder="동·호수 등 상세주소" /></label>
             <button type="submit" class="btn btn-primary">정보 수정</button>
+            <p id="pfMsg" style="margin-top:8px;font-size:13px;min-height:16px;"></p>
           </form>
           <hr style="border:none;border-top:1px solid #EFE3DA;margin:22px 0;" />
           <h3 style="font-size:15px;margin-bottom:10px;">비밀번호 변경</h3>
@@ -280,7 +296,7 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=16"></script>
+  <script src="supabase.js?v=17"></script>
   <script src="script.js?v=35"></script>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script>
@@ -308,6 +324,14 @@
         const pfName = document.getElementById("pfName"); if (pfName) pfName.value = p.name || "";
         const pfPhone = document.getElementById("pfPhone"); if (pfPhone) pfPhone.value = p.phone || "";
         const pfEmail = document.getElementById("pfEmail"); if (pfEmail) pfEmail.value = p.email || "";
+        var pfU = document.getElementById("pfUsername"); if (pfU) pfU.value = p.username || "";
+        var pfMb = document.getElementById("pfMailbox"); if (pfMb) pfMb.value = p.mailbox_code || "발급 전";
+        var pfZ = document.getElementById("pfZip"); if (pfZ) pfZ.value = p.addr_zip || "";
+        var pfA2 = document.getElementById("pfAddr"); if (pfA2) pfA2.value = p.addr_main || "";
+        var pfAd = document.getElementById("pfAddrDetail"); if (pfAd) pfAd.value = p.addr_detail || "";
+        var depB = document.getElementById("depBal"); if (depB) depB.textContent = Number(p.deposit || 0).toLocaleString() + "원";
+        var wDep = document.getElementById("walDeposit"); if (wDep) wDep.innerHTML = Number(p.deposit || 0).toLocaleString() + "<em>원</em>";
+        var wPt = document.getElementById("walPoint"); if (wPt) wPt.innerHTML = Number(p.points || 0).toLocaleString() + "<em>원</em>";
 
         // 주문내역
         let orders = [];
@@ -492,15 +516,25 @@
             document.getElementById("adAddr").focus();
           } }).open();
         });
+        const pfZipBtn = document.getElementById("pfZipBtn");
+        if (pfZipBtn) pfZipBtn.addEventListener("click", function () {
+          if (!window.daum || !daum.Postcode) { alert("주소검색을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."); return; }
+          new daum.Postcode({ oncomplete: function (data) {
+            document.getElementById("pfZip").value = data.zonecode;
+            document.getElementById("pfAddr").value = (data.roadAddress || data.address || "");
+            document.getElementById("pfAddrDetail").focus();
+          } }).open();
+        });
 
         // 회원정보 수정
         const pf = document.getElementById("profileForm");
         if (pf) pf.addEventListener("submit", async (e) => {
           e.preventDefault();
+          var pm = document.getElementById("pfMsg");
           try {
-            await window.OSS.updateMyProfile(pfName.value.trim(), pfPhone.value.trim(), pfEmail.value.trim());
-            alert("정보가 수정되었어요.");
-          } catch (err) { alert("수정 실패: " + (err.message || err)); }
+            await window.OSS.updateMyProfile(null, pfPhone.value.trim(), null, document.getElementById("pfZip").value.trim(), document.getElementById("pfAddr").value.trim(), document.getElementById("pfAddrDetail").value.trim());
+            if (pm) { pm.style.color = "#1F9D6B"; pm.textContent = "✓ 정보가 저장됐어요."; }
+          } catch (err) { if (pm) { pm.style.color = "#c0392b"; pm.textContent = "저장 실패 — 다시 시도해 주세요."; } }
         });
 
         // 비밀번호 변경
@@ -525,6 +559,18 @@
         e.preventDefault();
         try { await window.OSS.signOut(); } catch (err) {}
         location.href = "index.html";
+      });
+    })();
+
+    // 예치금 충전 금액 선택 버튼
+    (function () {
+      var sel = document.getElementById("depSel");
+      document.querySelectorAll(".mp-amt").forEach(function (b) {
+        b.addEventListener("click", function () {
+          document.querySelectorAll(".mp-amt").forEach(function (x) { x.classList.remove("on"); });
+          b.classList.add("on");
+          if (sel) sel.textContent = Number(b.dataset.amt).toLocaleString() + "원";
+        });
       });
     })();
 
