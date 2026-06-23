@@ -55,6 +55,7 @@ alter table public.applications add column if not exists coupon_id bigint;
 alter table public.applications add column if not exists coupon_amount integer;
 
 -- 회원이 주문 시 본인 활성쿠폰을 그 주문에 예약(reserved). 정산 때 사장님이 최종 used 처리.
+-- (2026-06-23 갱신) used_at = now() 도 기록 → 사장님이 관리자 2차 배송비칸에서 "사용신청일" 확인 가능
 create or replace function public.oss_reserve_coupon(p_coupon_id bigint, p_order_no text)
 returns integer
 language plpgsql
@@ -65,7 +66,8 @@ declare v_amount integer;
 begin
   update public.coupons set
     status = 'reserved',
-    used_order_no = p_order_no
+    used_order_no = p_order_no,
+    used_at = now()
   where id = p_coupon_id
     and user_id = auth.uid()
     and status = 'active'

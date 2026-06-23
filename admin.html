@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=48" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="admin.css?v=17" />
+  <link rel="stylesheet" href="admin.css?v=22" />
 </head>
 <body class="admin-body">
   <!-- 상단 바 -->
@@ -46,6 +46,11 @@
         <div class="stat-grid" style="margin-top:14px;grid-template-columns:repeat(2,1fr);">
           <div class="stat-card"><div class="stat-label">이번달 주문</div><div class="stat-num" id="kpiMonthCnt">0<small>건</small></div></div>
           <div class="stat-card"><div class="stat-label">이번달 총거래액 <small style="font-size:11px;">(추정·현재환율)</small></div><div class="stat-num" id="kpiMonthGmv">₩0</div></div>
+        </div>
+        <div class="dash-panel" style="margin:14px 0;">
+          <h3>신청 현황 <span style="font-size:12px;font-weight:400;color:var(--muted);">(숫자를 누르면 그 상태 주문만 표로 보여요)</span></h3>
+          <style>.dash-st-row{display:flex;justify-content:space-between;align-items:center;padding:6px 6px;border-radius:7px;cursor:pointer;font-size:13.5px;}.dash-st-row:hover{background:#f4f6fb;}.dash-st-grp{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;}.dash-st-grp h4{margin:0 0 8px;font-size:13px;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line);font-weight:700;}</style>
+          <div id="dashStatusGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px;"></div>
         </div>
         <div class="dash-panel" style="margin:14px 0;">
           <h3>⏰ 오래 멈춘 주문 <span style="font-size:12px;font-weight:400;color:var(--muted);">(설정 '지연 기준일' 이상 손 안 댄 진행중 주문 · 추정)</span></h3>
@@ -102,19 +107,21 @@
 
         <div class="kanban-toolbar">
           <input id="orderSearch" placeholder="🔍 주문번호 · 고객명 · 연락처 · 송장번호로 검색" />
-          <button class="btn btn-small view-toggle active" data-view="kanban" type="button">칸반</button>
-          <button class="btn btn-small view-toggle" data-view="table" type="button">표</button>
+          <button class="btn btn-small view-toggle" data-view="kanban" type="button">칸반</button>
+          <button class="btn btn-small view-toggle active" data-view="table" type="button">표</button>
+          <select id="orderStatusFilter" style="padding:8px 11px;border:1px solid var(--line);border-radius:4px;font-family:inherit;font-size:13px;background:#fff;"></select>
+          <span id="orderFilterChip" style="display:none;align-items:center;gap:6px;font-size:13px;background:#FFF8F2;border:1px solid #F6C99B;border-radius:4px;padding:4px 10px;">상태: <b></b> <button id="orderFilterClear" type="button" style="border:none;background:none;cursor:pointer;color:var(--red);font-weight:700;font-size:14px;line-height:1;">✕</button></span>
           <button class="btn btn-small" id="trashToggle" type="button">🗑 휴지통 (<span id="trashCount">0</span>)</button>
         </div>
 
-        <div id="kanbanWrap">
+        <div id="kanbanWrap" hidden>
           <p class="kanban-section-label">정상 흐름 — 카드를 끌어다 다음 단계로 옮기세요</p>
           <div class="kanban" id="kanbanNormal"></div>
           <p class="kanban-section-label" style="margin-top:20px;">예외 처리 — 취소·반품·사고 등은 이쪽으로</p>
           <div class="kanban" id="kanbanException"></div>
         </div>
 
-        <div id="orderTableWrap" hidden>
+        <div id="orderTableWrap">
           <div class="set-actions"><button class="btn btn-small" id="orderCsvBtn" type="button">📊 엑셀(CSV) 추출</button></div>
           <div class="table-wrap">
             <table class="data-table" id="orderTable">
@@ -142,7 +149,7 @@
         <div class="dash-panel">
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr><th>아이디</th><th>이름</th><th>연락처</th><th>이메일</th><th>고객번호</th><th>등급</th><th>역할</th><th>매니저 권한</th><th>가입일</th><th>최근로그인</th></tr></thead>
+              <thead><tr><th>아이디</th><th>이름</th><th>연락처</th><th>이메일</th><th>고객번호</th><th>등급</th><th>역할</th><th>매니저 권한</th><th>예치금/적립금</th><th>가입일</th><th>최근로그인</th></tr></thead>
               <tbody id="memberRows">
                 <tr><td colspan="10" class="empty">불러오는 중…</td></tr>
               </tbody>
@@ -425,37 +432,64 @@
 
       <div id="modalDetail"></div>
 
+      <div class="oss-wrap">
+        <table class="oss-etable">
+          <tr class="sect"><td colspan="6">사입 · 구매 정보 (어디서·얼마에·어떻게·언제)</td></tr>
+          <tr>
+            <th>사입처</th><td><input id="modalBuyFrom" placeholder="예: 라쿠텐 / 메루카리 / 점포명" /></td>
+            <th>사입가(¥)</th><td><input type="number" id="modalBuyYen" min="0" step="1" placeholder="현지 구매가" /></td>
+            <th>현지오더번호</th><td><input id="modalLocalOrder" placeholder="일본 주문번호" /></td>
+          </tr>
+          <tr>
+            <th>결제수단</th><td><select id="modalPayCard"></select><input id="modalPayCardCustom" placeholder="직접 입력" style="display:none;margin-top:5px;" /></td>
+            <th>결제(사입)일</th><td><input id="modalPayDate" inputmode="numeric" placeholder="260612 → 26.06.12" /></td>
+            <th>정산액(₩)</th><td><input type="number" id="modalSettleKrw" min="0" step="100" placeholder="고객 청구·정산액" /></td>
+          </tr>
+
+          <tr class="sect"><td colspan="6">입고 · 무게 · 배송비 (2차)</td></tr>
+          <tr>
+            <th>실무게(kg)</th><td><input type="number" id="modalWeight" step="0.1" min="0" placeholder="예: 1.5" /></td>
+            <th>배송센터</th><td><select id="modalCenter"><option value="air">일본(항공)</option><option value="sea">일본(해상)</option></select></td>
+            <th>국제배송비</th><td style="white-space:nowrap;"><button class="btn btn-small" id="modalCalcFee" type="button">계산</button> <b id="modalFee">-</b></td>
+          </tr>
+          <tr>
+            <th>예치금 사용(₩)</th><td><input type="number" id="modalDepositUsed" min="0" step="100" placeholder="0" /></td>
+            <th>적립금 사용(₩)</th><td><input type="number" id="modalPointsUsed" min="0" step="100" placeholder="0" /></td>
+            <th>배송비 결제수단</th><td><select id="modalShipPay"></select><input id="modalShipPayCustom" placeholder="직접 입력" style="display:none;margin-top:5px;" /></td>
+          </tr>
+          <tr>
+            <td colspan="6">
+              <div id="modalCouponBox" style="display:none;margin-bottom:8px;padding:8px 11px;background:#F0FBF6;border:1px solid #9AD6BC;border-radius:9px;font-size:12.5px;color:#1F7A57;">🎟️ 쿠폰 사용 신청 — <b id="modalCouponAmt">₩0</b> <span id="modalCouponDate" style="color:#5C8C77;font-size:11.5px;"></span></div>
+              <div style="font-size:13.5px;">실결제 배송비 <span style="font-size:11.5px;color:var(--muted);">(배송비 − 쿠폰 − 예치금 − 적립금)</span>: <b id="modalShipFinal" style="color:var(--blue);font-size:15px;">-</b></div>
+              <div id="modalMemberBal" style="font-size:12px;color:var(--muted);margin-top:5px;"></div>
+            </td>
+          </tr>
+
+          <tr class="sect"><td colspan="6">통관 · 상품 정보</td></tr>
+          <tr>
+            <th>HS코드</th><td><input id="modalHsCode" placeholder="예: 3924100000" /></td>
+            <th>럭넘버</th><td><input id="modalRackNo" placeholder="창고 보관위치" /></td>
+            <th>적하명(영문)</th><td><input id="modalCustomsName" placeholder="예: PLASTIC TOY" /></td>
+          </tr>
+
+          <tr class="sect"><td colspan="6">송장 · 배송 추적</td></tr>
+          <tr>
+            <th>택배사</th><td><input id="modalCourier" placeholder="예: CJ대한통운" /></td>
+            <th>송장번호</th><td><input id="modalTracking" placeholder="국내/국제 송장번호" /></td>
+            <th>조회</th><td style="white-space:nowrap;"><button class="btn btn-small" id="modalTrack" type="button">📦 국내배송</button> <button class="btn btn-small" id="modalCustoms" type="button">🛃 통관(Pantos)</button></td>
+          </tr>
+        </table>
+      </div>
+
       <div class="modal-fee-box">
-        <h4>송장 · 배송 추적</h4>
-        <div class="modal-fee-row">
-          <label>택배사<input id="modalCourier" placeholder="예: CJ대한통운" /></label>
-          <label>송장번호<input id="modalTracking" placeholder="국내 송장번호" /></label>
-        </div>
-        <div class="set-actions" style="margin-top:10px;">
-          <button class="btn btn-small" id="modalTrack" type="button">📦 배송조회</button>
-          <a class="btn btn-small" href="https://unipass.customs.go.kr/csp/persIndex.do" target="_blank" rel="noopener">🛃 통관조회(유니패스)</a>
-        </div>
+        <h4>단계별 완료일 <span style="font-size:12px;font-weight:400;color:var(--muted);">(상태가 바뀌면 자동 기록)</span></h4>
+        <div class="modal-dates" id="modalDates"></div>
       </div>
 
       <div class="modal-fee-box">
         <h4>관리자 메모</h4>
         <textarea id="modalMemo" rows="2" placeholder="이 주문에 대한 메모를 남기세요" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fbfcfe;"></textarea>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px;"><input type="checkbox" id="modalMemoPublic" style="width:auto;" /> 고객에게도 보이기 (주문조회 화면에 표시 — 2단계 예정)</label>
-      </div>
-
-      <div class="modal-fee-box">
-        <h4>입고 · 무게 · 배송비</h4>
-        <div class="modal-fee-row">
-          <label>실무게(kg)<input type="number" id="modalWeight" step="0.1" min="0" placeholder="예: 1.5" /></label>
-          <label>배송센터
-            <select id="modalCenter">
-              <option value="air">일본(항공)</option>
-              <option value="sea">일본(해상)</option>
-            </select>
-          </label>
-          <button class="btn btn-small" id="modalCalcFee" type="button">배송비 계산</button>
-        </div>
-        <p class="modal-fee-out">예상 국제배송비: <b id="modalFee">-</b> <span class="modal-fee-note">(임시 요율 · 실제 요율로 교체 예정)</span></p>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px;"><input type="checkbox" id="modalMemoPublic" style="width:auto;" /> 고객에게도 보이기 (주문조회 화면에 표시)</label>
       </div>
 
       <div class="modal-fee-box">
@@ -475,8 +509,8 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=18"></script>
-  <script src="admin.js?v=22"></script>
+  <script src="supabase.js?v=21"></script>
+  <script src="admin.js?v=31"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

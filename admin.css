@@ -67,9 +67,22 @@ body.admin-body { background: #eef1f6; --ac-line: #ffd8c6; --ac-ring: rgba(255,1
 /* 상세 모달 */
 .admin-modal { position: fixed; inset: 0; background: rgba(27,35,48,.55); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
 .admin-modal[hidden] { display: none; }
-.admin-modal-box { background: #fff; border-radius: 16px; padding: 28px; max-width: 560px; width: 100%; max-height: 85vh; overflow: auto; box-shadow: var(--sh-pop); }
+.admin-modal-box { background: #fff; border-radius: 6px; padding: 22px; max-width: 1360px; width: 100%; max-height: 90vh; overflow: auto; box-shadow: var(--sh-pop); }
+/* 주문 상세 — 엑셀형 표(한눈에, 줄바꿈 최소) */
+.modal-dates { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.modal-dates .md-cell { background: #fff; border: 1px solid var(--line); border-radius: 3px; padding: 6px 9px; font-size: 12.5px; }
+.modal-dates .md-cell .mdk { color: var(--muted); display: block; font-size: 11.5px; margin-bottom: 2px; }
+.modal-dates .md-cell .mdv { font-weight: 700; color: var(--navy); }
+.modal-dates .md-cell.on { background: #eef7ff; border-color: #bcdcff; }
+.oss-wrap { overflow-x: auto; margin-top: 12px; }
+.oss-etable { width: 100%; border-collapse: collapse; table-layout: auto; }
+.oss-etable th { text-align: left; background: #eef1f6; color: var(--navy); font-weight: 700; font-size: 12px; padding: 6px 9px; border: 1px solid var(--line); white-space: nowrap; vertical-align: middle; }
+.oss-etable td { padding: 4px 7px; border: 1px solid var(--line); font-size: 13px; color: var(--text); vertical-align: middle; }
+.oss-etable td input, .oss-etable td select { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--line); border-radius: 3px; font-family: inherit; font-size: 13px; background: #fff; }
+.oss-etable tr.sect td { background: var(--navy); color: #fff; font-weight: 700; font-size: 12.5px; padding: 6px 11px; }
+.oss-etable td .btn { width: auto; }
 .admin-modal-box h3 { font-size: 20px; color: var(--navy); margin-bottom: 4px; }
-.admin-modal-box .modal-id { color: var(--blue); font-weight: 700; font-size: 13px; margin-bottom: 18px; }
+.admin-modal-box .modal-id { color: var(--blue); font-weight: 700; font-size: 13px; margin-bottom: 14px; }
 .detail-row { display: flex; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
 .detail-row .dk { width: 110px; color: var(--muted); flex-shrink: 0; }
 .detail-row .dv { color: var(--text); font-weight: 500; }
@@ -198,3 +211,25 @@ body.admin-body { background: #eef1f6; --ac-line: #ffd8c6; --ac-ring: rgba(255,1
 .stat-card.clickable { cursor: pointer; transition: box-shadow .15s, transform .15s; }
 .stat-card.clickable:hover { box-shadow: 0 8px 20px rgba(17,24,39,.10); transform: translateY(-2px); }
 .kanban-col.col-flash { outline: 3px solid var(--orange); outline-offset: -3px; transition: outline-color .2s; }
+
+/* ============================================================
+   엑셀형 납작·격자 디자인 (관리자 한눈에 — 둥근/몽글 제거)
+   ============================================================ */
+.admin-page-title { font-size: 18px; }
+.stat-card, .dash-panel { border-radius: 4px; box-shadow: none; }
+.dash-panel { padding: 14px 16px; }
+.stat-card { padding: 13px 15px; }
+.kanban-col { border-radius: 4px; }
+.kanban-card { border-radius: 4px; box-shadow: none; }
+.btn, .btn-small, .btn-primary, .btn-dark { border-radius: 4px !important; box-shadow: none; }
+.admin-main input, .admin-main select, .admin-main textarea { border-radius: 4px !important; }
+.set-subtab { border-radius: 4px !important; }
+.modal-fee-box { border-radius: 4px; box-shadow: none; padding: 12px 14px; }
+.dash-st-grp { border-radius: 4px !important; }
+.stat-card.clickable:hover { box-shadow: none; transform: none; background: #f3f6fb; }
+/* 데이터 표 = 엑셀 격자(전체 칸 테두리·빽빽·줄무늬·hover) */
+.admin-main .data-table { border-collapse: collapse; }
+.admin-main .data-table th, .admin-main .data-table td { border: 1px solid var(--line); padding: 6px 10px; font-size: 12.5px; line-height: 1.4; }
+.admin-main .data-table thead th { background: #eef1f6; color: var(--navy); }
+.admin-main .data-table tbody tr:nth-child(even) td { background: #fafbfd; }
+.admin-main .data-table tbody tr:hover td { background: #eaf2ff; }

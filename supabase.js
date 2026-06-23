@@ -12,6 +12,14 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ---- 신청서 저장 (구매대행/배송대행 공용) ----
 async function submitApplication(payload) {
+  // 로그인 회원이면 주문을 그 회원과 자동 연결 (예치금/적립금 자동정산·주문이력용)
+  try {
+    if (payload && payload.user_id == null) {
+      const { data } = await sb.auth.getSession();
+      const u = data && data.session && data.session.user;
+      if (u) payload = Object.assign({}, payload, { user_id: u.id });
+    }
+  } catch (e) {}
   // .select() 안 함: 비회원(anon)은 조회 권한이 없으므로 insert만 수행
   const { error } = await sb.from("applications").insert([payload]);
   if (error) throw error;
@@ -332,6 +340,42 @@ async function reserveCoupon(couponId, orderNo) {
   if (error) throw error;
   return Number(data) || 0;
 }
+// 관리자: 특정 주문에 쓰인 쿠폰 1장 조회 (2차 배송비칸에서 금액·사용일 확인). 없으면 null.
+async function getOrderCoupon(orderNo) {
+  if (!orderNo) return null;
+  const { data, error } = await sb
+    .from("coupons")
+    .select("id,amount,status,used_at,used_order_no")
+    .eq("used_order_no", orderNo)
+    .order("used_at", { ascending: false })
+    .limit(1);
+  if (error) return null;
+  return (data && data[0]) || null;
+}
+
+// ---- 예치금/적립금 충전·차감 + 내역(원장) ----
+// kind: 'deposit'|'points', delta: +충전 / -차감. 반환 = 처리 후 잔액. 스태프 전용(RPC에서 검증).
+async function adjustBalance(userId, kind, delta, reason, orderNo) {
+  const { data, error } = await sb.rpc("oss_adjust_balance", {
+    p_user_id: userId, p_kind: kind, p_delta: delta, p_reason: reason || null, p_order_no: orderNo || null,
+  });
+  if (error) throw error;
+  return Number(data) || 0;
+}
+async function fetchLedger(userId, kind) {
+  let q = sb.from("member_ledger").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+  if (kind) q = q.eq("kind", kind);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data || [];
+}
+// 회원 1명 잔액·이름 조회 (주문창에서 예치금/적립금 잔액 힌트용)
+async function getMemberById(userId) {
+  if (!userId) return null;
+  const { data, error } = await sb.from("profiles").select("id,name,username,deposit,points").eq("id", userId).maybeSingle();
+  if (error) return null;
+  return data || null;
+}
 
 // ---- 구매후기 (회원만 작성, 사장님 승인 후 게시) ----
 async function submitReview(fields) {
@@ -581,6 +625,10 @@ window.OSS = {
   issueCoupon,
   deleteCoupon,
   reserveCoupon,
+  getOrderCoupon,
+  adjustBalance,
+  fetchLedger,
+  getMemberById,
   // 구매후기
   submitReview,
   updateMyReview,

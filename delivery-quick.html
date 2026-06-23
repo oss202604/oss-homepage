@@ -290,6 +290,7 @@
           <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);cursor:pointer;background:var(--o-tint);border:1px solid var(--o-line2);border-radius:13px;padding:13px;">
             <input type="checkbox" id="fUseCoupon" style="width:auto;" /> <span id="fCouponLabel">보유한 배송비 할인쿠폰 사용하기</span>
           </label>
+          <select id="fCouponSelect" class="oq-input" style="display:none;margin-top:8px;"></select>
           <span class="oq-help"><i data-lucide="info"></i> 쿠폰을 선택하면 <b>2차 배송비 결제</b> 때 자동으로 할인돼요. (한 주문에 1장)</span>
         </div>
       </div>
@@ -378,7 +379,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=18"></script>
+  <script src="supabase.js?v=21"></script>
   <script>
   (function () {
     var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -644,9 +645,24 @@
           var now = Date.now();
           var act = (cs || []).filter(function (c) { return c.status === "active" && (!c.expires_at || new Date(c.expires_at).getTime() > now); });
           if (!act.length) return;
-          var c = act[0];
-          window.__oqCoupon = { id: c.id, amount: Number(c.amount) || 0 };
-          var lab = $("#fCouponLabel"); if (lab) lab.innerHTML = "보유한 <b>배송비 할인쿠폰 ₩" + (Number(c.amount) || 0).toLocaleString() + "</b> 사용하기";
+          act.sort(function (a, b) { return (Number(b.amount) || 0) - (Number(a.amount) || 0); });
+          function pick(c) { window.__oqCoupon = { id: c.id, amount: Number(c.amount) || 0 }; }
+          pick(act[0]);
+          var lab = $("#fCouponLabel"), sel = $("#fCouponSelect");
+          if (act.length > 1 && sel) {
+            sel.innerHTML = act.map(function (c) {
+              var exp = c.expires_at ? " · ~" + String(c.expires_at).slice(0, 10) : "";
+              return '<option value="' + c.id + '">배송비 할인쿠폰 ₩' + (Number(c.amount) || 0).toLocaleString() + exp + '</option>';
+            }).join("");
+            sel.style.display = "";
+            sel.addEventListener("change", function () {
+              var hit = act.filter(function (x) { return String(x.id) === sel.value; })[0] || act[0];
+              pick(hit);
+            });
+            if (lab) lab.textContent = "보유한 배송비 할인쿠폰 사용하기 (" + act.length + "장 보유 — 아래에서 선택)";
+          } else if (lab) {
+            lab.innerHTML = "보유한 <b>배송비 할인쿠폰 ₩" + (Number(act[0].amount) || 0).toLocaleString() + "</b> 사용하기";
+          }
           var cw = $("#fCouponWrap"); if (cw) cw.style.display = "";
           icons();
         }).catch(function () {});
