@@ -94,9 +94,9 @@
         <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="bar-chart-3"></i></span> 정산·통계</button>
           <div class="nav-sub">
             <button data-page="settle">정산 요약</button>
-            <button data-page="stub" data-label="부가세 신고자료" data-desc="배송센터·기간별 부가세 신고용 엑셀">부가세 신고자료</button>
-            <button data-page="stub" data-label="매출 리포트" data-desc="구매대행·배송대행·반송비 매출 엑셀">매출 리포트</button>
-            <button data-page="stub" data-label="가입·건수 리포트" data-desc="회원가입·배송신청건수·회원별 신청건수 엑셀">가입·건수 리포트</button>
+            <button data-page="vatrep">부가세 신고자료</button>
+            <button data-page="salesrep">매출 리포트</button>
+            <button data-page="cntrep">가입·건수 리포트</button>
           </div>
         </li>
 
@@ -681,6 +681,65 @@
         </div>
       </section>
 
+      <!-- ===== 정산통계 > 매출 리포트 ===== -->
+      <section class="admin-page" id="page-salesrep">
+        <h2 class="admin-page-title">매출 리포트 <span style="font-size:14px;font-weight:400;color:var(--muted);">(기간별 매출 집계)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">유형(구매대행·배송대행)별 매출을 기간으로 집계해요. 취소·반품/교환은 제외. 엑셀(CSV) 저장 가능.</p>
+        <div class="dash-panel">
+          <div class="set-actions" style="margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+            <input type="date" id="salesFrom" style="height:38px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;">
+            <span style="color:var(--muted);">~</span>
+            <input type="date" id="salesTo" style="height:38px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;">
+            <button class="btn btn-small btn-primary" id="salesRun" type="button">조회</button>
+            <button class="btn btn-small" id="salesCsvBtn" type="button">엑셀(CSV) 저장</button>
+          </div>
+          <p id="salesSummary" style="margin:0 0 12px;font-size:14px;"></p>
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>유형</th><th>건수</th><th>상품합계¥</th><th>환산₩</th><th>배송비₩</th><th>추정수수료₩</th><th>총매출₩</th></tr></thead>
+            <tbody id="salesRows"><tr><td colspan="7" class="empty">조회를 누르면 표시돼요.</td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ===== 정산통계 > 부가세 신고자료 ===== -->
+      <section class="admin-page" id="page-vatrep">
+        <h2 class="admin-page-title">부가세 신고자료 <span style="font-size:14px;font-weight:400;color:var(--muted);">(월별 수수료매출·부가세 추정)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 10px;background:#FFF4E5;border:1px solid #FFD8A8;border-radius:8px;padding:10px;color:#A15C00;">⚠️ <b>참고용 추정치</b>예요. 구매대행 부가세 과세표준·세율은 사업 형태에 따라 달라요. <b>반드시 세무사·세무서 확인 후</b> 신고하세요. (여기선 '수수료 매출=공급대가'로 보고 1/11을 부가세로 추정)</p>
+        <div class="dash-panel">
+          <div class="set-actions" style="margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+            <input type="date" id="vatFrom" style="height:38px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;">
+            <span style="color:var(--muted);">~</span>
+            <input type="date" id="vatTo" style="height:38px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;">
+            <button class="btn btn-small btn-primary" id="vatRun" type="button">조회</button>
+            <button class="btn btn-small" id="vatCsvBtn" type="button">엑셀(CSV) 저장</button>
+          </div>
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>월</th><th>수수료매출₩</th><th>공급가액₩</th><th>부가세추정₩</th></tr></thead>
+            <tbody id="vatRows"><tr><td colspan="4" class="empty">조회를 누르면 표시돼요.</td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ===== 정산통계 > 가입·건수 리포트 ===== -->
+      <section class="admin-page" id="page-cntrep">
+        <h2 class="admin-page-title">가입·건수 리포트 <span style="font-size:14px;font-weight:400;color:var(--muted);">(회원별 신청건수)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">기간 내 회원별 신청 건수를 많은 순으로 집계해요. VIP·단골 파악용. 엑셀(CSV) 저장 가능.</p>
+        <div class="dash-panel">
+          <div class="set-actions" style="margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+            <input type="date" id="cntFrom" style="height:38px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;">
+            <span style="color:var(--muted);">~</span>
+            <input type="date" id="cntTo" style="height:38px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;">
+            <button class="btn btn-small btn-primary" id="cntRun" type="button">조회</button>
+            <button class="btn btn-small" id="cntCsvBtn" type="button">엑셀(CSV) 저장</button>
+          </div>
+          <p id="cntSummary" style="margin:0 0 12px;font-size:14px;"></p>
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>순위</th><th>회원</th><th>신청건수</th><th>상품합계¥</th></tr></thead>
+            <tbody id="cntRows"><tr><td colspan="4" class="empty">조회를 누르면 표시돼요.</td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
       <!-- ===== 준비중(스텁) 공용 화면 ===== -->
       <section class="admin-page" id="page-stub">
         <h2 class="admin-page-title" id="stubTitle">준비중</h2>
@@ -791,7 +850,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=22"></script>
-  <script src="admin.js?v=38"></script>
+  <script src="admin.js?v=39"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

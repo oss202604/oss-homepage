@@ -520,6 +520,9 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
     if (page === "deplog") renderLedgerLog("deposit", "depLogRows", false);
     if (page === "pointlog") renderLedgerLog("points", "pointLogRows", false);
     if (page === "refund") renderLedgerLog("deposit", "refundRows", true);
+    if (page === "salesrep") renderSalesReport();
+    if (page === "vatrep") renderVatReport();
+    if (page === "cntrep") renderCountReport();
   });
 });
 function renderStub(label, desc) {
@@ -759,6 +762,113 @@ async function renderLedgerLog(kind, tbId, refundOnly) {
     }).join("") : '<tr><td colspan="7" class="empty">' + (refundOnly ? "환불 내역이 없어요." : "내역이 없어요.") + '</td></tr>';
   } catch (e) { tb.innerHTML = '<tr><td colspan="7" class="empty">불러오기 실패: ' + esc(e.message || e) + '</td></tr>'; }
 }
+
+// ===== 정산통계 리포트 (매출·부가세·가입건수) — ORDERS 기반 기간 집계 + CSV =====
+function repRange(pre) { const f = document.getElementById(pre + "From"), t = document.getElementById(pre + "To"); return [f ? f.value : "", t ? t.value : ""]; }
+function repDefaults(pre) {
+  const f = document.getElementById(pre + "From"), t = document.getElementById(pre + "To");
+  const now = new Date();
+  const ym = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+  if (f && !f.value) f.value = ym + "-01";
+  if (t && !t.value) t.value = toLocalYmd(now.toISOString());
+}
+function ordersInRange(from, to) { return ORDERS.filter((o) => !o.deleted && (o.created_local || "") >= from && (o.created_local || "") <= to); }
+function salesCalc(list) {
+  const jpy = perJpy();
+  const sub = (o) => Number(o.raw.subtotal) || 0;
+  const gy = list.reduce((s, o) => s + sub(o), 0);
+  const gw = Math.round(list.reduce((s, o) => s + sub(o) * jpy, 0));
+  const sh = list.reduce((s, o) => s + (Number(o.raw.shipping_fee) || 0), 0);
+  const cm = Math.round(list.reduce((s, o) => s + sub(o) * jpy * COMMISSION_PCT / 100, 0));
+  return { cnt: list.length, goodsYen: gy, goodsWon: gw, ship: sh, comm: cm, gross: gw + sh };
+}
+function salesBase() {
+  const rg = repRange("sales");
+  return { from: rg[0], to: rg[1], base: ordersInRange(rg[0], rg[1]).filter((o) => o.status !== "취소" && o.status !== "반품/교환") };
+}
+function renderSalesReport() {
+  repDefaults("sales");
+  const x = salesBase(); const tb = document.getElementById("salesRows");
+  if (!tb || !x.from || !x.to) return;
+  const types = [["purchase", "구매대행"], ["delivery", "배송대행"]];
+  let html = "", tot = salesCalc([]);
+  types.forEach((tt) => {
+    const c = salesCalc(x.base.filter((o) => o.type === tt[0]));
+    ["cnt", "goodsYen", "goodsWon", "ship", "comm", "gross"].forEach((k) => { tot[k] += c[k]; });
+    html += '<tr><td><b>' + tt[1] + '</b></td><td>' + c.cnt + '건</td><td>¥' + c.goodsYen.toLocaleString() + '</td><td>₩' + c.goodsWon.toLocaleString() + '</td><td>₩' + c.ship.toLocaleString() + '</td><td>₩' + c.comm.toLocaleString() + '</td><td><b>₩' + c.gross.toLocaleString() + '</b></td></tr>';
+  });
+  html += '<tr style="background:#FAF6F2;font-weight:700;"><td>합계</td><td>' + tot.cnt + '건</td><td>¥' + tot.goodsYen.toLocaleString() + '</td><td>₩' + tot.goodsWon.toLocaleString() + '</td><td>₩' + tot.ship.toLocaleString() + '</td><td>₩' + tot.comm.toLocaleString() + '</td><td>₩' + tot.gross.toLocaleString() + '</td></tr>';
+  tb.innerHTML = html;
+  const sm = document.getElementById("salesSummary");
+  if (sm) sm.innerHTML = '<b>' + x.from + ' ~ ' + x.to + '</b> · 총 ' + tot.cnt + '건 · 총매출 <b style="color:var(--orange);">₩' + tot.gross.toLocaleString() + '</b> · 추정 수수료수익 ₩' + tot.comm.toLocaleString();
+}
+function salesReportCsv() {
+  renderSalesReport(); const x = salesBase(); if (!x.from || !x.to) return;
+  const types = [["purchase", "구매대행"], ["delivery", "배송대행"]];
+  const head = ["유형", "건수", "상품합계(엔)", "환산(원)", "배송비(원)", "추정수수료(원)", "총매출(원)"];
+  const body = types.map((tt) => { const c = salesCalc(x.base.filter((o) => o.type === tt[0])); return [tt[1], c.cnt, c.goodsYen, c.goodsWon, c.ship, c.comm, c.gross]; });
+  const t = salesCalc(x.base); body.push(["합계", t.cnt, t.goodsYen, t.goodsWon, t.ship, t.comm, t.gross]);
+  downloadCsv("매출리포트_" + x.from + "_" + x.to + ".csv", [head].concat(body));
+}
+function vatByMonth() {
+  const rg = repRange("vat"); const from = rg[0], to = rg[1];
+  const base = ordersInRange(from, to).filter((o) => o.status !== "취소" && o.status !== "반품/교환");
+  const jpy = perJpy(); const m = {};
+  base.forEach((o) => { const k = (o.created_local || "").slice(0, 7); if (k) m[k] = (m[k] || 0) + (Number(o.raw.subtotal) || 0) * jpy * COMMISSION_PCT / 100; });
+  return { from: from, to: to, m: m };
+}
+function renderVatReport() {
+  repDefaults("vat");
+  const x = vatByMonth(); const tb = document.getElementById("vatRows");
+  if (!tb || !x.from || !x.to) return;
+  const months = Object.keys(x.m).sort();
+  let html = "", totC = 0;
+  months.forEach((mo) => {
+    const comm = Math.round(x.m[mo]); const supply = Math.round(comm / 1.1);
+    totC += comm;
+    html += '<tr><td>' + mo + '</td><td>₩' + comm.toLocaleString() + '</td><td>₩' + supply.toLocaleString() + '</td><td><b>₩' + (comm - supply).toLocaleString() + '</b></td></tr>';
+  });
+  if (!months.length) { tb.innerHTML = '<tr><td colspan="4" class="empty">해당 기간 매출이 없어요.</td></tr>'; return; }
+  const sup = Math.round(totC / 1.1);
+  html += '<tr style="background:#FAF6F2;font-weight:700;"><td>합계</td><td>₩' + totC.toLocaleString() + '</td><td>₩' + sup.toLocaleString() + '</td><td>₩' + (totC - sup).toLocaleString() + '</td></tr>';
+  tb.innerHTML = html;
+}
+function vatReportCsv() {
+  renderVatReport(); const x = vatByMonth(); if (!x.from || !x.to) return;
+  const head = ["월", "수수료매출(원)", "공급가액(원)", "부가세추정(원)"];
+  const body = Object.keys(x.m).sort().map((mo) => { const c = Math.round(x.m[mo]); const sup = Math.round(c / 1.1); return [mo, c, sup, c - sup]; });
+  downloadCsv("부가세신고참고_" + x.from + "_" + x.to + ".csv", [head].concat(body));
+}
+function countAgg() {
+  const rg = repRange("cnt"); const base = ordersInRange(rg[0], rg[1]);
+  const by = {};
+  base.forEach((o) => { const k = o.customer || "-"; if (!by[k]) by[k] = { cnt: 0, yen: 0 }; by[k].cnt++; by[k].yen += (Number(o.raw.subtotal) || 0); });
+  const list = Object.keys(by).map((k) => ({ name: k, cnt: by[k].cnt, yen: by[k].yen })).sort((a, b) => b.cnt - a.cnt);
+  return { from: rg[0], to: rg[1], list: list, total: base.length };
+}
+function renderCountReport() {
+  repDefaults("cnt");
+  const x = countAgg(); const tb = document.getElementById("cntRows");
+  if (!tb || !x.from || !x.to) return;
+  tb.innerHTML = x.list.length ? x.list.map((r, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(r.name) + '</td><td><b>' + r.cnt + '건</b></td><td>¥' + r.yen.toLocaleString() + '</td></tr>').join("") : '<tr><td colspan="4" class="empty">해당 기간 신청이 없어요.</td></tr>';
+  const sm = document.getElementById("cntSummary");
+  if (sm) sm.innerHTML = '<b>' + x.from + ' ~ ' + x.to + '</b> · 신청 회원 ' + x.list.length + '명 · 총 신청 ' + x.total + '건';
+}
+function countReportCsv() {
+  renderCountReport(); const x = countAgg(); if (!x.from || !x.to) return;
+  const head = ["순위", "회원", "신청건수", "상품합계(엔)"];
+  const body = x.list.map((r, i) => [i + 1, r.name, r.cnt, r.yen]);
+  downloadCsv("회원별신청건수_" + x.from + "_" + x.to + ".csv", [head].concat(body));
+}
+(function bindReports() {
+  const wire = (runId, csvId, render, csv) => {
+    const r = document.getElementById(runId); if (r) r.addEventListener("click", render);
+    const c = document.getElementById(csvId); if (c) c.addEventListener("click", csv);
+  };
+  wire("salesRun", "salesCsvBtn", renderSalesReport, salesReportCsv);
+  wire("vatRun", "vatCsvBtn", renderVatReport, vatReportCsv);
+  wire("cntRun", "cntCsvBtn", renderCountReport, countReportCsv);
+})();
 
 // ===== 결제관리 (예치금/적립금 충전·차감·환불 + 원장 + 결제내역) =====
 let PAY_MEMBER = null;
