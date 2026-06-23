@@ -131,15 +131,6 @@ if (menuToggle && mainMenu) {
         (biz.legal ? '<p class="footer-legal">' + biz.legal + '</p>' : '') +
         '<p class="footer-fx">오쓰 적용환율 : 100엔 = ₩1,000 <small>(1엔 = 10원)</small></p>' +
         '<div class="footer-bottom-inner">' +
-        '<nav class="footer-links">' +
-          '<a href="index.html#about">회사소개</a>' +
-          '<a href="terms.html">이용약관</a>' +
-          '<a href="privacy.html">개인정보처리방침</a>' +
-          '<a href="refund.html">취소·환불정책</a>' +
-          '<a href="notice.html">공지사항</a>' +
-          '<a href="faq.html">FAQ</a>' +
-          '<a href="contact.html">1:1 문의</a>' +
-        '</nav>' +
         '<span class="footer-copy">© 2026 OSS. All rights reserved.</span>' +
         '</div>' +
       '</div></div>';
@@ -167,28 +158,54 @@ if (menuToggle && mainMenu) {
   if (window.lucide) lucide.createIcons();
 })();
 
-// ===== 우측 고정 퀵메뉴 (전 페이지 공통) =====
-(function renderQuickMenu() {
-  if (document.querySelector(".quick-menu")) return; // 메인 등 이미 있으면 건너뜀
-  const items = [
-    ["notice.html", "headphones", "고객센터"],
-    ["order.html", "shopping-bag", "구매대행"],
-    ["delivery.html", "package", "배송대행"],
-    ["index.html#fee", "calculator", "예상비용"],
-    ["guide.html", "book-open", "이용가이드"],
+// ===== 푸터 위 사이트맵 가로 한 줄 (회사소개·약관·공지 등) =====
+(function renderFooterSitemap() {
+  if (document.querySelector(".footer-sitemap")) return;
+  const links = [
+    ["index.html#about", "회사소개"],
+    ["terms.html", "이용약관"],
+    ["privacy.html", "개인정보처리방침"],
+    ["refund.html", "취소·환불정책"],
+    ["notice.html", "공지사항"],
+    ["faq.html", "FAQ"],
+    ["contact.html", "1:1 문의"],
   ];
-  const aside = document.createElement("aside");
+  const bar = document.createElement("nav");
+  bar.className = "footer-sitemap";
+  bar.setAttribute("aria-label", "사이트맵");
+  bar.innerHTML = '<div class="footer-sitemap-in">' +
+    links.map(function(x) { return '<a href="' + x[0] + '">' + x[1] + '</a>'; }).join("") +
+    '</div>';
+  var footer = document.querySelector(".site-footer");
+  if (footer && footer.parentNode) footer.parentNode.insertBefore(bar, footer);
+  else document.body.appendChild(bar);
+})();
+
+// ===== 우측 고정 퀵메뉴 (전 페이지 공통, inline SVG) =====
+(function renderQuickMenu() {
+  if (document.querySelector(".quick-menu")) return;
+  var ICO = {
+    cs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H4a1 1 0 0 1-1-1v-7a9 9 0 0 1 18 0v7a1 1 0 0 1-1 1h-2a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg>',
+    bag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+    box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
+    calc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="8" x2="16" y1="10" y2="10"/><line x1="8" x2="8" y1="14" y2="14"/><line x1="12" x2="12" y1="14" y2="14"/><line x1="16" x2="16" y1="14" y2="14"/><line x1="8" x2="8" y1="18" y2="18"/><line x1="12" x2="12" y1="18" y2="18"/><line x1="16" x2="16" y1="18" y2="18"/></svg>',
+    book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>',
+    up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>'
+  };
+  var items = [
+    ["notice.html", ICO.cs, "고객센터"],
+    ["order.html", ICO.bag, "구매대행"],
+    ["delivery.html", ICO.box, "배송대행"],
+    ["index.html#fee", ICO.calc, "예상비용"],
+    ["guide.html", ICO.book, "이용가이드"],
+  ];
+  var aside = document.createElement("aside");
   aside.className = "quick-menu";
   aside.innerHTML =
-    items.map(([h, ic, l]) => `<a href="${h}" class="qm-item"><span class="qm-ico"><i data-lucide="${ic}"></i></span>${l}</a>`).join("") +
-    '<button class="qm-top" type="button" title="맨 위로"><i data-lucide="chevron-up" class="ico-inline"></i><br /><small>TOP</small></button>';
+    items.map(function(x) { return '<a href="' + x[0] + '" class="qm-item"><span class="qm-ico">' + x[1] + '</span>' + x[2] + '</a>'; }).join("") +
+    '<button class="qm-top" type="button" title="맨 위로" aria-label="맨 위로">' + ICO.up + '<br><small>TOP</small></button>';
   document.body.appendChild(aside);
-  aside.querySelector(".qm-top").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-  // 아이콘 렌더 — lucide가 늦게 로드돼도 뜨도록 재시도
-  function _qmIcons() { try { if (window.lucide && lucide.createIcons) lucide.createIcons(); } catch (e) {} }
-  _qmIcons();
-  if (document.readyState !== "complete") window.addEventListener("load", _qmIcons);
-  setTimeout(_qmIcons, 600);
+  aside.querySelector(".qm-top").addEventListener("click", function() { window.scrollTo({ top: 0, behavior: "smooth" }); });
 })();
 
 // ===== 고객센터 사이드바 (공지·문의·FAQ·후기 허브) =====
