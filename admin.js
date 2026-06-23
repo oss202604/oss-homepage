@@ -1324,6 +1324,12 @@ function openModal(id) {
     </table></div>`;
   const sel = document.getElementById("modalStatus");
   sel.innerHTML = ALL_STATUS.map((s) => `<option value="${s.key}" ${s.key === o.status ? "selected" : ""}>${s.label}</option>`).join("");
+  const _cr = document.getElementById("modalCancelReason");
+  if (_cr) {
+    _cr.value = "";
+    _cr.style.display = (o.status === "취소") ? "" : "none";
+    sel.onchange = function () { _cr.style.display = (sel.value === "취소") ? "" : "none"; };
+  }
   // 입고·무게·배송비
   document.getElementById("modalWeight").value = r.weight_kg != null ? r.weight_kg : "";
   document.getElementById("modalCenter").value = r.center_type === "sea" ? "sea" : "air";
@@ -1520,6 +1526,14 @@ document.getElementById("modalSave").addEventListener("click", async () => {
       rack_no: gv("modalRackNo"),
       customs_name: gv("modalCustomsName"),
     };
+    // 취소 사유별 환불 (품절=예치금·적립금 환불 / 단순변심=환불불가)
+    if (newStatus === "취소") {
+      const _cr = document.getElementById("modalCancelReason");
+      const _reason = _cr ? _cr.value : "";
+      if (prev.status !== "취소" && !_reason) { alert("취소 사유를 선택해주세요.\n· 품절(판매자 사유) → 예치금·적립금 환불\n· 단순변심(고객 사유) → 환불 불가"); return; }
+      if (_reason) fields.admin_memo = (fields.admin_memo ? fields.admin_memo + " " : "") + "[취소:" + _reason + (_reason === "품절" ? "·환불" : "·환불불가") + "]";
+      if (_reason === "품절") { fields.deposit_used = 0; fields.points_used = 0; } // 사용액 0 → 아래 자동정산이 잔액 복원(환불)
+    }
     o.status = newStatus;
     o.flag = fields.flag;
     Object.assign(o.raw, fields);
@@ -1537,8 +1551,8 @@ document.getElementById("modalSave").addEventListener("click", async () => {
         const depAdj = (Number(prev.raw.deposit_used) || 0) - (Number(fields.deposit_used) || 0); // 음수=추가차감 / 양수=환불
         const ptsAdj = (Number(prev.raw.points_used) || 0) - (Number(fields.points_used) || 0);
         try {
-          if (depAdj !== 0) { const nb = await window.OSS.adjustBalance(uid, "deposit", depAdj, "주문 " + o.no + " 예치금 정산", o.no); logAction(o, "예치금 " + (depAdj < 0 ? "차감 " : "환불 ") + Math.abs(depAdj).toLocaleString() + "원 (잔액 " + nb.toLocaleString() + ")"); }
-          if (ptsAdj !== 0) { const nb2 = await window.OSS.adjustBalance(uid, "points", ptsAdj, "주문 " + o.no + " 적립금 정산", o.no); logAction(o, "적립금 " + (ptsAdj < 0 ? "차감 " : "환불 ") + Math.abs(ptsAdj).toLocaleString() + "원 (잔액 " + nb2.toLocaleString() + ")"); }
+          if (depAdj !== 0) { const nb = await window.OSS.adjustBalance(uid, "deposit", depAdj, "주문 " + o.no + (depAdj > 0 ? " 환불" : " 예치금 차감"), o.no); logAction(o, "예치금 " + (depAdj < 0 ? "차감 " : "환불 ") + Math.abs(depAdj).toLocaleString() + "원 (잔액 " + nb.toLocaleString() + ")"); }
+          if (ptsAdj !== 0) { const nb2 = await window.OSS.adjustBalance(uid, "points", ptsAdj, "주문 " + o.no + (ptsAdj > 0 ? " 환불" : " 적립금 차감"), o.no); logAction(o, "적립금 " + (ptsAdj < 0 ? "차감 " : "환불 ") + Math.abs(ptsAdj).toLocaleString() + "원 (잔액 " + nb2.toLocaleString() + ")"); }
         } catch (be) { alert("회원 예치금/적립금 자동정산 실패: " + (be.message || be) + "\n(주문은 저장됐어요. 회원관리에서 수동으로 맞춰주세요.)"); }
       }
     } catch (err) {

@@ -930,6 +930,11 @@
       <div class="modal-status-select">
         <span style="font-size:14px;font-weight:700;">상태 변경:</span>
         <select id="modalStatus"></select>
+        <select id="modalCancelReason" title="취소 사유" style="display:none;height:34px;border:1px solid #f6c2c8;border-radius:6px;font-family:inherit;font-size:13px;padding:0 8px;background:#fff7f8;">
+          <option value="">취소 사유 선택…</option>
+          <option value="품절">품절·판매자사유 → 예치금/적립금 환불</option>
+          <option value="단순변심">고객 단순변심 → 환불 불가</option>
+        </select>
         <button class="btn btn-primary btn-small" id="modalSave">저장</button>
         <button class="btn btn-dark btn-small" id="modalClose">닫기</button>
         <button class="btn btn-small" id="modalDelete" style="background:#fff0f1;color:var(--red);border:1px solid #f6c2c8;margin-left:auto;">🗑 휴지통</button>
@@ -956,7 +961,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=23"></script>
-  <script src="admin.js?v=45"></script>
+  <script src="admin.js?v=46"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>
