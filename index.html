@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=48" />
+  <link rel="stylesheet" href="styles.css?v=52" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <style>
     .oh-wrap{max-width:1280px;margin:0 auto;padding:0 28px;color:#140F0B;}
@@ -53,7 +53,19 @@
     .oh-evt-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
     .oh-evt{display:block;height:300px;border-radius:20px;position:relative;overflow:hidden;text-decoration:none;}
     .oh-evt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-    @media(max-width:760px){.oh-hero-full{height:230px;}.oh-hero-carousel{height:200px;}.oh-arrow{width:38px;height:38px;font-size:22px;}.oh-evt-grid{grid-template-columns:1fr;}.oh-evt{height:190px;}}
+    @media(max-width:760px){
+      /* 모바일: 화면 꽉 차게(가장자리까지) + 배너 원본비율 그대로(잘림 없음) + 손가락 슬라이드 */
+      .oh-hero-full{height:auto;}
+      .oh-hero-full img{position:static;width:100%;height:auto;display:block;}
+      .oh-hero-carousel{height:auto;margin:0 -16px;width:auto;border-radius:0;}
+      .oh-hero-carousel .oh-slides{align-items:flex-start;}
+      .oh-hero-carousel .oh-slide{height:auto;}
+      .oh-hero-carousel .oh-slide img{position:static;width:100%;height:auto;display:block;}
+      .oh-arrow{width:34px;height:34px;font-size:20px;}
+      .oh-evt-grid{grid-template-columns:1fr;}
+      .oh-evt{height:auto;}
+      .oh-evt img{position:static;width:100%;height:auto;display:block;}
+    }
     .oh-quicks{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:34px 0;}
     .oh-quick{display:flex;flex-direction:column;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:24px 12px;text-decoration:none;box-shadow:0 8px 30px rgba(40,26,16,.07);transition:transform .12s;}
     .oh-quick:hover{transform:translateY(-3px);}
@@ -75,7 +87,7 @@
     .oh-feebar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;box-shadow:0 8px 30px rgba(40,26,16,.07);border-radius:20px;padding:20px 26px;}
     .oh-feebar b{font-size:16px;font-weight:900;}
     .oh-feebar small{display:block;font-size:12.5px;color:#8A7F76;font-weight:500;margin-top:3px;}
-    .oh-malls{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+    .oh-malls{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
     .oh-mall{background:#fff;border-radius:16px;padding:16px 10px;text-align:center;text-decoration:none;box-shadow:0 8px 30px rgba(40,26,16,.07);transition:transform .12s;}
     .oh-mall:hover{transform:translateY(-3px);}
     .oh-logo{position:relative;height:44px;margin-bottom:8px;border-radius:10px;overflow:hidden;}
@@ -93,7 +105,9 @@
     .oh-kk b{font-size:17px;font-weight:900;color:#5A4413;}.oh-kk small{display:block;font-size:12.5px;color:#8A6F2E;font-weight:500;margin-top:3px;}
     .oh-kk .oh-btn{background:#3A1D1D;color:#fff;}
     .oh-note{background:#FFF8E6;border:1px solid #F3E2B0;border-radius:14px;padding:13px 18px;font-size:12.5px;color:#8A6D2A;margin:22px 0 0;font-weight:500;}
-    #reviewGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    #reviewGrid{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px;}
+    #reviewGrid::-webkit-scrollbar{display:none;}
+    #reviewGrid>.review-card{flex:0 0 300px;scroll-snap-align:start;}
     @media(max-width:860px){
       .oh-wrap{padding:0 16px;}
       .oh-sec{padding:15px 0;}
@@ -108,7 +122,9 @@
       .oh-quicks{grid-template-columns:repeat(2,1fr);}
       .oh-svc{grid-template-columns:1fr;}
       .oh-malls{grid-template-columns:repeat(3,1fr);}
-      .oh-trust,.oh-faq,#reviewGrid{grid-template-columns:1fr;}
+      .oh-trust,.oh-faq{grid-template-columns:1fr;}
+      #reviewGrid{margin:0 -16px;padding:0 16px 6px;}
+      #reviewGrid>.review-card{flex:0 0 82%;}
       .oh-feebar,.oh-kk{flex-direction:column;align-items:flex-start;}
       .oh-how{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px;}
       .oh-how .oh-sep{display:none;}
@@ -120,7 +136,7 @@
   </style>
 </head>
 <body>
-  <header class="osshead" id="top"><div class="osshead-in"><a class="osshead-logo" href="index.html">OSSohayo</a><nav class="osshead-nav"><a href="index.html" class="on">홈</a><a href="order.html">구매대행 신청</a><a href="delivery.html">배송대행 신청</a><a href="notice.html">공지사항</a><a href="guide.html">이용가이드</a><a href="order-lookup.html">주문조회</a></nav><div class="osshead-icons"><a class="osshead-ic" href="notice.html#search" aria-label="검색"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></a><div class="osshead-acct"><button class="osshead-ic" type="button" aria-label="계정"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg></button><div class="osshead-menu"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="order-lookup.html">주문조회</a><a href="mypage.html">마이페이지</a></div></div></div></div></header>
+  <header class="osshead" id="top"><div class="osshead-in"><a class="osshead-logo" href="index.html">OSSohayo</a><nav class="osshead-nav"><a href="index.html" class="on">홈</a><a href="order.html">구매대행 신청</a><a href="delivery.html">배송대행 신청</a><a href="notice.html">공지사항</a><a href="community.html">커뮤니티</a><a href="guide.html">이용가이드</a><a href="order-lookup.html">주문조회</a></nav><div class="osshead-icons"><a class="osshead-ic" href="notice.html#search" aria-label="검색"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></a><div class="osshead-acct"><button class="osshead-ic" type="button" aria-label="계정"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg></button><div class="osshead-menu"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="order-lookup.html">주문조회</a><a href="mypage.html">마이페이지</a></div></div></div></div></header>
 
   <main class="oh-wrap">
 
@@ -136,11 +152,29 @@
       <button class="oh-arrow next" id="heroNext" type="button" aria-label="다음 배너">›</button>
       <div class="oh-dots" id="heroDots"></div>
     </div>
+    <script>
+      /* 첫 페인트 전에 캐시된 배너(첫 장 base64)를 즉시 렌더 → 웹·폰 모두 깜빡임 제거 */
+      (function(){
+        try{
+          var b=JSON.parse(localStorage.getItem('oss_banners_v1')||'null');
+          if(!(b&&b.length)) return;
+          var h='';
+          for(var i=0;i<b.length;i++){
+            var d=b[i]&&b[i].data, u=b[i]&&b[i].url;
+            var s=(d&&/^data:image\//.test(d))?d:(/^https?:\/\//i.test(u||'')?u:'');
+            if(!s) continue;
+            var lk=(b[i]&&b[i].link)||'order.html'; if(!/^(https?:\/\/|[a-z0-9_\-]+\.html)/i.test(lk)) lk='order.html';
+            h+='<a class="oh-slide" href="'+lk.replace(/"/g,'&quot;')+'"><img src="'+s.replace(/"/g,'&quot;')+'" alt="배너" onerror="this.remove()"></a>';
+          }
+          if(h){ var el=document.getElementById('heroSlides'); if(el) el.innerHTML=h; }
+        }catch(e){}
+      })();
+    </script>
 
     <!-- 빠른메뉴 -->
     <div class="oh-quicks">
-      <a class="oh-quick" href="guide.html"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></span><b>국제배송 요금안내</b></a>
-      <a class="oh-quick" href="signup.html"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><polyline points="8.2 13 7 22 12 19 17 22 15.8 13"></polyline></svg></span><b>회원등급 및 혜택</b></a>
+      <a class="oh-quick" href="guide.html#guide-fee"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></span><b>국제배송 요금안내</b></a>
+      <a class="oh-quick" href="guide.html#guide-grade"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><polyline points="8.2 13 7 22 12 19 17 22 15.8 13"></polyline></svg></span><b>회원등급 및 혜택</b></a>
       <a class="oh-quick" href="#fee"><span class="ic"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"></rect><line x1="8" y1="7" x2="16" y2="7"></line><line x1="8" y1="11" x2="8.01" y2="11"></line><line x1="12" y1="11" x2="12.01" y2="11"></line><line x1="16" y1="11" x2="16.01" y2="11"></line><line x1="8" y1="15" x2="8.01" y2="15"></line></svg></span><b>예상비용 계산</b></a>
       <a class="oh-quick" href="guide.html"><span class="ic"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span><b>오쓰 이용안내</b></a>
     </div>
@@ -148,16 +182,34 @@
 
     <!-- 서비스 -->
     <section class="oh-sec" style="padding-top:0;">
-      <div class="oh-evt-grid">
-        <a class="oh-ph oh-evt" href="order.html"><b>이벤트 서브배너 1</b><span>1200 × 600 px · img/event-1.png</span><img src="img/event-1.png" alt="이벤트 배너 1" onerror="this.remove()"></a>
-        <a class="oh-ph oh-evt" href="delivery.html"><b>이벤트 서브배너 2</b><span>1200 × 600 px · img/event-2.png</span><img src="img/event-2.png" alt="이벤트 배너 2" onerror="this.remove()"></a>
+      <div class="oh-evt-grid" id="evtGrid">
+        <a class="oh-ph oh-evt" href="order.html"><b>이벤트 서브배너 1</b><span>1000 × 500 px · 관리자 ▸ 배너관리</span><img src="img/event-1.png" alt="이벤트 배너 1" onerror="this.remove()"></a>
+        <a class="oh-ph oh-evt" href="delivery.html"><b>이벤트 서브배너 2</b><span>1000 × 500 px · 관리자 ▸ 배너관리</span><img src="img/event-2.png" alt="이벤트 배너 2" onerror="this.remove()"></a>
       </div>
+      <script>
+        /* 이벤트 서브배너도 첫 페인트 전에 캐시(첫 장 base64) 즉시 렌더 → 웹·폰 깜빡임 제거 */
+        (function(){
+          try{
+            var b=JSON.parse(localStorage.getItem('oss_evt_banners_v1')||'null');
+            if(!(b&&b.length)) return;
+            var h='';
+            for(var i=0;i<b.length;i++){
+              var d=b[i]&&b[i].data, u=b[i]&&b[i].url;
+              var s=(d&&/^data:image\//.test(d))?d:(/^https?:\/\//i.test(u||'')?u:'');
+              if(!s) continue;
+              var lk=(b[i]&&b[i].link)||'order.html'; if(!/^(https?:\/\/|[a-z0-9_\-]+\.html)/i.test(lk)) lk='order.html';
+              h+='<a class="oh-evt" href="'+lk.replace(/"/g,'&quot;')+'"><img src="'+s.replace(/"/g,'&quot;')+'" alt="이벤트 배너" onerror="this.remove()"></a>';
+            }
+            if(h){ var el=document.getElementById('evtGrid'); if(el) el.innerHTML=h; }
+          }catch(e){}
+        })();
+      </script>
     </section>
 
 
     <!-- 고객 후기 (실제 후기 #reviewGrid — script.js 가 채움) -->
     <section class="oh-sec" style="padding-top:4px;">
-      <div class="oh-sec-h"><h2>고객 후기 <small>실제 이용 후기예요</small></h2><a href="mypage.html#reviews">후기 작성하기 ›</a></div>
+      <div class="oh-sec-h"><h2>고객 후기 <small>실제 이용 후기예요</small></h2></div>
       <div class="review-grid" id="reviewGrid"></div>
     </section>
 
@@ -171,12 +223,10 @@
         <a class="oh-mall" href="https://www.amazon.co.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-amazonjp.png" alt="아마존JP" loading="lazy" onerror="this.remove()"></div><p>아마존JP</p><span>빠른배송</span></a>
         <a class="oh-mall" href="https://zozo.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-zozo.png" alt="ZOZOTOWN" loading="lazy" onerror="this.remove()"></div><p>ZOZOTOWN</p><span>패션</span></a>
         <a class="oh-mall" href="https://www.qoo10.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-qoo10.png" alt="큐텐" loading="lazy" onerror="this.remove()"></div><p>큐텐</p><span>해외직구</span></a>
-        <a class="oh-mall" href="https://www.uniqlo.com/jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-uniqlo.png" alt="유니클로" loading="lazy" onerror="this.remove()"></div><p>유니클로</p><span>의류</span></a>
-        <a class="oh-mall" href="https://www.montbell.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-montbell.png" alt="몽벨" loading="lazy" onerror="this.remove()"></div><p>몽벨</p><span>아웃도어</span></a>
         <a class="oh-mall" href="https://www.gu-global.com/jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-gu.png" alt="지유 GU" loading="lazy" onerror="this.remove()"></div><p>지유(GU)</p><span>의류</span></a>
         <a class="oh-mall" href="https://www.beams.co.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-beams.png" alt="빔즈" loading="lazy" onerror="this.remove()"></div><p>빔즈</p><span>셀렉트샵</span></a>
-        <a class="oh-mall" href="https://www.daytona-park.com/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-daytona.png" alt="데이토나" loading="lazy" onerror="this.remove()"></div><p>데이토나</p><span>셀렉트샵</span></a>
-        <a class="oh-mall" href="https://www.muji.com/jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-muji.png" alt="무지 MUJI" loading="lazy" onerror="this.remove()"></div><p>무지(MUJI)</p><span>생활용품</span></a>
+        <a class="oh-mall" href="https://www.animate-onlineshop.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-animate.png" alt="애니메이트" loading="lazy" onerror="this.remove()"></div><p>애니메이트</p><span>애니·굿즈</span></a>
+        <a class="oh-mall" href="https://www.amiami.jp/" target="_blank" rel="noopener"><div class="oh-logo"><span class="lc">로고</span><img src="img/mall-amiami.png" alt="아미아미" loading="lazy" onerror="this.remove()"></div><p>아미아미</p><span>피규어·모형</span></a>
       </div>
     </section>
 
@@ -241,8 +291,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=21"></script>
-  <script src="script.js?v=39"></script>
+  <script src="supabase.js?v=26"></script>
+  <script src="script.js?v=47"></script>
 
   <!-- 회원가입 쿠폰 팝업 (홈 첫 진입 1회) -->
   <style>
@@ -304,24 +354,58 @@
       document.getElementById('heroPrev').addEventListener('click',function(){ prev(); restart(); });
       car.addEventListener('mouseenter',function(){ clearInterval(timer); });
       car.addEventListener('mouseleave',start);
+      // 터치 스와이프(손가락으로 넘기기)
+      var _sx=0,_sdx=0,_sw=false;
+      track.addEventListener('touchstart',function(e){ _sx=e.touches[0].clientX; _sdx=0; _sw=true; clearInterval(timer); },{passive:true});
+      track.addEventListener('touchmove',function(e){ if(_sw) _sdx=e.touches[0].clientX-_sx; },{passive:true});
+      track.addEventListener('touchend',function(){ if(_sw&&Math.abs(_sdx)>40){ if(_sdx<0) next(); else prev(); } _sw=false; restart(); });
       go(0); start();
     }
-    // 관리자가 올린 배너(settings.banners)가 있으면 자리표시 대신 표시한 뒤 캐러셀 시작
+    function escLocalB(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function safeUrlLocalB(u){ u=String(u==null?'':u).trim(); if(/^https?:\/\//i.test(u)) return u.replace(/["'<>]/g,encodeURIComponent); if(/^[a-z0-9_\-]+\.html(\?|#|$)/i.test(u)) return u.replace(/["'<>]/g,encodeURIComponent); return ''; }
+    // 배너 이미지를 폰에 통째(base64)로 저장 → 다음 방문 땐 네트워크 없이 즉시 표시(깜빡임 0). 관리자 변경도 그대로 유지.
+    function cacheBannersB64(key, list){
+      try{
+        if(!(Array.isArray(list)&&list.length)){ localStorage.setItem(key, JSON.stringify(list||[])); return; }
+        var out=list.map(function(b){ return {url:b.url, link:b.link, alt:b.alt}; });
+        function save(){ try{ localStorage.setItem(key, JSON.stringify(out)); }catch(e){ out.forEach(function(o){ delete o.data; }); try{ localStorage.setItem(key, JSON.stringify(out)); }catch(e2){} } }
+        // 로딩 시 보이는 '첫 배너'만 base64로 저장 → 깜빡임 제거 + localStorage 용량 보호. 나머지는 주소(브라우저 캐시) 사용.
+        var first=out[0], u=first&&first.url;
+        if(!/^https?:\/\//i.test(String(u||''))){ save(); return; }
+        fetch(u).then(function(r){ return r.blob(); }).then(function(blob){
+          if(!blob || blob.size>1300000){ save(); return; }   // 1.3MB↑ 큰 사진은 생략(용량 보호)
+          var fr=new FileReader(); fr.onload=function(){ first.data=fr.result; save(); }; fr.onerror=save; fr.readAsDataURL(blob);
+        }).catch(save);
+      }catch(e){ try{ localStorage.setItem(key, JSON.stringify(list||[])); }catch(e2){} }
+    }
+    function bannerSrc(b){ return (b && b.data && /^data:image\//.test(b.data)) ? b.data : safeUrlLocalB(b && b.url); }
+    // 관리자가 올린 메인 배너 — 캐시(base64)로 즉시 렌더 후 네트워크로 갱신
     (function initHero(){
-      function escLocal(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-      function safeUrlLocal(u){ u=String(u==null?'':u).trim(); if(/^https?:\/\//i.test(u)) return u.replace(/["'<>]/g,encodeURIComponent); if(/^[a-z0-9_\-]+\.html(\?|#|$)/i.test(u)) return u.replace(/["'<>]/g,encodeURIComponent); return ''; }
-      function done(){ heroCarousel(); }
+      function buildHtml(banners){ if(!(Array.isArray(banners)&&banners.length)) return ''; return banners.map(function(b){ var src=bannerSrc(b); if(!src) return ''; var href=safeUrlLocalB(b.link)||'order.html'; var alt=escLocalB(b.alt||'배너'); return '<a class="oh-slide" href="'+href+'"><img src="'+src+'" alt="'+alt+'" onerror="this.remove()"></a>'; }).join(''); }
+      var slides=document.getElementById('heroSlides'); var started=false;
+      // 1) 캐시 즉시 렌더 (첫 페인트 전 → 자리표시·이미지 깜빡임 제거)
+      try { var c=buildHtml(JSON.parse(localStorage.getItem('oss_banners_v1')||'null')); if(c){ slides.innerHTML=c; heroCarousel(); started=true; } } catch(e){}
+      // 2) 네트워크 최신본 → 렌더(처음만) + 이미지 base64로 캐시
       try {
         if(window.OSS && OSS.getSetting){
           OSS.getSetting('banners').then(function(banners){
-            if(Array.isArray(banners) && banners.length){
-              var html=banners.map(function(b){ var src=safeUrlLocal(b.url); if(!src) return ''; var href=safeUrlLocal(b.link)||'order.html'; var alt=escLocal(b.alt||'배너'); return '<a class="oh-slide" href="'+href+'"><img src="'+src+'" alt="'+alt+'" onerror="this.remove()"></a>'; }).join('');
-              if(html) document.getElementById('heroSlides').innerHTML=html;
-            }
-            done();
-          }).catch(done);
-        } else { done(); }
-      } catch(e){ done(); }
+            if(!started){ var h=buildHtml(banners); if(h) slides.innerHTML=h; heroCarousel(); }
+            cacheBannersB64('oss_banners_v1', banners);
+          }).catch(function(){ if(!started) heroCarousel(); });
+        } else if(!started){ heroCarousel(); }
+      } catch(e){ if(!started) heroCarousel(); }
+    })();
+    // 이벤트 서브배너 — 동일하게 base64 캐시
+    (function initEvtBanners(){
+      function buildHtml(list){ if(!(Array.isArray(list)&&list.length)) return ''; return list.map(function(b){ var src=bannerSrc(b); if(!src) return ''; var href=safeUrlLocalB(b.link)||'order.html'; var alt=escLocalB(b.alt||'이벤트 배너'); return '<a class="oh-evt" href="'+href+'"><img src="'+src+'" alt="'+alt+'" onerror="this.remove()"></a>'; }).join(''); }
+      var grid=document.getElementById('evtGrid'); if(!grid) return;
+      var started=false;
+      try { var c=buildHtml(JSON.parse(localStorage.getItem('oss_evt_banners_v1')||'null')); if(c){ grid.innerHTML=c; started=true; } } catch(e){}
+      if(!(window.OSS && OSS.getSetting)) return;
+      OSS.getSetting('event_banners').then(function(list){
+        if(!started){ var h=buildHtml(list); if(h) grid.innerHTML=h; }
+        cacheBannersB64('oss_evt_banners_v1', list);
+      }).catch(function(){});
     })();
   </script>
 </body>

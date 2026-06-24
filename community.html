@@ -1,0 +1,595 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>커뮤니티 | OSS(オッス)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=52" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <style>
+    /* ─── 커뮤니티 사이드바 = 공지/이용가이드와 동일(cs-sidebar 재사용) ─── */
+    /* 게시판 링크 옆 건수 배지 */
+    .cs-sidebar a .cnt { float:right; background:#F0E6DF; color:#c07800; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; min-width:18px; text-align:center; }
+    .cs-sidebar a.active .cnt { background:rgba(255,255,255,.28); color:#fff; }
+
+    /* ─── 메인 콘텐츠 ─── */
+    .cm-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .cm-head h2 { font-size:19px; font-weight:900; color:var(--navy,#1b2330); }
+    .cm-write-btn { background:var(--orange,#F46A2C); color:#fff; border:none; border-radius:8px; padding:9px 18px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .cm-write-btn:hover { opacity:.88; }
+    /* 게시판 안내 노트(비밀게시판·등급업 등) */
+    .cm-board-note { background:#FFF6EF; border:1px solid #F6C99B; border-radius:10px; padding:11px 14px; font-size:13px; line-height:1.6; color:#7a4a1f; margin-bottom:16px; }
+    .cm-board-note b { color:#c0571a; }
+    /* 비로그인 안내 */
+    .cm-login-hint { background:#F7F8FA; border:1px dashed #cfd6df; border-radius:10px; padding:14px 16px; font-size:13.5px; color:var(--muted,#8b95a1); margin-bottom:16px; line-height:1.6; }
+    .cm-login-hint a { color:var(--orange,#F46A2C); font-weight:700; }
+    /* 글쓰기 폼 상단 힌트 */
+    .cm-form-hint { font-size:13px; color:var(--muted,#8b95a1); line-height:1.6; margin:-8px 0 18px; }
+    .cm-form-hint:empty { display:none; }
+
+    /* ─── 게시글 카드 ─── */
+    .cm-list { display:flex; flex-direction:column; gap:1px; background:#EFE3DA; border:1.5px solid #EFE3DA; border-radius:12px; overflow:hidden; }
+    .cm-item { background:#fff; padding:14px 18px; cursor:pointer; transition:.1s; display:grid; grid-template-columns:1fr auto; gap:6px; align-items:start; }
+    .cm-item:hover { background:#FFF8F4; }
+    .cm-item-top { display:flex; align-items:center; gap:7px; margin-bottom:4px; flex-wrap:wrap; }
+    .cm-badge { font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; }
+    .cm-badge-pub  { background:#E8F4FF; color:#1e6fc8; }
+    .cm-badge-prv  { background:#F3F3F3; color:#888; }
+    .cm-badge-pend { background:#FFF3E0; color:#c07800; }
+    .cm-badge-done { background:#E3F6EC; color:#16843a; }
+    .cm-title { font-size:15px; font-weight:700; color:var(--navy,#1b2330); }
+    .cm-title.lock::before { content:"🔒 "; }
+    .cm-preview { font-size:13px; color:#999; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:500px; }
+    .cm-meta { font-size:12px; color:#bbb; margin-top:5px; }
+    .cm-photos-thumb { display:flex; gap:4px; margin-top:7px; flex-wrap:wrap; }
+    .cm-photos-thumb img { width:54px; height:54px; object-fit:cover; border-radius:6px; border:1px solid #EFE3DA; }
+    .cm-date { font-size:12px; color:#ccc; white-space:nowrap; }
+    .cm-empty { text-align:center; padding:56px 0; color:#ccc; font-size:15px; background:#fff; }
+
+    /* ─── 상세 모달 ─── */
+    .cm-modal-back { position:fixed; inset:0; background:rgba(0,0,0,.46); z-index:300; display:flex; align-items:center; justify-content:center; padding:16px; }
+    .cm-modal-back[hidden] { display:none; }
+    .cm-modal { background:#fff; border-radius:16px; max-width:680px; width:100%; max-height:90vh; overflow-y:auto; padding:28px; }
+    .cm-modal h3 { font-size:19px; font-weight:900; margin-bottom:6px; }
+    .cm-modal-meta { font-size:12.5px; color:#aaa; margin-bottom:16px; }
+    .cm-modal-content { font-size:15px; line-height:1.78; color:#333; white-space:pre-wrap; }
+    .cm-modal-photos { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+    .cm-modal-photos img { max-width:200px; max-height:220px; object-fit:cover; border-radius:8px; border:1px solid #eee; cursor:pointer; }
+    .cm-reply-box { background:#FFF8F2; border:1px solid #F6C99B; border-radius:10px; padding:16px; margin-top:20px; }
+    .cm-reply-box h4 { font-size:13px; font-weight:700; color:#c07800; margin-bottom:8px; }
+    .cm-reply-box p { font-size:14px; color:#555; white-space:pre-wrap; }
+    .cm-modal-close { float:right; background:none; border:none; font-size:22px; cursor:pointer; color:#aaa; line-height:1; }
+    .cm-admin-actions { display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+    .cm-admin-actions button { padding:7px 14px; border:none; border-radius:6px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .btn-approve { background:#16a34a; color:#fff; }
+    .btn-reject  { background:#dc2626; color:#fff; }
+    .btn-reply   { background:var(--orange,#F46A2C); color:#fff; }
+
+    /* ─── 글쓰기 모달 ─── */
+    .cm-write-modal { background:#fff; border-radius:16px; max-width:600px; width:100%; padding:28px; max-height:90vh; overflow-y:auto; }
+    .cm-write-modal h3 { font-size:18px; font-weight:900; margin-bottom:20px; }
+    .cm-field { margin-bottom:16px; }
+    .cm-field label { display:block; font-size:13px; font-weight:700; color:#555; margin-bottom:6px; }
+    .cm-field input, .cm-field textarea, .cm-field select { width:100%; padding:10px 13px; border:1.5px solid #EFE3DA; border-radius:8px; font-family:inherit; font-size:14px; box-sizing:border-box; }
+    .cm-field textarea { height:140px; resize:vertical; }
+    .cm-field select { background:#fff; }
+    .cm-vis-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .cm-vis-opt { position:absolute; opacity:0; pointer-events:none; }
+    .cm-vis-label { display:flex; flex-direction:column; align-items:center; gap:5px; padding:15px 10px; border:2px solid #EFE3DA; border-radius:10px; cursor:pointer; text-align:center; transition:.15s; }
+    .cm-vis-label .vis-icon { font-size:24px; line-height:1; }
+    .cm-vis-label .vis-name { font-size:14.5px; font-weight:700; color:var(--text,#333); }
+    .cm-vis-label .vis-desc { font-size:12px; font-weight:400; color:var(--muted,#8b95a1); line-height:1.4; }
+    .cm-vis-opt:checked + .cm-vis-label { border-color:var(--orange,#F46A2C); background:#FFF8F4; }
+    .cm-vis-opt:checked + .cm-vis-label .vis-name { color:var(--orange,#F46A2C); }
+    .cm-photo-list { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .cm-photo-item { position:relative; }
+    .cm-photo-item img { width:72px; height:72px; object-fit:cover; border-radius:8px; border:1px solid #EFE3DA; }
+    .cm-photo-item .rm { position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:#dc2626; color:#fff; border:none; font-size:13px; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center; }
+    .cm-submit { width:100%; padding:13px; background:var(--orange,#F46A2C); color:#fff; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; margin-top:6px; }
+    .cm-submit:disabled { opacity:.6; cursor:default; }
+    .cm-msg { font-size:13px; margin-top:10px; text-align:center; min-height:18px; }
+
+    @media(max-width:640px){
+      .cm-modal, .cm-write-modal { padding:18px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="osshead" id="top"><div class="osshead-in"><a class="osshead-logo" href="index.html">OSSohayo</a><nav class="osshead-nav"><a href="index.html">홈</a><a href="order.html">구매대행 신청</a><a href="delivery.html">배송대행 신청</a><a href="notice.html">공지사항</a><a href="community.html" class="on">커뮤니티</a><a href="guide.html">이용가이드</a><a href="order-lookup.html">주문조회</a></nav><div class="osshead-icons"><a class="osshead-ic" href="notice.html#search" aria-label="검색"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></a><div class="osshead-acct"><button class="osshead-ic" type="button" aria-label="계정"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg></button><div class="osshead-menu"><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="order-lookup.html">주문조회</a><a href="mypage.html">마이페이지</a></div></div></div></div></header>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>커뮤니티</h1>
+      <p>이용후기, 등급업 팁, 사업자 정보, 1:1 문의를 나눠보세요.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container cs-layout">
+
+      <!-- ─── 커뮤니티 사이드바 (공지/이용가이드와 동일 디자인) ─── -->
+      <aside class="cs-sidebar" data-cs="community">
+        <p class="cs-sidebar-title">커뮤니티</p>
+        <a href="#review"  class="active" data-board="review">후기 게시판 <span class="cnt" id="cnt-review">0</span></a>
+        <a href="#grade"   data-board="grade">타사이트 등급업 <span class="cnt" id="cnt-grade">0</span></a>
+        <a href="#biz"     data-board="biz">사업자 게시판 <span class="cnt" id="cnt-biz">0</span></a>
+        <a href="#contact" data-board="contact">1:1 문의 <span class="cnt" id="cnt-contact">0</span></a>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.6;">
+          <p style="margin:0 0 9px;"><b style="color:var(--text);">상담시간</b><br>평일 10:00 ~ 22:00 <small>(일본시간)</small></p>
+          <p style="margin:0;"><b style="color:var(--text);">카카오톡</b><br><a href="http://pf.kakao.com/_srxlxfX/chat" target="_blank" rel="noopener" style="color:var(--orange,#F46A2C);font-weight:700;">@ossohayo</a></p>
+        </div>
+      </aside>
+
+      <!-- ─── 게시판 콘텐츠 ─── -->
+      <div class="cs-content">
+        <div class="cm-head">
+          <h2 id="boardTitle">후기 게시판</h2>
+          <button class="cm-write-btn" id="writeBtn" type="button" style="display:none;">글쓰기</button>
+        </div>
+        <div class="cm-board-note" id="boardNote" hidden></div>
+        <div class="cm-login-hint" id="loginHint" hidden></div>
+        <div class="cm-list" id="postList">
+          <div class="cm-empty">불러오는 중...</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 푸터 ─── -->
+  <footer class="site-footer">
+    <div class="footer-biz" id="footer-biz-info"></div>
+    <div class="container footer-inner">
+      <div><p class="footer-logo">OSS <small>オッス</small></p><p class="footer-desc">일본 현지인 구매대행 배대지</p></div>
+      <div class="footer-contact">
+        <p><i data-lucide="mail" class="ico-inline"></i> ossohayo@gmail.com</p>
+        <p><i data-lucide="message-circle" class="ico-inline"></i> 카카오톡: @ossohayo</p>
+        <p><i data-lucide="clock" class="ico-inline"></i> 평일 10:00 ~ 22:00 (일본시간)</p>
+      </div>
+    </div>
+    <div class="footer-bottom"><div class="container">© 2026 OSS. All rights reserved.</div></div>
+  </footer>
+
+  <!-- ─── 글 상세 모달 ─── -->
+  <div class="cm-modal-back" id="detailModal" hidden>
+    <div class="cm-modal" id="detailBox">
+      <button class="cm-modal-close" id="detailClose" type="button">✕</button>
+      <span class="cm-badge" id="detailBadge" style="display:inline-block;margin-bottom:10px;"></span>
+      <h3 id="detailTitle"></h3>
+      <div class="cm-modal-meta" id="detailMeta"></div>
+      <div class="cm-modal-content" id="detailContent"></div>
+      <div class="cm-modal-photos" id="detailPhotos"></div>
+      <div class="cm-reply-box" id="detailReply" hidden>
+        <h4>관리자 답변</h4>
+        <p id="detailReplyText"></p>
+        <p id="detailReplyDate" style="font-size:12px;color:#aaa;margin-top:6px;"></p>
+      </div>
+      <!-- 작성자 본인 전용 (자기 글만 수정·삭제) -->
+      <div class="cm-admin-actions" id="ownerActions" hidden>
+        <button class="btn-reply"  id="btnEdit"   type="button">✏ 수정</button>
+        <button class="btn-reject" id="btnDelete" type="button">삭제</button>
+      </div>
+      <!-- 관리자 전용 -->
+      <div class="cm-admin-actions" id="adminActions" hidden>
+        <button class="btn-approve" id="btnApprove" type="button">승인 (공개)</button>
+        <button class="btn-reject"  id="btnReject"  type="button">비공개 처리</button>
+        <button class="btn-reply"   id="btnReply"   type="button">답변 달기</button>
+      </div>
+      <div id="replyForm" hidden style="margin-top:12px;">
+        <textarea id="replyText" rows="4" placeholder="답변 내용을 입력하세요." style="width:100%;padding:10px;border:1.5px solid #EFE3DA;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;"></textarea>
+        <button type="button" id="replySubmit" style="margin-top:8px;padding:8px 20px;background:var(--orange,#F46A2C);color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-family:inherit;">답변 저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 글쓰기 모달 ─── -->
+  <div class="cm-modal-back" id="writeModal" hidden>
+    <div class="cm-write-modal">
+      <button class="cm-modal-close" id="writeClose" type="button">✕</button>
+      <h3 id="writeBoardLabel">후기 쓰기</h3>
+      <p class="cm-form-hint" id="wHint"></p>
+
+      <!-- 문의유형 (1:1 문의 전용) -->
+      <div class="cm-field" id="wTypeField" hidden>
+        <label>문의 유형</label>
+        <select id="wType">
+          <option value="배송/통관">배송/통관 문의</option>
+          <option value="결제">결제 문의</option>
+          <option value="취소/환불">취소/환불 문의</option>
+          <option value="구매대행">구매대행 문의</option>
+          <option value="아이디/비밀번호 찾기">아이디/비밀번호 찾기</option>
+          <option value="기타">기타 문의</option>
+        </select>
+      </div>
+
+      <!-- 이름 (1:1 문의) -->
+      <div class="cm-field" id="wNameField" hidden>
+        <label>이름</label>
+        <input id="wName" type="text" placeholder="성함" maxlength="30" />
+      </div>
+
+      <!-- 연락처 (1:1 문의·사업자) -->
+      <div class="cm-field" id="wPhoneField" hidden>
+        <label>연락처 <span id="wPhoneOpt" style="font-weight:400;color:#aaa;"></span></label>
+        <input id="wPhone" type="tel" placeholder="답변 받으실 휴대폰 번호" maxlength="20" />
+      </div>
+
+      <!-- 제목 -->
+      <div class="cm-field" id="wTitleField">
+        <label>제목 *</label>
+        <input id="wTitle" type="text" placeholder="제목을 입력하세요." maxlength="100" />
+      </div>
+
+      <!-- 주문번호 (후기·1:1, 선택) -->
+      <div class="cm-field" id="wOrderField" hidden>
+        <label>주문번호 <span style="font-weight:400;color:#aaa;">(있으면)</span></label>
+        <input id="wOrderNo" type="text" placeholder="예: OSS-260601-XXXX" />
+      </div>
+
+      <!-- 내용 -->
+      <div class="cm-field">
+        <label>내용 *</label>
+        <textarea id="wContent" placeholder="내용을 입력하세요."></textarea>
+      </div>
+
+      <!-- 공개 범위: 전체공개 / 비밀글 (후기 전용) -->
+      <div class="cm-field" id="wVisField">
+        <label>공개 범위</label>
+        <div class="cm-vis-row">
+          <div>
+            <input class="cm-vis-opt" type="radio" name="wVis" id="visPublic" value="public" checked />
+            <label class="cm-vis-label" for="visPublic">
+              <span class="vis-icon">🌐</span>
+              <span class="vis-name">전체공개</span>
+              <span class="vis-desc">모든 방문자에게 노출</span>
+            </label>
+          </div>
+          <div>
+            <input class="cm-vis-opt" type="radio" name="wVis" id="visPrivate" value="private" />
+            <label class="cm-vis-label" for="visPrivate">
+              <span class="vis-icon">🔒</span>
+              <span class="vis-name">비밀글</span>
+              <span class="vis-desc">나와 관리자만 볼 수 있어요</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 사진 첨부 (후기·등급업·사업자) -->
+      <div class="cm-field" id="wPhotoField">
+        <label>사진 첨부 <span style="font-weight:400;color:#aaa;">(선택, 최대 5장)</span></label>
+        <input type="file" id="wPhotoFile" accept="image/*" multiple style="display:none;" />
+        <button type="button" id="wPhotoBtn" style="padding:7px 14px;border:1.5px solid #EFE3DA;border-radius:7px;background:#fff;cursor:pointer;font-size:13px;font-family:inherit;">사진 선택</button>
+        <div class="cm-photo-list" id="wPhotoList"></div>
+      </div>
+
+      <p class="cm-msg" id="wMsg"></p>
+      <button class="cm-submit" id="wSubmit" type="button">등록하기</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=26"></script>
+  <script src="script.js?v=47"></script>
+  <script>
+  (async function(){
+    function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function maskName(n){ n=String(n||""); if(n.length<=1) return n+"*"; return n[0]+"*".repeat(n.length-1); }
+    function kstD(s){ return (window.OSS&&OSS.kstDate)?OSS.kstDate(s):String(s||"").slice(0,10); }
+    function relDate(s){ const d=new Date(s),now=new Date(),diff=now-d; if(diff<60000) return "방금"; if(diff<3600000) return Math.floor(diff/60000)+"분 전"; if(diff<86400000) return Math.floor(diff/3600000)+"시간 전"; return kstD(s); }
+    // 배경 클릭 시 닫기 — 단, 모달 안에서 드래그 시작(텍스트 선택)했다가 바깥에서 놓으면 닫지 않음
+    function bindBackdropClose(m){ if(!m) return; let down=false; m.addEventListener("mousedown",(e)=>{ down=(e.target===m); }); m.addEventListener("click",(e)=>{ if(e.target===m && down) m.hidden=true; }); }
+
+    const KAKAO_URL = "http://pf.kakao.com/_srxlxfX/chat";
+    const BOARD_LABELS = { review:"후기 게시판", grade:"타사이트 등급업", biz:"사업자 게시판", contact:"1:1 문의" };
+    const WRITE_LABELS = { review:"후기 쓰기", grade:"등급업 요청하기", biz:"사업자 문의하기", contact:"1:1 문의하기" };
+    const VIS_LABELS   = { public:"전체공개", private:"비밀글" };
+    const VIS_BADGE    = { public:"cm-badge-pub", private:"cm-badge-prv" };
+
+    // 게시판별 폼 구성. forcedVis=강제 공개범위, autoTitle=자동 제목, phoneReq=연락처 필수
+    const BOARD_CFG = {
+      review:  { type:false, name:false, phone:false, title:true,  order:true,  vis:true,  photo:true,  forcedVis:null,        autoTitle:null,            phoneReq:false, hint:"받으신 상품·서비스 후기를 남겨주세요. 전체공개로 올리면 다른 분들께도 도움이 돼요." },
+      grade:   { type:false, name:false, phone:false, title:false, order:false, vis:false, photo:true,  forcedVis:"private",   autoTitle:"등급업 요청합니다", phoneReq:false, hint:"타 구매대행 사이트(사토리 등)에서 등급을 올리고 싶을 때 요청하세요. 어느 사이트·현재 등급·목표를 적어주세요." },
+      biz:     { type:false, name:false, phone:true,  title:true,  order:false, vis:false, photo:true,  forcedVis:"private",   autoTitle:null,            phoneReq:false, hint:"사업자 신청 시에는 사업자등록증과 이메일이 필요합니다." },
+      contact: { type:true,  name:true,  phone:true,  title:true,  order:true,  vis:false, photo:false, forcedVis:"private",   autoTitle:null,            phoneReq:true,  hint:"궁금한 점을 남겨주시면 확인 후 빠르게 답변드려요. (자주 묻는 질문은 FAQ를 먼저 확인해 주세요)" },
+    };
+    const ALWAYS_PRIVATE = new Set(["grade","biz","contact"]); // 목록에서 항상 비밀글로 표시
+
+    const VALID_BOARDS = new Set(["review","grade","biz","contact"]);
+    function hashBoard(){ const h=(location.hash||"").replace("#",""); return VALID_BOARDS.has(h)?h:"review"; }
+
+    let CUR_BOARD=hashBoard(), MY={}, IS_STAFF=false, POSTS=[], CUR_POST=null, EDIT_ID=null, EDIT_PHOTOS=[];
+    const COUNTS = { review:0, grade:0, biz:0, contact:0 };
+
+    // 로그인 상태
+    try { MY = await window.OSS.getMyProfile() || {}; IS_STAFF = (MY.role==="master"||MY.role==="manager"); } catch(e){}
+    const isLoggedIn = !!MY.id;
+    if(isLoggedIn) document.getElementById("writeBtn").style.display="";
+
+    function applyBoard(board){
+      CUR_BOARD = board;
+      const cfg = BOARD_CFG[board];
+      document.querySelectorAll(".cs-sidebar a[data-board]").forEach(a=>a.classList.toggle("active", a.dataset.board===board));
+      document.getElementById("boardTitle").textContent = BOARD_LABELS[board];
+      document.getElementById("writeBoardLabel").textContent = WRITE_LABELS[board];
+      // 글쓰기 폼 필드 표시
+      document.getElementById("wTypeField").hidden  = !cfg.type;
+      document.getElementById("wNameField").hidden  = !cfg.name;
+      document.getElementById("wPhoneField").hidden = !cfg.phone;
+      document.getElementById("wTitleField").hidden = !cfg.title;
+      document.getElementById("wOrderField").hidden = !cfg.order;
+      document.getElementById("wVisField").style.display   = cfg.vis?"":"none";
+      document.getElementById("wPhotoField").style.display = cfg.photo?"":"none";
+      document.getElementById("wPhoneOpt").textContent = cfg.phoneReq?"":"(선택)";
+      document.getElementById("wHint").textContent = cfg.hint || "";
+      // 비밀 게시판 안내
+      const note = document.getElementById("boardNote");
+      if(ALWAYS_PRIVATE.has(board)){ note.hidden=false; note.innerHTML='🔒 <b>비밀 게시판</b> — 이곳의 글은 <b>작성자 본인과 관리자</b>만 볼 수 있어요.'; }
+      else note.hidden=true;
+      // 비로그인 안내
+      const lh = document.getElementById("loginHint");
+      if(!isLoggedIn){ lh.hidden=false; lh.innerHTML='글을 쓰려면 <a href="login.html">로그인</a>이 필요해요. 빠른 문의는 카카오톡 <a href="'+KAKAO_URL+'" target="_blank" rel="noopener">@ossohayo</a>로도 가능해요.'; }
+      else lh.hidden=true;
+      loadPosts();
+    }
+
+    // 사이드바 링크는 <a href="#board"> 라서 클릭 시 hash 자동 변경 → hashchange로 처리
+    window.addEventListener("hashchange", ()=>applyBoard(hashBoard()));
+
+    // 게시글 로드
+    async function loadPosts(){
+      const list=document.getElementById("postList");
+      list.innerHTML='<div class="cm-empty">불러오는 중...</div>';
+      try {
+        if(IS_STAFF||(isLoggedIn&&CUR_BOARD==="contact")){
+          POSTS = await window.OSS.listBoardPosts(CUR_BOARD);
+        } else if(isLoggedIn){
+          const pub   = await window.OSS.fetchBoardPosts(CUR_BOARD, 80);
+          const mine  = await window.OSS.fetchMyBoardPosts(CUR_BOARD);
+          const ids   = new Set(pub.map(p=>p.id));
+          POSTS = pub.concat(mine.filter(p=>!ids.has(p.id))).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+        } else {
+          POSTS = await window.OSS.fetchBoardPosts(CUR_BOARD, 80);
+        }
+        // 건수 배지 갱신
+        COUNTS[CUR_BOARD] = POSTS.filter(p=>p.status!=="deleted").length;
+        const cEl = document.getElementById("cnt-"+CUR_BOARD);
+        if(cEl) cEl.textContent = COUNTS[CUR_BOARD];
+        renderPosts();
+      } catch(e){
+        list.innerHTML='<div class="cm-empty">불러오지 못했어요: '+esc(e.message||e)+'</div>';
+      }
+    }
+
+    function renderPosts(){
+      const list=document.getElementById("postList");
+      const visible=POSTS.filter(p=>p.status!=="deleted");
+      if(!visible.length){ list.innerHTML='<div class="cm-empty">아직 게시글이 없어요. 첫 글을 남겨보세요!</div>'; return; }
+      const boardAlwaysPriv = ALWAYS_PRIVATE.has(CUR_BOARD);
+      list.innerHTML = visible.map(p=>{
+        const isMine = p.user_id&&MY.id&&p.user_id===MY.id;
+        const isPriv = boardAlwaysPriv || p.visibility==="private";
+        const canSee = IS_STAFF||!isPriv||isMine;
+        const title  = canSee ? esc(p.title) : "비밀글입니다.";
+        let sb="";
+        if(p.admin_reply)               sb='<span class="cm-badge cm-badge-done">답변완료</span>';
+        else if(p.status==="pending"&&!isPriv) sb='<span class="cm-badge cm-badge-pend">검토중</span>';
+        const vb = isPriv ? '<span class="cm-badge cm-badge-prv">비밀글</span>' : "";
+        const photos = Array.isArray(p.photos)&&p.photos.length&&canSee
+          ? `<div class="cm-photos-thumb">${p.photos.slice(0,3).map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join("")}</div>` : "";
+        const preview = canSee&&p.content ? `<div class="cm-preview">${esc((p.content||"").slice(0,80))}</div>` : "";
+        return `<div class="cm-item" data-id="${p.id}">
+          <div>
+            <div class="cm-item-top">${sb}${vb}<span class="cm-title${isPriv&&!canSee?" lock":""}">${title}</span></div>
+            ${preview}${photos}
+            <div class="cm-meta">${esc(p.author_display||"익명")} · ${relDate(p.created_at)}</div>
+          </div>
+          <div class="cm-date">${kstD(p.created_at)}</div>
+        </div>`;
+      }).join("");
+      list.querySelectorAll(".cm-item").forEach(el=>{
+        el.addEventListener("click",()=>{
+          const p=POSTS.find(x=>x.id===Number(el.dataset.id)); if(!p) return;
+          const isMine=p.user_id&&MY.id&&p.user_id===MY.id;
+          const isPriv=boardAlwaysPriv||p.visibility==="private";
+          if(isPriv&&!IS_STAFF&&!isMine){ alert("비밀글은 작성자와 관리자만 볼 수 있어요."); return; }
+          openDetail(p);
+        });
+      });
+    }
+
+    // 상세 모달
+    function openDetail(p){
+      CUR_POST=p;
+      const isMine = p.user_id&&MY.id&&p.user_id===MY.id;
+      const isPriv = ALWAYS_PRIVATE.has(p.board)||p.visibility==="private";
+      document.getElementById("detailTitle").textContent=p.title;
+      // 메타: 작성자·날짜·공개범위 (+ 본인/관리자에게만 유형·주문번호·연락처)
+      let extra="";
+      if(IS_STAFF||isMine){
+        if(p.inquiry_type) extra+=" · 유형: "+p.inquiry_type;
+        if(p.order_no)     extra+=" · 주문 "+p.order_no;
+        if(p.phone)        extra+=" · ☎ "+p.phone;
+      }
+      document.getElementById("detailMeta").textContent=(p.author_display||"익명")+" · "+kstD(p.created_at)+" · "+(isPriv?"비밀글":"전체공개")+extra;
+      document.getElementById("detailContent").textContent=p.content||"";
+      const bd=document.getElementById("detailBadge");
+      if(p.admin_reply){      bd.textContent="답변완료"; bd.className="cm-badge cm-badge-done"; }
+      else if(isPriv){        bd.textContent="비밀글";  bd.className="cm-badge cm-badge-prv"; }
+      else if(p.status==="pending"){ bd.textContent="검토중"; bd.className="cm-badge cm-badge-pend"; }
+      else{                   bd.textContent="전체공개"; bd.className="cm-badge cm-badge-pub"; }
+      const ph=document.getElementById("detailPhotos");
+      ph.innerHTML=Array.isArray(p.photos)&&p.photos.length
+        ? p.photos.map(u=>`<img src="${esc(u)}" alt="" onclick="window.open('${esc(u)}','_blank')">`).join("") : "";
+      const rb=document.getElementById("detailReply");
+      if(p.admin_reply){ rb.hidden=false; document.getElementById("detailReplyText").textContent=p.admin_reply; document.getElementById("detailReplyDate").textContent=kstD(p.replied_at); }
+      else rb.hidden=true;
+      document.getElementById("adminActions").hidden=!IS_STAFF;
+      document.getElementById("ownerActions").hidden=!isMine; // 본인 글만 수정·삭제
+      document.getElementById("replyForm").hidden=true;
+      document.getElementById("detailModal").hidden=false;
+    }
+    document.getElementById("detailClose").addEventListener("click",()=>document.getElementById("detailModal").hidden=true);
+    bindBackdropClose(document.getElementById("detailModal"));
+
+    // 작성자 본인 액션 — 수정
+    document.getElementById("btnEdit").addEventListener("click",()=>{
+      if(!CUR_POST) return;
+      const isMine = CUR_POST.user_id&&MY.id&&CUR_POST.user_id===MY.id;
+      if(!isMine){ alert("본인 글만 수정할 수 있어요."); return; }
+      document.getElementById("detailModal").hidden=true;
+      openWriteForEdit(CUR_POST);
+    });
+    // 작성자 본인 액션 — 삭제(soft delete)
+    document.getElementById("btnDelete").addEventListener("click",async()=>{
+      if(!CUR_POST) return;
+      const isMine = CUR_POST.user_id&&MY.id&&CUR_POST.user_id===MY.id;
+      if(!isMine){ alert("본인 글만 삭제할 수 있어요."); return; }
+      if(!confirm("이 글을 삭제할까요? 되돌릴 수 없어요.")) return;
+      try{ await window.OSS.deleteBoardPost(CUR_POST.id); alert("삭제됐어요."); document.getElementById("detailModal").hidden=true; loadPosts(); }catch(e){ alert(e.message||e); }
+    });
+
+    // 관리자 액션
+    document.getElementById("btnApprove").addEventListener("click",async()=>{
+      if(!CUR_POST||!IS_STAFF) return;
+      try{ await window.OSS.setBoardPostStatus(CUR_POST.id,"approved"); alert("승인됐어요."); document.getElementById("detailModal").hidden=true; loadPosts(); }catch(e){ alert(e.message||e); }
+    });
+    document.getElementById("btnReject").addEventListener("click",async()=>{
+      if(!CUR_POST||!IS_STAFF) return;
+      try{ await window.OSS.setBoardPostStatus(CUR_POST.id,"rejected"); alert("비공개 처리됐어요."); document.getElementById("detailModal").hidden=true; loadPosts(); }catch(e){ alert(e.message||e); }
+    });
+    document.getElementById("btnReply").addEventListener("click",()=>{ const rf=document.getElementById("replyForm"); rf.hidden=!rf.hidden; });
+    document.getElementById("replySubmit").addEventListener("click",async()=>{
+      const txt=document.getElementById("replyText").value.trim();
+      if(!txt||!CUR_POST) return;
+      try{ await window.OSS.replyBoardPost(CUR_POST.id,txt); alert("답변이 저장됐어요."); document.getElementById("detailModal").hidden=true; loadPosts(); }catch(e){ alert(e.message||e); }
+    });
+
+    // 글쓰기 모달
+    let WPHOTOS=[];
+    function clearWriteForm(){
+      ["wTitle","wContent","wOrderNo","wPhone"].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=""; });
+      const nm=document.getElementById("wName"); if(nm) nm.value = MY.name||"";
+      const vp=document.querySelector('input[name="wVis"][value="public"]'); if(vp) vp.checked=true;
+      WPHOTOS=[]; EDIT_PHOTOS=[]; renderWPhotos();
+      document.getElementById("wMsg").textContent="";
+    }
+    // 새 글 모드
+    function openWriteNew(){
+      if(!isLoggedIn){ alert("로그인 후 작성할 수 있어요."); location.href="login.html"; return; }
+      EDIT_ID=null;
+      document.getElementById("writeBoardLabel").textContent=WRITE_LABELS[CUR_BOARD];
+      document.getElementById("wSubmit").textContent="등록하기";
+      clearWriteForm();
+      document.getElementById("writeModal").hidden=false;
+    }
+    // 수정 모드(본인 글)
+    function openWriteForEdit(p){
+      EDIT_ID=p.id;
+      CUR_BOARD=p.board; applyFormFields(p.board);
+      document.getElementById("writeBoardLabel").textContent="글 수정";
+      document.getElementById("wSubmit").textContent="수정 저장";
+      clearWriteForm();
+      document.getElementById("wTitle").value=p.title||"";
+      document.getElementById("wContent").value=p.content||"";
+      document.getElementById("wOrderNo").value=p.order_no||"";
+      if(document.getElementById("wType")&&p.inquiry_type) document.getElementById("wType").value=p.inquiry_type;
+      if(document.getElementById("wPhone")) document.getElementById("wPhone").value=p.phone||"";
+      const visEl=document.querySelector('input[name="wVis"][value="'+(p.visibility||"public")+'"]'); if(visEl) visEl.checked=true;
+      EDIT_PHOTOS=Array.isArray(p.photos)?p.photos.slice():[];
+      if(EDIT_PHOTOS.length) document.getElementById("wMsg").textContent="기존 사진 "+EDIT_PHOTOS.length+"장은 유지돼요. (새 사진은 추가됩니다)";
+      document.getElementById("writeModal").hidden=false;
+    }
+    // 폼 필드 표시(수정모드에서 board가 바뀔 때 재적용)
+    function applyFormFields(board){
+      const cfg=BOARD_CFG[board];
+      document.getElementById("wTypeField").hidden=!cfg.type;
+      document.getElementById("wNameField").hidden=!cfg.name;
+      document.getElementById("wPhoneField").hidden=!cfg.phone;
+      document.getElementById("wTitleField").hidden=!cfg.title;
+      document.getElementById("wOrderField").hidden=!cfg.order;
+      document.getElementById("wVisField").style.display=cfg.vis?"":"none";
+      document.getElementById("wPhotoField").style.display=cfg.photo?"":"none";
+      document.getElementById("wPhoneOpt").textContent=cfg.phoneReq?"":"(선택)";
+      document.getElementById("wHint").textContent=cfg.hint||"";
+    }
+    document.getElementById("writeBtn").addEventListener("click",openWriteNew);
+    document.getElementById("writeClose").addEventListener("click",()=>document.getElementById("writeModal").hidden=true);
+    bindBackdropClose(document.getElementById("writeModal"));
+    document.getElementById("wPhotoBtn").addEventListener("click",()=>document.getElementById("wPhotoFile").click());
+    document.getElementById("wPhotoFile").addEventListener("change",()=>{
+      Array.prototype.slice.call(document.getElementById("wPhotoFile").files).forEach(f=>{
+        if(WPHOTOS.length+EDIT_PHOTOS.length>=5){ alert("사진은 최대 5장이에요."); return; }
+        if(f.size>5*1024*1024){ alert(f.name+" — 5MB 이하만 가능"); return; }
+        WPHOTOS.push({file:f,url:URL.createObjectURL(f)});
+      });
+      document.getElementById("wPhotoFile").value="";
+      renderWPhotos();
+    });
+    function renderWPhotos(){
+      const box=document.getElementById("wPhotoList");
+      box.innerHTML=WPHOTOS.map((p,i)=>`<div class="cm-photo-item"><img src="${p.url}" alt=""><button class="rm" data-i="${i}" type="button">✕</button></div>`).join("");
+      box.querySelectorAll(".rm").forEach(b=>b.addEventListener("click",()=>{ WPHOTOS.splice(Number(b.dataset.i),1); renderWPhotos(); }));
+    }
+
+    document.getElementById("wSubmit").addEventListener("click",async()=>{
+      const cfg=BOARD_CFG[CUR_BOARD];
+      const title = cfg.autoTitle || document.getElementById("wTitle").value.trim();
+      const content=document.getElementById("wContent").value.trim();
+      const phone  = cfg.phone ? document.getElementById("wPhone").value.trim() : "";
+      const type   = cfg.type  ? document.getElementById("wType").value : null;
+      const orderNo= cfg.order ? document.getElementById("wOrderNo").value.trim() : "";
+      const visEl  = document.querySelector('input[name="wVis"]:checked');
+      const visibility = cfg.forcedVis || (cfg.vis && visEl ? visEl.value : "public");
+      const msg=document.getElementById("wMsg");
+      const setErr=(t)=>{ msg.textContent=t; msg.style.color="var(--red,#c0392b)"; };
+      if(cfg.title && !cfg.autoTitle && !title){ setErr("제목을 입력하세요."); return; }
+      if(!content){ setErr("내용을 입력하세요."); return; }
+      if(cfg.phoneReq && !phone){ setErr("연락처를 입력하세요."); return; }
+      const btn=document.getElementById("wSubmit");
+      btn.disabled=true; msg.textContent=""; msg.style.color="";
+      try{
+        // 새 사진 업로드
+        let newUrls=[];
+        if(cfg.photo){
+          for(let i=0;i<WPHOTOS.length;i++){
+            msg.textContent="사진 업로드 중… ("+(i+1)+"/"+WPHOTOS.length+")";
+            newUrls.push(await window.OSS.uploadBoardImage(WPHOTOS[i].file));
+          }
+        }
+        if(EDIT_ID){
+          // 수정
+          const fields={ title, content, visibility };
+          if(cfg.order) fields.order_no=orderNo||null;
+          if(cfg.phone) fields.phone=phone||null;
+          if(cfg.type)  fields.inquiry_type=type;
+          if(cfg.photo) fields.photos=EDIT_PHOTOS.concat(newUrls);
+          await window.OSS.updateBoardPost(EDIT_ID, fields);
+          msg.textContent="✓ 수정됐어요."; msg.style.color="var(--ok,#16a34a)";
+        }else{
+          // 새 글: contact는 입력한 이름, 그 외는 마스킹된 회원명
+          const dispName = cfg.name
+            ? (document.getElementById("wName").value.trim() || maskName(MY.name||MY.username||""))
+            : maskName(MY.name||MY.username||"");
+          await window.OSS.submitBoardPost({ board:CUR_BOARD, title, content, photos:newUrls, visibility, order_no:orderNo||null, phone:phone||null, inquiry_type:type, author_display:dispName, status:"pending" });
+          msg.textContent = (visibility==="private")
+            ? "✓ 등록됐어요! 관리자 확인 후 답변드릴게요."
+            : "✓ 등록됐어요! 관리자 검토 후 공개됩니다.";
+          msg.style.color="var(--ok,#16a34a)";
+        }
+        EDIT_ID=null;
+        setTimeout(()=>{ document.getElementById("writeModal").hidden=true; msg.textContent=""; loadPosts(); },1600);
+      }catch(e){ setErr((EDIT_ID?"수정":"등록")+" 실패: "+(e.message||e)); }
+      btn.disabled=false;
+    });
+
+    // 초기 탭 적용 (hash 기반)
+    applyBoard(CUR_BOARD);
+  })();
+  </script>
+</body>
+</html>

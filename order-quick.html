@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -347,7 +347,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=21"></script>
+  <script src="supabase.js?v=26"></script>
   <script>
   (function () {
     var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -577,10 +577,12 @@
 
     // ----- 제출 -----
     function genOrderNo() {
-      var d = new Date();
       var p = function (n) { return ("0" + n).slice(-2); };
       var r = Math.random().toString(36).slice(2, 6).toUpperCase();
-      return "OSS-" + String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate()) + "-" + r;
+      var ymd;
+      if (window.OSS && OSS.kstDate) { ymd = OSS.kstDate(new Date().toISOString()).slice(2).replace(/-/g, ""); }   // KST YYMMDD
+      else { var d = new Date(); ymd = String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate()); }
+      return "OSS-" + ymd + "-" + r;
     }
     function numOnly(s) { return Number(String(s || "").replace(/[^0-9.]/g, "")) || 0; }
 
@@ -700,7 +702,7 @@
           var lab = $("#fCouponLabel"), sel = $("#fCouponSelect");
           if (act.length > 1 && sel) {
             sel.innerHTML = act.map(function (c) {
-              var exp = c.expires_at ? " · ~" + String(c.expires_at).slice(0, 10) : "";
+              var exp = c.expires_at ? " · ~" + ((window.OSS&&OSS.kstDate)?OSS.kstDate(c.expires_at):String(c.expires_at).slice(0, 10)) : "";
               return '<option value="' + c.id + '">배송비 할인쿠폰 ₩' + (Number(c.amount) || 0).toLocaleString() + exp + '</option>';
             }).join("");
             sel.style.display = "";

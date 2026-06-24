@@ -236,16 +236,16 @@ p { word-break: keep-all; }
 .legal-body { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 32px 34px; box-shadow: var(--shadow); }
 
 /* 예상비용 계산기 */
-.calc-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
-.calc-form { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 26px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 14px; }
-.calc-form label { display: flex; flex-direction: column; gap: 7px; font-size: 14px; font-weight: 600; color: var(--text); }
-.calc-form select, .calc-form input { padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; font-family: inherit; font-size: 15px; background: #fbfaf8; }
+.calc-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
+.calc-form { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 9px; }
+.calc-form label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: 600; color: var(--text); }
+.calc-form select, .calc-form input { padding: 10px 12px; border: 1px solid var(--line); border-radius: 11px; font-family: inherit; font-size: 15px; background: #fbfaf8; }
 .calc-form select:focus, .calc-form input:focus { outline: none; border-color: var(--blue); background: #fff; }
 .calc-form .btn-block { margin-top: 6px; }
-.calc-result { background: linear-gradient(160deg, #fff3ec, #fff); border: 1px solid #ffd9c2; border-radius: 18px; padding: 26px; display: flex; flex-direction: column; }
+.calc-result { background: linear-gradient(160deg, #fff3ec, #fff); border: 1px solid #ffd9c2; border-radius: 18px; padding: 18px; display: flex; flex-direction: column; }
 .calc-fx { font-size: 14px; color: var(--text); background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; }
-.calc-lines { list-style: none; display: flex; flex-direction: column; gap: 12px; flex: 1; }
-.calc-lines li { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; color: var(--muted); padding-bottom: 12px; border-bottom: 1px dashed var(--line); }
+.calc-lines { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.calc-lines li { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; color: var(--muted); padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
 .calc-lines li b { color: var(--text); font-size: 16px; font-weight: 700; }
 .calc-lines .calc-total { border-bottom: none; padding-top: 6px; }
 .calc-lines .calc-total span { font-size: 17px; font-weight: 800; color: var(--navy); }
@@ -255,10 +255,15 @@ p { word-break: keep-all; }
 
 /* 이용후기 */
 .review-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-.review-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 26px 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; }
-.review-stars { color: #ffb300; font-size: 18px; letter-spacing: 2px; }
-.review-text { font-size: 15px; line-height: 1.65; color: var(--text); flex: 1; }
-.review-photo { width: 100%; max-height: 220px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line); }
+/* 후기 카드 = 사진이 크게 들어간 하나의 카드(별점 없음, 이름 옆 날짜) — bonri 스타일 */
+.review-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 0; box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
+.review-stars { display: none; }
+.review-photo { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border: none; border-radius: 0; max-height: none; display: block; }
+.review-noimg { display: flex; align-items: center; justify-content: center; aspect-ratio: 1 / 1; font-size: 44px; background: linear-gradient(135deg, #FFF0E6, #FFE7EE); color: #F6A98A; }
+.review-text { font-size: 14.5px; line-height: 1.55; color: var(--text); padding: 14px 16px 0; flex: 1; }
+.review-meta { display: flex; align-items: center; gap: 8px; padding: 10px 16px 16px; font-size: 12.5px; margin: 0; }
+.review-meta .rv-name { font-weight: 700; color: var(--text); }
+.review-meta .rv-date { color: var(--muted); }
 .review-author { font-size: 14px; font-weight: 700; color: var(--muted); }
 @media (max-width: 860px) { .review-grid { grid-template-columns: 1fr; } }
 
@@ -335,7 +340,7 @@ p { word-break: keep-all; }
 .modal[hidden] { display: none; }
 .modal-box { background: #fff; border-radius: 16px; padding: 30px; max-width: 520px; width: 100%; max-height: 80vh; overflow: auto; }
 .modal-box h3 { font-size: 22px; color: var(--navy); margin-bottom: 8px; }
-.modal-sub { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+.modal-sub { color: var(--muted); font-size: 14px; margin-bottom: 12px; }
 .modal-box pre { background: var(--bg); border-radius: 10px; padding: 16px; font-size: 13px; white-space: pre-wrap; word-break: break-all; margin-bottom: 18px; font-family: "Noto Sans KR", monospace; }
 /* 예상비용 계산기 팝업 (넓은 모달 + 닫기 버튼) */
 .calc-modal-box { max-width: 760px; position: relative; }
@@ -464,7 +469,7 @@ p { word-break: keep-all; }
 .mypage-menu { list-style: none; padding: 10px; }
 .mypage-menu a { display: block; padding: 12px 14px; border-radius: 10px; font-size: 15px; font-weight: 600; color: var(--text); }
 .mypage-menu a:hover, .mypage-menu a.active { background: #fff3ec; color: var(--orange); }
-.mypage-content { display: flex; flex-direction: column; gap: 28px; }
+.mypage-content { display: flex; flex-direction: column; gap: 18px; }
 .mypage-block { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 26px; }
 .mypage-title { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid var(--yellow); }
 .address-card { background: var(--bg-soft); border-radius: 12px; padding: 20px; line-height: 1.9; font-size: 15px; }
@@ -583,8 +588,7 @@ p { word-break: keep-all; }
   .form-row-3 { grid-template-columns: 1fr; }
   .amount-grid { grid-template-columns: 1fr 1fr; }
   .guide-layout { grid-template-columns: 1fr; }
-  .guide-nav { position: static; flex-direction: row; flex-wrap: wrap; }
-  .guide-nav-btn { flex: 1 1 auto; text-align: center; }
+  .guide-nav { position: static; }
   .guide-content { padding: 22px; }
   .header-inner { flex-wrap: wrap; gap: 16px; }
   .search-box { order: 3; max-width: none; flex-basis: 100%; }
@@ -611,7 +615,11 @@ p { word-break: keep-all; }
   .feature-grid, .steps { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
   .order-form { padding: 22px; }
-  .section { padding: 50px 0; }
+  .section { padding: 28px 0; }
+  /* 모바일 모달: 위에서부터 스크롤(가운데정렬 상단잘림 방지) + 가로 넘침 방지 */
+  .modal { align-items: flex-start; padding: 12px; overflow-y: auto; }
+  .modal-box { max-height: none; }
+  .calc-modal-box { padding: 24px 18px; }
   .logo-name { font-size: 28px; }
   .center-options { grid-template-columns: 1fr; }
   .addon-checks { grid-template-columns: 1fr; }
@@ -663,6 +671,25 @@ p { word-break: keep-all; }
   .osshead-ic { width: 34px; height: 34px; }
 }
 
+/* ===== 모바일 햄버거 메뉴 (bonri식) ===== */
+.osshead-burger { display: none; background: none; border: none; cursor: pointer; padding: 4px; color: var(--text); flex: none; }
+.osshead-drawer, .osshead-drawer-back { display: none; }
+@media (max-width: 860px) {
+  .osshead-in { position: relative; }
+  .osshead-burger { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; }
+  .osshead-nav { display: none !important; }
+  .osshead-logo { position: absolute; left: 50%; transform: translateX(-50%); }
+  .osshead-icons { margin-left: auto; }
+  .osshead-drawer-back { position: fixed; inset: 0; background: rgba(20,14,10,.42); z-index: 190; }
+  .osshead-drawer-back.open { display: block; }
+  .osshead-drawer { display: block; position: fixed; top: 0; left: 0; bottom: 0; width: 80%; max-width: 300px; background: #fff; z-index: 200; transform: translateX(-100%); transition: transform .25s ease; box-shadow: 4px 0 24px rgba(0,0,0,.18); overflow-y: auto; padding: 12px 0 24px; }
+  .osshead-drawer.open { transform: translateX(0); }
+  .osshead-drawer .dr-sec { font-size: 12px; font-weight: 700; color: var(--muted); padding: 16px 22px 6px; }
+  .osshead-drawer a { display: block; padding: 13px 22px; font-size: 15.5px; font-weight: 700; color: var(--text); border-bottom: 1px solid var(--line); }
+  .osshead-drawer a.on { color: var(--orange); }
+  .osshead-drawer a:active { background: var(--hero-bg); }
+}
+
 /* ===== 본문 테마 정리 (새 헤더와 통일 · 웹디자이너 페이스리프트) ===== */
 /* 버튼: 알약형 + 따뜻한 그림자 통일 */
 .btn { border-radius: 999px; }
@@ -677,11 +704,11 @@ p { word-break: keep-all; }
 .search-box:focus-within { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,107,44,.14); }
 .form-block legend { border-bottom-color: var(--orange); }
 /* 서브페이지 상단 배너: 진한 주황 그라데이션 → 깔끔한 라이트 */
-.page-hero { background: var(--hero-bg); color: var(--text); padding: 42px 0; }
+.page-hero { background: var(--hero-bg); color: var(--text); padding: 26px 0; }
 .page-hero h1 { color: var(--text); }
 .page-hero p { color: var(--muted); opacity: 1; }
 /* 섹션 여백 정리 + 제목 크기 */
-.section { padding: 66px 0; }
+.section { padding: 42px 0; }
 .section-title { font-size: 30px; }
 /* 히어로 제목 크기 정리 */
 .slide-text h1 { font-size: 42px; }

@@ -74,15 +74,27 @@ function downloadCsv(filename, rows) {
   a.href = URL.createObjectURL(blob); a.download = filename; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1500);
 }
-// UTC ISO → 사장님 PC(한국시간) 기준 날짜 YYYY-MM-DD (월말 새벽/막차 주문 오집계 방지)
+// UTC ISO → 한국(서울) 기준 날짜 YYYY-MM-DD (집계·표시 모두 KST 고정. 월말 새벽/막차 주문 오집계 방지)
 function toLocalYmd(iso) {
   if (!iso) return "";
   const d = new Date(iso);
   if (isNaN(d)) return String(iso).slice(0, 10);
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return d.getFullYear() + "-" + m + "-" + day;
+  try { return new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(d); }
+  catch (e) { const m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0"); return d.getFullYear() + "-" + m + "-" + day; }
 }
+// UTC ISO → 한국(서울) 시간 "YYYY-MM-DD HH:MM" (로그·이력 표시용)
+function toKst(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return String(iso).replace("T", " ").slice(0, 16);
+  try {
+    return new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(d).replace(/ /g, " ");
+  } catch (e) {
+    return String(iso).replace("T", " ").slice(0, 16);
+  }
+}
+// UTC ISO → 한국(서울) 날짜 "YYYY-MM-DD" (표시용)
+function toKstD(iso) { const s = toKst(iso); return s ? s.slice(0, 10) : ""; }
 
 // 정산·대시보드·표뷰·배너 공용 전역
 const perJpy = () => FX_APPLIED / 100;   // ¥1 → ₩ (계산기·요율과 동일 환율)
@@ -162,7 +174,7 @@ function mapRow(row) {
     customer: row.applicant_name || "-",
     amount: row.subtotal || 0,
     status: row.status || "신규접수",
-    created: (row.created_at || "").slice(0, 10),
+    created: toKstD(row.created_at),
     created_local: toLocalYmd(row.created_at),
     flag: row.flag || "",
     deleted: !!row.deleted_at,
@@ -272,7 +284,7 @@ async function renderOrderLog(orderNo) {
     const list = await window.OSS.fetchActivityLogByOrder(orderNo);
     box.innerHTML = list.length ? list.map(function (e) {
       const dev = e.device === "phone" ? "📱 휴대폰" : "💻 데스크톱";
-      const t = (e.created_at || "").replace("T", " ").slice(0, 16);
+      const t = toKst(e.created_at);
       return '<div class="log-row"><span class="log-time">' + t + '</span><span class="log-dev">' + dev + '</span><span class="log-act">' + esc(e.action || "") + (e.detail ? " · " + esc(e.detail) : "") + "</span></div>";
     }).join("") : '<div class="empty">아직 작업 기록이 없어요. (이 주문부터 기록됩니다)</div>';
   } catch (e) { box.innerHTML = '<div class="empty">기록 불러오기 실패: ' + esc(e.message || e) + "</div>"; }
@@ -289,11 +301,13 @@ async function loadReviews() {
     tb.innerHTML = list.map(function (r) {
       const st = r.status === "approved" ? '<span style="color:#1F9D6B;font-weight:700;">게시중</span>' : (r.status === "rejected" ? '<span style="color:#C0392B;">숨김</span>' : '<span style="color:#C77A12;font-weight:700;">대기</span>');
       const btn = (r.status === "approved")
-        ? '<button class="btn btn-small" data-rv-hide="' + r.id + '">숨김</button>'
-        : '<button class="btn btn-small btn-primary" data-rv-ok="' + r.id + '">승인</button>';
+        ? '<button class="btn btn-small" data-rv-hide="' + r.id + '" style="color:var(--red);">거절(숨김)</button>'
+        : (r.status === "rejected")
+          ? '<button class="btn btn-small btn-primary" data-rv-ok="' + r.id + '">승인</button>'
+          : '<button class="btn btn-small btn-primary" data-rv-ok="' + r.id + '">승인</button> <button class="btn btn-small" data-rv-hide="' + r.id + '" style="color:var(--red);">거절</button>';
       const photo = r.image_url ? '<br><a href="' + esc(r.image_url) + '" target="_blank" rel="noopener"><img src="' + esc(r.image_url) + '" alt="후기사진" style="max-width:120px;max-height:120px;border-radius:8px;border:1px solid #e5e5e5;margin-top:6px;object-fit:cover;" /></a>' : "";
       const editedTag = r.updated_at ? ' <span style="font-size:11px;color:#C77A12;">(수정됨)</span>' : "";
-      return '<tr><td>' + esc(r.author_name || "회원") + '</td><td style="white-space:nowrap;color:#F1A23A;">' + "★".repeat(r.rating || 5) + '</td><td style="max-width:280px;white-space:normal;word-break:break-word;">' + esc(r.body || "") + editedTag + photo + '</td><td>' + esc(r.order_no || "-") + '</td><td>' + (r.created_at || "").slice(0, 10) + '</td><td>' + st + '</td><td style="white-space:nowrap;">' + btn + ' <button class="btn btn-small" data-rv-del="' + r.id + '" style="color:var(--red);">삭제</button></td></tr>';
+      return '<tr><td>' + esc(r.author_name || "회원") + '</td><td style="white-space:nowrap;color:#F1A23A;">' + "★".repeat(r.rating || 5) + '</td><td style="max-width:280px;white-space:normal;word-break:break-word;">' + esc(r.body || "") + editedTag + photo + '</td><td>' + esc(r.order_no || "-") + '</td><td>' + toKstD(r.created_at) + '</td><td>' + st + '</td><td style="white-space:nowrap;">' + btn + ' <button class="btn btn-small" data-rv-del="' + r.id + '" style="color:var(--red);">삭제</button></td></tr>';
     }).join("");
   } catch (e) { tb.innerHTML = '<tr><td colspan="7" class="empty">불러오기 실패: ' + esc(e.message || e) + '</td></tr>'; }
 }
@@ -342,7 +356,7 @@ function initCoupons() {
               : (expired
                 ? '<button class="btn btn-small" data-cp-del="' + c.id + '">삭제</button>'
                 : '<button class="btn btn-small btn-primary" data-cp-use="' + c.id + '">사용처리</button> <button class="btn btn-small" data-cp-del="' + c.id + '">삭제</button>');
-          return '<tr><td>' + esc(m.name || m.username) + '</td><td>₩' + Number(c.amount || 0).toLocaleString() + '</td><td>' + state + '</td><td>' + (c.expires_at || "").slice(0, 10) + '</td><td>' + esc(c.used_order_no || "-") + '</td><td>' + act + '</td></tr>';
+          return '<tr><td>' + esc(m.name || m.username) + '</td><td>₩' + Number(c.amount || 0).toLocaleString() + '</td><td>' + state + '</td><td>' + toKstD(c.expires_at) + '</td><td>' + esc(c.used_order_no || "-") + '</td><td>' + act + '</td></tr>';
         }).join("");
       }
       tb.innerHTML = rows;
@@ -426,8 +440,8 @@ async function loadMembers() {
       <td>${roleCell}</td>
       <td>${permCell}</td>
       <td style="white-space:nowrap;">예치 <b style="color:var(--blue);">₩${Number(m.deposit || 0).toLocaleString()}</b> · 적립 <b style="color:#1F9D6B;">₩${Number(m.points || 0).toLocaleString()}</b>${isMaster ? `<br><button class="btn btn-small m-bal" data-id="${m.id}" data-kind="deposit" type="button" style="padding:3px 7px;margin-top:4px;">예치±</button> <button class="btn btn-small m-bal" data-id="${m.id}" data-kind="points" type="button" style="padding:3px 7px;">적립±</button> <button class="btn btn-small m-ledger" data-id="${m.id}" data-name="${esc(m.name || m.username || "")}" type="button" style="padding:3px 7px;">내역</button>` : ""}</td>
-      <td>${(m.created_at || "").slice(0, 10)}</td>
-      <td>${(m.last_login_at || "").slice(0, 10) || "-"}</td>
+      <td>${toKstD(m.created_at)}</td>
+      <td>${toKstD(m.last_login_at) || "-"}</td>
     </tr>`;
   }).join("");
 
@@ -478,7 +492,7 @@ async function loadMembers() {
       const rows = await window.OSS.fetchLedger(btn.dataset.id, null);
       if (!rows.length) { alert((btn.dataset.name || "회원") + " — 예치금/적립금 내역이 없습니다."); return; }
       const lines = rows.slice(0, 40).map((r) => {
-        const d = (r.created_at || "").slice(0, 10);
+        const d = toKstD(r.created_at);
         const k = r.kind === "deposit" ? "예치금" : "적립금";
         const sign = r.delta >= 0 ? "+" : "";
         return d + "  " + k + "  " + sign + Number(r.delta).toLocaleString() + "  (잔액 " + Number(r.balance_after || 0).toLocaleString() + ")" + (r.reason ? "  · " + r.reason : "") + (r.order_no ? "  · " + r.order_no : "");
@@ -513,6 +527,7 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
     if (page === "settle" && SETTLE_ROWS === null) renderSettle(); // 첫 진입 시 이번달 자동집계
     if (page === "stub") renderStub(btn.dataset.label, btn.dataset.desc);
     if (page === "log") renderLog();
+    if (page === "boards") loadBoardPosts();
     if (page === "trash") renderTrash();
     if (page === "purchase") renderPurchase();
     if (page === "warehouse") renderGroupWork("warehouse");
@@ -543,7 +558,7 @@ async function renderLog() {
     const list = await window.OSS.fetchActivityLog(300);
     tb.innerHTML = list.length ? list.map((e) => {
       const dev = e.device === "phone" ? "📱 폰" : "💻 PC";
-      const t = (e.created_at || "").replace("T", " ").slice(0, 16);
+      const t = toKst(e.created_at);
       return '<tr><td style="white-space:nowrap;">' + t + '</td><td>' + dev + '</td><td>' + esc(e.actor || "-") + '</td><td>' + esc(e.order_no || "-") + '</td><td>' + esc(e.action || "") + '</td><td style="white-space:normal;">' + esc(e.detail || "") + '</td></tr>';
     }).join("") : '<tr><td colspan="6" class="empty">작업 기록이 없어요.</td></tr>';
   } catch (e) { tb.innerHTML = '<tr><td colspan="6" class="empty">불러오기 실패: ' + esc(e.message || e) + '</td></tr>'; }
@@ -734,7 +749,7 @@ function renderStock() {
     const inDate = sd["입고완료"] || sd["일부입고"] || sd["창고도착"] || r.created_at;
     let days = -1, daysTxt = "-";
     if (inDate) { days = Math.floor((now - new Date(inDate).getTime()) / 86400000); daysTxt = days >= 0 ? days + "일" : "-"; }
-    const inStr = inDate ? String(inDate).replace("T", " ").slice(0, 10) : "-";
+    const inStr = inDate ? toKstD(inDate) : "-";
     return '<tr><td class="stock-open" data-id="' + o.id + '" style="cursor:pointer;color:var(--blue);font-weight:700;">' + esc(o.no) + '</td>' +
       '<td>' + esc(o.customer) + '</td>' +
       '<td style="max-width:200px;white-space:normal;">' + esc(o.name) + '</td>' +
@@ -754,7 +769,7 @@ async function renderLedgerLog(kind, tbId, refundOnly) {
     let list = await window.OSS.fetchAllLedger(kind, 300);
     if (refundOnly) list = list.filter((e) => (e.reason || "").indexOf("환불") >= 0);
     tb.innerHTML = list.length ? list.map((e) => {
-      const t = (e.created_at || "").replace("T", " ").slice(0, 16);
+      const t = toKst(e.created_at);
       const d = Number(e.delta || 0);
       const col = d > 0 ? "#1F9D6B" : (d < 0 ? "var(--red)" : "var(--muted)");
       return '<tr><td style="white-space:nowrap;">' + t + '</td>' +
@@ -773,7 +788,7 @@ function repRange(pre) { const f = document.getElementById(pre + "From"), t = do
 function repDefaults(pre) {
   const f = document.getElementById(pre + "From"), t = document.getElementById(pre + "To");
   const now = new Date();
-  const ym = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+  const ym = toLocalYmd(now.toISOString()).slice(0, 7);   // KST 기준 현재 월
   if (f && !f.value) f.value = ym + "-01";
   if (t && !t.value) t.value = toLocalYmd(now.toISOString());
 }
@@ -885,7 +900,7 @@ async function openMemberDetail(id) {
   const info = document.getElementById("mdInfo");
   if (info) info.innerHTML =
     '<b>아이디</b> ' + esc(m.username || "-") + ' &nbsp;·&nbsp; <b>이름</b> ' + esc(m.name || "-") + ' &nbsp;·&nbsp; <b>연락처</b> ' + esc(m.phone || "-") + '<br>' +
-    '<b>이메일</b> ' + esc(m.email || "-") + ' &nbsp;·&nbsp; <b>고객번호</b> ' + esc(m.mailbox_code || "-") + ' &nbsp;·&nbsp; <b>등급</b> ' + esc(m.grade || "-") + ' &nbsp;·&nbsp; <b>가입</b> ' + ((m.created_at || "").slice(0, 10) || "-") + '<br>' +
+    '<b>이메일</b> ' + esc(m.email || "-") + ' &nbsp;·&nbsp; <b>고객번호</b> ' + esc(m.mailbox_code || "-") + ' &nbsp;·&nbsp; <b>등급</b> ' + esc(m.grade || "-") + ' &nbsp;·&nbsp; <b>가입</b> ' + (toKstD(m.created_at) || "-") + '<br>' +
     '<b>예치금</b> <span style="color:var(--blue);font-weight:700;">₩' + Number(m.deposit || 0).toLocaleString() + '</span> &nbsp;·&nbsp; <b>적립금</b> <span style="color:#1F9D6B;font-weight:700;">₩' + Number(m.points || 0).toLocaleString() + '</span>';
   const my = ORDERS.filter((o) => o.raw && o.raw.user_id === id && !o.deleted);
   const cntEl = document.getElementById("mdOrderCnt"); if (cntEl) cntEl.textContent = "(" + my.length + "건)";
@@ -1067,7 +1082,7 @@ async function renderPayLedger() {
       (rows.length ? rows.map((r) => {
         const disp = (r.delta > 0 ? "＋" : "－") + payFmt(Math.abs(r.delta));
         const col = r.delta > 0 ? "var(--blue)" : "var(--red)";
-        return '<tr><td>' + (r.created_at || "").replace("T", " ").slice(0, 16) + '</td><td>' + (r.kind === "deposit" ? "예치금" : "적립금") + '</td><td style="color:' + col + ';font-weight:700;white-space:nowrap;">' + disp + '</td><td>' + payFmt(r.balance_after) + '</td><td>' + esc(r.reason || "-") + '</td><td>' + esc(r.order_no || "-") + '</td></tr>';
+        return '<tr><td>' + toKst(r.created_at) + '</td><td>' + (r.kind === "deposit" ? "예치금" : "적립금") + '</td><td style="color:' + col + ';font-weight:700;white-space:nowrap;">' + disp + '</td><td>' + payFmt(r.balance_after) + '</td><td>' + esc(r.reason || "-") + '</td><td>' + esc(r.order_no || "-") + '</td></tr>';
       }).join("") : '<tr><td colspan="6" class="empty">내역이 없어요.</td></tr>') +
       '</tbody></table></div>';
   } catch (e) { led.innerHTML = '<p class="form-note" style="text-align:left;color:var(--red);">원장 불러오기 실패: ' + esc(e.message || e) + '</p>'; }
@@ -1223,8 +1238,7 @@ function renderBundlePanel() {
   </tr>`).join("");
 }
 function genBundleId() {
-  const d = new Date();
-  const s = String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+  const s = toLocalYmd(new Date().toISOString()).slice(2).replace(/-/g, "");   // KST YYMMDD
   return "BDL-" + s + "-" + Math.random().toString(36).slice(2, 5).toUpperCase();
 }
 document.getElementById("doBundle").addEventListener("click", async () => {
@@ -1366,7 +1380,7 @@ function openModal(id) {
       if (window.OSS && OSS.getOrderCoupon) OSS.getOrderCoupon(o.no).then((cp) => {
         if (!cp) return;
         const st = cp.status === "used" ? " · 정산완료" : cp.status === "reserved" ? " · 적용예약" : "";
-        dEl.textContent = (cp.used_at ? "(사용신청일 " + String(cp.used_at).slice(0, 10) + st + ")" : st ? "(" + st.replace(" · ", "") + ")" : "");
+        dEl.textContent = (cp.used_at ? "(사용신청일 " + toKstD(cp.used_at) + st + ")" : st ? "(" + st.replace(" · ", "") + ")" : "");
       }).catch(() => {});
     } else {
       cBox.style.display = "none";
@@ -1574,10 +1588,8 @@ document.getElementById("modalSave").addEventListener("click", async () => {
 
 // ----- 대시보드 -----
 function todayStr() {
-  const d = new Date();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${m}-${day}`;
+  try { return new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
+  catch (e) { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
 }
 // 모달/실시간 저장 후 '지금 보고 있는' 운영표를 다시 그려 유령 행 방지 (일괄버튼과 동작 일치)
 function refreshActivePage() {
@@ -1657,9 +1669,8 @@ function renderTrendChart(live) {
   const now = new Date();
   for (let i = 13; i >= 0; i--) {
     const d = new Date(now.getTime() - i * 86400000);
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    days.push({ ymd: d.getFullYear() + "-" + mm + "-" + dd, label: mm + "/" + dd, cnt: 0, gmv: 0 });
+    const ymd = toLocalYmd(d.toISOString());          // KST 날짜 (주문일 키와 일치)
+    days.push({ ymd: ymd, label: ymd.slice(5).replace("-", "/"), cnt: 0, gmv: 0 });
   }
   const idx = {}; days.forEach((d, i) => { idx[d.ymd] = i; });
   (live || []).forEach((o) => {
@@ -1873,14 +1884,31 @@ function renderOrderTable() {
 function renderBanners() {
   const box = document.getElementById("bannerList");
   if (!box) return;
-  box.innerHTML = BANNERS.length
-    ? BANNERS.map((b, i) => `<div class="bn-item"><img src="${safeUrl(b.url)}" alt="" onerror="this.style.display='none'"><div class="bn-meta">${esc(b.alt || "(설명 없음)")}<br><span style="color:var(--muted);font-size:12px;">${esc(b.link || "(링크 없음)")}</span></div><button class="btn btn-small" data-bn-del="${i}" style="color:var(--red);">삭제</button></div>`).join("")
-    : '<p class="form-note" style="text-align:left;">등록된 배너가 없어요. 비우면 홈에 기본 자리표시가 보여요.</p>';
-  box.querySelectorAll("[data-bn-del]").forEach((btn) => btn.addEventListener("click", async () => {
-    if (!confirm("이 배너를 목록에서 뺄까요? (홈에서 사라져요)")) return;
-    BANNERS.splice(Number(btn.dataset.bnDel), 1);
+  if (!BANNERS.length) {
+    box.innerHTML = '<p class="form-note" style="text-align:left;">등록된 배너가 없어요. 위에서 이미지를 올려 저장하세요. (비우면 홈에 기본 자리표시가 보여요)</p>';
+    return;
+  }
+  box.innerHTML = BANNERS.map((b, i) =>
+    '<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:8px;background:#fff;margin-bottom:8px;">'
+    + '<span style="font-weight:700;color:var(--navy);width:18px;text-align:center;flex-shrink:0;">' + (i + 1) + '</span>'
+    + '<img src="' + safeUrl(b.url) + '" alt="" onerror="this.style.display=\'none\'" style="width:96px;height:46px;object-fit:cover;border-radius:4px;border:1px solid var(--line);flex-shrink:0;">'
+    + '<input class="bn-elink" data-i="' + i + '" value="' + esc(b.link || "").replace(/"/g, "&quot;") + '" placeholder="클릭 시 이동(선택) 예: order.html — 비우면 구매대행 신청으로" style="flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:4px;font-family:inherit;font-size:13px;">'
+    + '<button class="btn btn-small bn-edel" data-i="' + i + '" type="button" style="color:var(--red);flex-shrink:0;">✕ 삭제</button>'
+    + '</div>'
+  ).join("")
+    + '<div class="set-actions"><button class="btn btn-primary" id="bnSaveEdits" type="button">변경사항 저장</button><span class="save-ok" id="bnEditMsg"></span></div>';
+  box.querySelectorAll(".bn-elink").forEach((inp) => inp.addEventListener("input", () => { BANNERS[Number(inp.dataset.i)].link = inp.value; }));
+  box.querySelectorAll(".bn-edel").forEach((btn) => btn.addEventListener("click", async () => {
+    if (!confirm("이 배너를 뺄까요? (홈에서 사라져요)")) return;
+    BANNERS.splice(Number(btn.dataset.i), 1);
     await saveBanners();
   }));
+  const saveBtn = document.getElementById("bnSaveEdits");
+  if (saveBtn) saveBtn.addEventListener("click", async () => {
+    const msg = document.getElementById("bnEditMsg");
+    try { await window.OSS.saveSetting("banners", BANNERS); if (msg) { msg.textContent = "✓ 저장됨"; setTimeout(() => (msg.textContent = ""), 2500); } }
+    catch (e) { if (msg) msg.textContent = "저장 실패: " + (e.message || e); }
+  });
 }
 async function saveBanners() {
   try { await window.OSS.saveSetting("banners", BANNERS); renderBanners(); }
@@ -1891,45 +1919,155 @@ async function loadBanners() {
   catch (e) { BANNERS = []; }
   renderBanners();
 }
+// 추가 대기중인 배너(미리보기 + 개별 링크 + X)
+let BN_PENDING = [];
+function renderBnPending() {
+  const box = document.getElementById("bnPending"); if (!box) return;
+  box.innerHTML = BN_PENDING.map((p, i) => {
+    if (!p.url) p.url = URL.createObjectURL(p.file);
+    return '<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:8px;background:#fff;">'
+      + '<span style="font-weight:700;color:var(--navy);width:18px;text-align:center;flex-shrink:0;">' + (i + 1) + '</span>'
+      + '<img src="' + p.url + '" alt="" style="width:96px;height:46px;object-fit:cover;border-radius:4px;border:1px solid var(--line);flex-shrink:0;">'
+      + '<input class="bn-plink" data-i="' + i + '" value="' + String(p.link || "").replace(/"/g, "&quot;") + '" placeholder="클릭 시 이동(선택) 예: order.html — 비우면 구매대행 신청으로" style="flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:4px;font-family:inherit;font-size:13px;">'
+      + '<button class="btn btn-small bn-prm" data-i="' + i + '" type="button" style="color:var(--red);flex-shrink:0;">✕</button>'
+      + '</div>';
+  }).join("");
+  box.querySelectorAll(".bn-plink").forEach((inp) => inp.addEventListener("input", () => { BN_PENDING[Number(inp.dataset.i)].link = inp.value; }));
+  box.querySelectorAll(".bn-prm").forEach((b) => b.addEventListener("click", () => { BN_PENDING.splice(Number(b.dataset.i), 1); renderBnPending(); }));
+}
 (function bindBanner() {
   const add = document.getElementById("bnAdd"); if (!add) return;
+  const fileEl = document.getElementById("bnFile");
+  if (fileEl) fileEl.addEventListener("change", () => {
+    Array.prototype.slice.call(fileEl.files).forEach((f) => {
+      if (!/^image\/(png|jpeg|webp)$/.test(f.type)) { alert(f.name + " — png·jpeg·webp만 가능, 제외"); return; }
+      if (f.size > 5 * 1024 * 1024) { alert(f.name + " — 5MB 초과, 제외"); return; }
+      BN_PENDING.push({ file: f, link: "" });
+    });
+    fileEl.value = "";
+    renderBnPending();
+  });
   add.addEventListener("click", async () => {
     const msg = document.getElementById("bnMsg");
-    const fileEl = document.getElementById("bnFile");
-    const file = fileEl && fileEl.files && fileEl.files[0];
-    if (!file) { if (msg) msg.textContent = "이미지 파일을 먼저 선택하세요."; return; }
-    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) { if (msg) msg.textContent = "png·jpeg·webp 이미지만 올릴 수 있어요."; return; }
-    if (file.size > 5 * 1024 * 1024) { if (msg) msg.textContent = "5MB 이하 이미지만 올릴 수 있어요."; return; }
-    if (msg) msg.textContent = "업로드 중…";
+    if (!BN_PENDING.length) { if (msg) msg.textContent = "이미지를 먼저 선택하세요."; return; }
     try {
-      const url = await window.OSS.uploadBannerImage(file);
-      BANNERS.push({ url: url, link: (document.getElementById("bnLink").value || "").trim(), alt: (document.getElementById("bnAlt").value || "").trim() });
+      let n = 0;
+      for (const p of BN_PENDING) {
+        if (msg) msg.textContent = "업로드 중… (" + (n + 1) + "/" + BN_PENDING.length + ")";
+        const url = await window.OSS.uploadBannerImage(p.file);
+        BANNERS.push({ url: url, link: String(p.link || "").trim(), alt: "" });
+        n++;
+      }
       await window.OSS.saveSetting("banners", BANNERS);
-      if (msg) msg.textContent = "✓ 추가됐어요";
-      renderBanners();
-      fileEl.value = ""; document.getElementById("bnLink").value = ""; document.getElementById("bnAlt").value = "";
+      BN_PENDING = []; renderBnPending(); renderBanners();
+      if (msg) msg.textContent = "✓ " + n + "장 추가됐어요";
       setTimeout(() => { if (msg) msg.textContent = ""; }, 3000);
     } catch (e) { if (msg) msg.textContent = "업로드/저장 실패: " + (e.message || e); }
   });
 })();
 
-// ----- 공지사항 (작성/목록/삭제) -----
+// ----- 이벤트 서브배너 (settings.event_banners) — 메인 배너와 동일 구조 -----
+let EVENT_BANNERS = [];
+function renderEventBanners() {
+  const box = document.getElementById("evList");
+  if (!box) return;
+  if (!EVENT_BANNERS.length) {
+    box.innerHTML = '<p class="form-note" style="text-align:left;">등록된 서브배너가 없어요. 위에서 이미지를 올려 저장하세요. (비우면 홈에 기본 자리표시가 보여요)</p>';
+    return;
+  }
+  box.innerHTML = EVENT_BANNERS.map((b, i) =>
+    '<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:8px;background:#fff;margin-bottom:8px;">'
+    + '<span style="font-weight:700;color:var(--navy);width:18px;text-align:center;flex-shrink:0;">' + (i + 1) + '</span>'
+    + '<img src="' + safeUrl(b.url) + '" alt="" onerror="this.style.display=\'none\'" style="width:96px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--line);flex-shrink:0;">'
+    + '<input class="ev-elink" data-i="' + i + '" value="' + esc(b.link || "").replace(/"/g, "&quot;") + '" placeholder="클릭 시 이동(선택) 예: order.html" style="flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:4px;font-family:inherit;font-size:13px;">'
+    + '<button class="btn btn-small ev-edel" data-i="' + i + '" type="button" style="color:var(--red);flex-shrink:0;">✕ 삭제</button>'
+    + '</div>'
+  ).join("")
+    + '<div class="set-actions"><button class="btn btn-primary" id="evSaveEdits" type="button">변경사항 저장</button><span class="save-ok" id="evEditMsg"></span></div>';
+  box.querySelectorAll(".ev-elink").forEach((inp) => inp.addEventListener("input", () => { EVENT_BANNERS[Number(inp.dataset.i)].link = inp.value; }));
+  box.querySelectorAll(".ev-edel").forEach((btn) => btn.addEventListener("click", async () => {
+    if (!confirm("이 서브배너를 뺄까요?")) return;
+    EVENT_BANNERS.splice(Number(btn.dataset.i), 1);
+    try { await window.OSS.saveSetting("event_banners", EVENT_BANNERS); renderEventBanners(); } catch (e) { alert("저장 실패: " + (e.message || e)); }
+  }));
+  const saveBtn = document.getElementById("evSaveEdits");
+  if (saveBtn) saveBtn.addEventListener("click", async () => {
+    const msg = document.getElementById("evEditMsg");
+    try { await window.OSS.saveSetting("event_banners", EVENT_BANNERS); if (msg) { msg.textContent = "✓ 저장됨"; setTimeout(() => (msg.textContent = ""), 2500); } }
+    catch (e) { if (msg) msg.textContent = "저장 실패: " + (e.message || e); }
+  });
+}
+async function loadEventBanners() {
+  try { const b = await window.OSS.getSetting("event_banners"); EVENT_BANNERS = Array.isArray(b) ? b : []; }
+  catch (e) { EVENT_BANNERS = []; }
+  renderEventBanners();
+}
+let EV_PENDING = [];
+function renderEvPending() {
+  const box = document.getElementById("evPending"); if (!box) return;
+  box.innerHTML = EV_PENDING.map((p, i) => {
+    if (!p.url) p.url = URL.createObjectURL(p.file);
+    return '<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:8px;background:#fff;">'
+      + '<span style="font-weight:700;color:var(--navy);width:18px;text-align:center;flex-shrink:0;">' + (i + 1) + '</span>'
+      + '<img src="' + p.url + '" alt="" style="width:96px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--line);flex-shrink:0;">'
+      + '<input class="ev-plink" data-i="' + i + '" value="' + String(p.link || "").replace(/"/g, "&quot;") + '" placeholder="클릭 시 이동(선택) 예: order.html — 비우면 구매대행 신청으로" style="flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:4px;font-family:inherit;font-size:13px;">'
+      + '<button class="btn btn-small ev-prm" data-i="' + i + '" type="button" style="color:var(--red);flex-shrink:0;">✕</button>'
+      + '</div>';
+  }).join("");
+  box.querySelectorAll(".ev-plink").forEach((inp) => inp.addEventListener("input", () => { EV_PENDING[Number(inp.dataset.i)].link = inp.value; }));
+  box.querySelectorAll(".ev-prm").forEach((b) => b.addEventListener("click", () => { EV_PENDING.splice(Number(b.dataset.i), 1); renderEvPending(); }));
+}
+(function bindEvBanner() {
+  const add = document.getElementById("evAdd"); if (!add) return;
+  const fileEl = document.getElementById("evFile");
+  if (fileEl) fileEl.addEventListener("change", () => {
+    Array.prototype.slice.call(fileEl.files).forEach((f) => {
+      if (!/^image\/(png|jpeg|webp)$/.test(f.type)) { alert(f.name + " — png·jpeg·webp만 가능, 제외"); return; }
+      if (f.size > 5 * 1024 * 1024) { alert(f.name + " — 5MB 초과, 제외"); return; }
+      EV_PENDING.push({ file: f, link: "" });
+    });
+    fileEl.value = "";
+    renderEvPending();
+  });
+  add.addEventListener("click", async () => {
+    const msg = document.getElementById("evMsg");
+    if (!EV_PENDING.length) { if (msg) msg.textContent = "이미지를 먼저 선택하세요."; return; }
+    try {
+      let n = 0;
+      for (const p of EV_PENDING) {
+        if (msg) msg.textContent = "업로드 중… (" + (n + 1) + "/" + EV_PENDING.length + ")";
+        const url = await window.OSS.uploadBannerImage(p.file);
+        EVENT_BANNERS.push({ url: url, link: String(p.link || "").trim(), alt: "" });
+        n++;
+      }
+      await window.OSS.saveSetting("event_banners", EVENT_BANNERS);
+      EV_PENDING = []; renderEvPending(); renderEventBanners();
+      if (msg) msg.textContent = "✓ " + n + "장 추가됐어요";
+      setTimeout(() => { if (msg) msg.textContent = ""; }, 3000);
+    } catch (e) { if (msg) msg.textContent = "업로드/저장 실패: " + (e.message || e); }
+  });
+})();
+
+// ----- 공지사항 (작성/목록/수정/삭제) -----
+let NOTICES = [];
+let NOTICE_EDIT_ID = null;
 async function loadNotices() {
   const tbody = document.getElementById("noticeRows");
   try {
-    const list = await window.OSS.fetchNotices();
-    tbody.innerHTML = list.length
-      ? list.map((n) => `<tr>
-          <td>${n.title}</td>
+    NOTICES = await window.OSS.fetchNotices();
+    tbody.innerHTML = NOTICES.length
+      ? NOTICES.map((n) => `<tr>
+          <td>${esc(n.title)}</td>
           <td>${n.pinned ? "📌" : "-"}</td>
-          <td>${(n.created_at || "").slice(0, 10)}</td>
-          <td><button class="btn btn-small remove-product" data-del="${n.id}">삭제</button></td>
+          <td>${toKst(n.created_at).slice(0, 10)}</td>
+          <td><button class="btn btn-small" data-edit="${n.id}">수정</button> <button class="btn btn-small remove-product" data-del="${n.id}">삭제</button></td>
         </tr>`).join("")
       : `<tr><td colspan="4" class="empty">등록된 공지가 없습니다.</td></tr>`;
+    tbody.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => startEditNotice(b.dataset.edit)));
     tbody.querySelectorAll("[data-del]").forEach((b) => {
       b.addEventListener("click", async () => {
         if (!confirm("이 공지를 삭제할까요?")) return;
-        try { await window.OSS.deleteNotice(b.dataset.del); loadNotices(); }
+        try { await window.OSS.deleteNotice(b.dataset.del); if (String(NOTICE_EDIT_ID) === String(b.dataset.del)) cancelEditNotice(); loadNotices(); }
         catch (e) { alert("삭제 실패: " + (e.message || e)); }
       });
     });
@@ -1937,19 +2075,50 @@ async function loadNotices() {
     tbody.innerHTML = `<tr><td colspan="4" class="empty">불러오기 실패: ${e.message || e}</td></tr>`;
   }
 }
+function startEditNotice(id) {
+  const n = NOTICES.find((x) => String(x.id) === String(id)); if (!n) return;
+  NOTICE_EDIT_ID = id;
+  document.getElementById("noticeTitle").value = n.title || "";
+  document.getElementById("noticeBody").value = n.body || "";
+  document.getElementById("noticePinned").checked = !!n.pinned;
+  document.getElementById("addNotice").textContent = "수정 저장";
+  let cancel = document.getElementById("noticeCancel");
+  if (!cancel) {
+    const btn = document.getElementById("addNotice");
+    cancel = document.createElement("button");
+    cancel.id = "noticeCancel"; cancel.type = "button"; cancel.className = "btn btn-small"; cancel.textContent = "취소"; cancel.style.marginLeft = "8px";
+    cancel.addEventListener("click", cancelEditNotice);
+    btn.parentNode.insertBefore(cancel, btn.nextSibling);
+  }
+  document.getElementById("noticeTitle").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function cancelEditNotice() {
+  NOTICE_EDIT_ID = null;
+  document.getElementById("noticeTitle").value = "";
+  document.getElementById("noticeBody").value = "";
+  document.getElementById("noticePinned").checked = false;
+  document.getElementById("addNotice").textContent = "공지 등록";
+  const cancel = document.getElementById("noticeCancel"); if (cancel) cancel.remove();
+}
 document.getElementById("addNotice").addEventListener("click", async () => {
   const title = document.getElementById("noticeTitle").value.trim();
   const body = document.getElementById("noticeBody").value.trim();
   const pinned = document.getElementById("noticePinned").checked;
   if (!title) { alert("공지 제목을 입력해 주세요."); return; }
   try {
-    await window.OSS.createNotice(title, body, pinned);
-    document.getElementById("noticeTitle").value = "";
-    document.getElementById("noticeBody").value = "";
-    document.getElementById("noticePinned").checked = false;
-    loadNotices();
-    alert("공지가 등록되었습니다.");
-  } catch (e) { alert("등록 실패: " + (e.message || e)); }
+    if (NOTICE_EDIT_ID) {
+      await window.OSS.updateNotice(NOTICE_EDIT_ID, title, body, pinned);
+      cancelEditNotice(); loadNotices();
+      alert("공지가 수정되었습니다.");
+    } else {
+      await window.OSS.createNotice(title, body, pinned);
+      document.getElementById("noticeTitle").value = "";
+      document.getElementById("noticeBody").value = "";
+      document.getElementById("noticePinned").checked = false;
+      loadNotices();
+      alert("공지가 등록되었습니다.");
+    }
+  } catch (e) { alert((NOTICE_EDIT_ID ? "수정" : "등록") + " 실패: " + (e.message || e)); }
 });
 
 // ----- 설정: 센터주소 -----
@@ -2052,20 +2221,30 @@ if (saveGradeBtn) saveGradeBtn.addEventListener("click", async () => {
 loadGrades();
 
 // ----- 설정: 이용안내 페이지 편집 -----
-const PAGE_TITLES = {
-  "guide-how": "이용방법",
-  "guide-purchase": "구매대행 이용안내",
-  "guide-delivery": "배송대행 이용안내",
-  "guide-customs": "통관·관세 안내",
-  "guide-refund": "취소·환불·반품 안내",
-};
+// 편집 가능한 안내 항목 = 공유 가이드 목록(guide-content.js). 설정값으로 렌더되는 guide-charge는 제외.
+const GUIDE_DEFAULTS = (window.OSS_GUIDE && window.OSS_GUIDE.DEFAULT) || {};
+const GUIDE_PAGE_LIST = ((window.OSS_GUIDE && window.OSS_GUIDE.PAGES) || []).filter((g) => g.slug !== "guide-charge");
+const PAGE_TITLES = {};
+GUIDE_PAGE_LIST.forEach((g) => { PAGE_TITLES[g.slug] = g.title; });
+// 편집 항목 드롭다운을 공유 목록으로 채움(13개 가이드 전부 편집 가능)
+(function fillPageSlug() {
+  const sel = document.getElementById("pageSlug");
+  if (!sel || !GUIDE_PAGE_LIST.length) return;
+  sel.innerHTML = GUIDE_PAGE_LIST.map((g) => '<option value="' + g.slug + '">' + g.title + '</option>').join("");
+})();
 async function loadPageEditor() {
   const slug = document.getElementById("pageSlug").value;
+  const titEl = document.getElementById("pageTitle");
+  const bodyEl = document.getElementById("pageBody");
   try {
     const p = await window.OSS.getPage(slug);
-    document.getElementById("pageTitle").value = (p && p.title) || PAGE_TITLES[slug] || "";
-    document.getElementById("pageBody").value = (p && p.body) || "";
-  } catch (e) { console.error(e); }
+    titEl.value = (p && p.title) || PAGE_TITLES[slug] || "";
+    // 저장된 내용이 없으면 현재 사이트에 보이는 기본 내용을 채워서 보여줌(사장님이 보고 수정)
+    bodyEl.value = (p && p.body) ? p.body : (GUIDE_DEFAULTS[slug] || "");
+  } catch (e) {
+    titEl.value = PAGE_TITLES[slug] || "";
+    bodyEl.value = GUIDE_DEFAULTS[slug] || "";   // Supabase 실패해도 기본 내용은 보여줌
+  }
 }
 document.getElementById("pageSlug").addEventListener("change", loadPageEditor);
 document.getElementById("savePage").addEventListener("click", async () => {
@@ -2125,45 +2304,39 @@ document.getElementById("saveFee").addEventListener("click", async () => {
 });
 
 // ----- 설정: 이용후기 -----
-let REVIEWS = [];
-function renderReviewRows() {
-  const box = document.getElementById("reviewRows");
-  box.innerHTML = REVIEWS.map((r, i) => `<div class="review-edit-row">
-    <input placeholder="작성자 (예: 양*향)" value="${(r.author||"").replace(/"/g,'&quot;')}" data-i="${i}" data-f="author" style="width:130px;" />
-    <select data-i="${i}" data-f="rating">${[5,4,3,2,1].map(n=>`<option value="${n}" ${Number(r.rating)===n?"selected":""}>${"★".repeat(n)}</option>`).join("")}</select>
-    <input placeholder="후기 내용" value="${(r.text||"").replace(/"/g,'&quot;')}" data-i="${i}" data-f="text" style="flex:1;min-width:200px;" />
-    <button class="btn btn-small remove-product" data-del="${i}">삭제</button>
-  </div>`).join("") || '<p class="form-note" style="text-align:left;">등록된 후기가 없습니다. "+ 후기 추가"를 누르세요.</p>';
-  box.querySelectorAll("input,select").forEach((inp) => inp.addEventListener("input", () => {
-    REVIEWS[inp.dataset.i][inp.dataset.f] = inp.dataset.f === "rating" ? Number(inp.value) : inp.value;
-  }));
-  box.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", () => {
-    REVIEWS.splice(Number(b.dataset.del), 1); renderReviewRows();
-  }));
-}
-async function loadReviews() {
-  try {
-    const r = await window.OSS.getSetting("reviews");
-    REVIEWS = Array.isArray(r) ? r : [];
-  } catch (e) { REVIEWS = []; }
-  renderReviewRows();
-}
-document.getElementById("addReview").addEventListener("click", () => { REVIEWS.push({ author: "", rating: 5, text: "" }); renderReviewRows(); });
-document.getElementById("saveReviews").addEventListener("click", async () => {
-  const ok = document.getElementById("reviewSaved");
-  try {
-    await window.OSS.saveSetting("reviews", REVIEWS.filter((r) => (r.text || "").trim()));
-    ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500);
-  } catch (e) { alert("저장 실패: " + (e.message || e)); }
-});
+// (옛 수동후기 편집기 제거 — 이제 손님이 쓴 실제 후기를 위 '구매후기 관리'에서 승인/거절합니다.
+//  loadReviews()는 상단 Supabase 승인테이블 버전(주석 "구매후기 관리")을 사용합니다.)
 
-// ----- 설정: 상단 띠배너 문구 -----
-async function loadTopbar() {
-  try { const v = await window.OSS.getSetting("topbar"); const el = document.getElementById("setTopbar"); if (el) el.value = (typeof v === "string" ? v : (v && v.text)) || ""; } catch (e) {}
+// ----- 설정: 상단 띠배너 문구 (여러 개 = 홈에서 순환) -----
+// 저장된 게 없을 때 보여줄 기본 문구 — script.js renderTopBar 기본값과 동일하게 유지
+const TOPBAR_DEFAULTS = ["신규 가입하면 배송비 쿠폰 3장 드려요 🎁", "일본 직구, 링크만 보내면 OSS가 다 해드려요 ✨", "검수사진 제공 · 실시간 배송추적 · 카톡 상담 💬"];
+let TOPBARS = [];
+function renderTopbars() {
+  const box = document.getElementById("topbarList"); if (!box) return;
+  box.innerHTML = TOPBARS.length ? TOPBARS.map((t, i) =>
+    '<div style="display:flex;gap:8px;align-items:center;">'
+    + '<span style="font-weight:700;color:var(--navy);width:18px;text-align:center;flex-shrink:0;">' + (i + 1) + '</span>'
+    + '<input class="tb-line" data-i="' + i + '" value="' + esc(t).replace(/"/g, "&quot;") + '" placeholder="띠배너에 표시할 문구" style="flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fbfcfe;">'
+    + '<button class="btn btn-small tb-rm" data-i="' + i + '" type="button" style="color:var(--red);flex-shrink:0;">✕</button>'
+    + '</div>'
+  ).join("") : '<p class="form-note" style="text-align:left;margin:0;">‘＋ 문구 추가’를 눌러 띠배너 문구를 넣어보세요. (비우면 기본 안내가 표시돼요)</p>';
+  box.querySelectorAll(".tb-line").forEach((inp) => inp.addEventListener("input", () => { TOPBARS[Number(inp.dataset.i)] = inp.value; }));
+  box.querySelectorAll(".tb-rm").forEach((b) => b.addEventListener("click", () => { TOPBARS.splice(Number(b.dataset.i), 1); renderTopbars(); }));
 }
+async function loadTopbar() {
+  try {
+    const v = await window.OSS.getSetting("topbar");
+    if (Array.isArray(v)) TOPBARS = v.map((s) => String(s)).filter((s) => s.trim());
+    else { const s = (typeof v === "string" ? v : (v && v.text)) || ""; TOPBARS = s.split(/\n+/).map((x) => x.trim()).filter(Boolean); }
+  } catch (e) { TOPBARS = []; }
+  if (!TOPBARS.length) TOPBARS = TOPBAR_DEFAULTS.slice();   // 저장된 게 없으면 현재 사이트에 보이는 기본 문구를 채워서 보여줌
+  renderTopbars();
+}
+document.getElementById("topbarAdd")?.addEventListener("click", () => { TOPBARS.push(""); renderTopbars(); });
 document.getElementById("saveTopbar")?.addEventListener("click", async () => {
   const ok = document.getElementById("topbarSaved");
-  try { await window.OSS.saveSetting("topbar", document.getElementById("setTopbar").value.trim()); ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500); }
+  const arr = TOPBARS.map((s) => String(s).trim()).filter(Boolean);
+  try { await window.OSS.saveSetting("topbar", arr); ok.textContent = "✓ 저장됨"; setTimeout(() => (ok.textContent = ""), 2500); }
   catch (e) { alert("저장 실패: " + (e.message || e)); }
 });
 
@@ -2212,7 +2385,7 @@ async function loadInquiries() {
     tbody.innerHTML = INQUIRIES.length ? INQUIRIES.map((q) => `
       <tr class="inq-head-row" data-id="${q.id}" style="cursor:pointer;">
         <td>${esc(q.category)}</td><td>${esc(q.title)}</td><td>${esc(q.name)}</td>
-        <td>${(q.created_at || "").slice(0, 10)}</td>
+        <td>${toKstD(q.created_at)}</td>
         <td><span class="status-badge ${inqBadge(q.status)}">${esc(q.status || "답변대기")}</span></td>
       </tr>
       <tr class="inq-detail-row" data-detail="${q.id}" hidden><td colspan="5" style="background:#fbfaf8;">
@@ -2244,6 +2417,69 @@ async function loadInquiries() {
   }
 }
 
+// ----- 커뮤니티 게시판 관리 -----
+const BRD_NAMES = { review: "후기", grade: "등급업", biz: "사업자", contact: "1:1문의" };
+let BRD_POSTS = [];
+async function loadBoardPosts() {
+  const tbody = document.getElementById("boardRows");
+  if (!tbody) return;
+  const filter = (document.getElementById("boardFilter") || {}).value || "";
+  try {
+    BRD_POSTS = await window.OSS.listBoardPosts(filter);
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty">불러오기 실패(게시판 테이블 미생성?): ${e.message || e}</td></tr>`;
+    return;
+  }
+  const esc = (s) => (s || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const posts = BRD_POSTS.filter((p) => p.status !== "deleted");
+  const visLabel = (v) => (v === "private" ? "비밀글" : "전체공개");
+  const statLabel = (p) => (p.admin_reply ? "답변완료" : (p.status === "pending" ? "검토중" : (p.status === "approved" ? "공개" : (p.status === "rejected" ? "비공개" : p.status))));
+  tbody.innerHTML = posts.length ? posts.map((p) => `
+    <tr class="brd-head-row" data-id="${p.id}" style="cursor:pointer;">
+      <td>${BRD_NAMES[p.board] || p.board}</td>
+      <td>${esc(p.title)}</td>
+      <td>${esc(p.author_display || "")}</td>
+      <td>${visLabel(p.visibility)}</td>
+      <td>${statLabel(p)}</td>
+      <td>${toKstD(p.created_at)}</td>
+      <td><button class="btn btn-small" data-bopen="${p.id}">보기</button></td>
+    </tr>
+    <tr class="brd-detail-row" data-detail="${p.id}" hidden><td colspan="7" style="background:#fbfaf8;">
+      ${p.inquiry_type ? `<p style="margin:0 0 6px;"><b>유형</b> ${esc(p.inquiry_type)}</p>` : ""}
+      ${p.phone ? `<p style="margin:0 0 6px;"><b>연락처</b> ${esc(p.phone)}</p>` : ""}
+      ${p.order_no ? `<p style="margin:0 0 6px;"><b>주문</b> ${esc(p.order_no)}</p>` : ""}
+      <p style="white-space:pre-wrap;margin:0 0 10px;">${esc(p.content)}</p>
+      ${Array.isArray(p.photos) && p.photos.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">${p.photos.map((u) => `<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid var(--line);"></a>`).join("")}</div>` : ""}
+      <textarea id="brep-${p.id}" rows="3" placeholder="답변 내용" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;">${esc(p.admin_reply)}</textarea>
+      <div class="set-actions" style="margin-top:8px;">
+        <button class="btn btn-primary btn-small" data-brep="${p.id}">답변 저장</button>
+        ${p.status !== "approved" ? `<button class="btn btn-small" data-bapp="${p.id}">승인(공개)</button>` : ""}
+        ${p.status !== "rejected" ? `<button class="btn btn-small" data-brej="${p.id}">비공개</button>` : ""}
+        <button class="btn btn-small remove-product" data-bdel="${p.id}">삭제</button>
+      </div>
+    </td></tr>`).join("") : `<tr><td colspan="7" class="empty">게시글이 없습니다.</td></tr>`;
+  tbody.querySelectorAll(".brd-head-row").forEach((r) => r.addEventListener("click", () => {
+    const d = tbody.querySelector(`[data-detail="${r.dataset.id}"]`); if (d) d.hidden = !d.hidden;
+  }));
+  tbody.querySelectorAll("[data-brep]").forEach((b) => b.addEventListener("click", async () => {
+    const t = document.getElementById("brep-" + b.dataset.brep).value.trim();
+    if (!t) { alert("답변 내용을 입력하세요."); return; }
+    try { await window.OSS.replyBoardPost(b.dataset.brep, t); alert("답변이 저장됐어요."); loadBoardPosts(); } catch (e) { alert("실패: " + (e.message || e)); }
+  }));
+  tbody.querySelectorAll("[data-bapp]").forEach((b) => b.addEventListener("click", async () => {
+    try { await window.OSS.setBoardPostStatus(b.dataset.bapp, "approved"); loadBoardPosts(); } catch (e) { alert("실패: " + (e.message || e)); }
+  }));
+  tbody.querySelectorAll("[data-brej]").forEach((b) => b.addEventListener("click", async () => {
+    try { await window.OSS.setBoardPostStatus(b.dataset.brej, "rejected"); loadBoardPosts(); } catch (e) { alert("실패: " + (e.message || e)); }
+  }));
+  tbody.querySelectorAll("[data-bdel]").forEach((b) => b.addEventListener("click", async () => {
+    if (!confirm("이 게시글을 삭제할까요?")) return;
+    try { await window.OSS.deleteBoardPost(b.dataset.bdel); loadBoardPosts(); } catch (e) { alert("실패: " + (e.message || e)); }
+  }));
+}
+document.getElementById("boardFilter")?.addEventListener("change", loadBoardPosts);
+document.getElementById("boardRefresh")?.addEventListener("click", loadBoardPosts);
+
 // 시작
 init();
 loadCenter();
@@ -2254,5 +2490,7 @@ loadFx();
 loadReviews();
 loadFaq();
 loadInquiries();
+loadBoardPosts();
 loadTopbar();
 loadBanners();
+loadEventBanners();

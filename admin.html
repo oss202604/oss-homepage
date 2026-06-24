@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -6,7 +6,7 @@
   <title>OSS 관리자</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=48" />
+  <link rel="stylesheet" href="styles.css?v=52" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="stylesheet" href="admin.css?v=24" />
 </head>
@@ -61,7 +61,7 @@
         <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="megaphone"></i></span> 컨텐츠관리</button>
           <div class="nav-sub">
             <button data-page="board">공지·문의·후기</button>
-            <button data-page="stub" data-label="게시판" data-desc="내부게시판·게시물·댓글·신고내역·게시판 유형 관리">게시판</button>
+            <button data-page="boards">게시판(커뮤니티)</button>
             <button data-page="stub" data-label="팝업" data-desc="레이어 팝업 관리">팝업</button>
             <button data-page="stub" data-label="메일·SMS" data-desc="메일·SMS 발송 + 발송내역">메일·SMS</button>
           </div>
@@ -77,9 +77,9 @@
 
         <li class="nav-group-li collapsed"><button class="nav-group" type="button"><span class="ico"><i data-lucide="ticket"></i></span> 프로모션</button>
           <div class="nav-sub">
-            <button data-page="stub" data-label="배송비 쿠폰" data-desc="배송비 회원쿠폰·단독쿠폰 (현재는 회원관리>혜택관리에서 발급)">배송비 쿠폰</button>
-            <button data-page="stub" data-label="구매대행 쿠폰" data-desc="구매대행 수수료 할인쿠폰">구매대행 쿠폰</button>
-            <button data-page="stub" data-label="쿠폰코드·신규가입" data-desc="쿠폰코드 발급·신규가입 자동발급 설정">쿠폰코드·신규가입</button>
+            <button data-page="coupons">배송비 쿠폰</button>
+            <button data-page="stub" data-label="구매대행 쿠폰" data-desc="구매대행 수수료 할인쿠폰 (미구현 — 배송비 쿠폰으로 대체 사용 중)">구매대행 쿠폰</button>
+            <button data-page="stub" data-label="쿠폰코드·신규가입" data-desc="쿠폰코드 발급·신규가입 자동발급 설정 (미구현)">쿠폰코드·신규가입</button>
           </div>
         </li>
 
@@ -233,28 +233,6 @@
             </table>
           </div>
         </div>
-        <div class="dash-panel" style="margin-top:18px;">
-          <h3>🎁 혜택 관리 — 쿠폰 발급·관리 <span style="font-size:13px;font-weight:400;color:var(--muted);">(회원에게 배송비 할인쿠폰 발급 / 정산 시 사용 처리)</span></h3>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;padding:12px;background:#FAF6F2;border-radius:10px;">
-            <b style="font-size:13px;">쿠폰 발급</b>
-            <input id="cpIssueUser" placeholder="회원 아이디(정확히)" style="height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;" />
-            <input id="cpIssueAmt" type="number" placeholder="금액₩" value="3000" style="width:110px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;" />
-            <input id="cpIssueDays" type="number" placeholder="유효일" value="30" style="width:90px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;" />
-            <input id="cpIssueReason" placeholder="사유(예: 이벤트)" style="width:150px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;" />
-            <button class="btn btn-small btn-primary" id="cpIssueBtn" type="button">발급</button>
-            <span class="save-ok" id="cpIssueMsg"></span>
-          </div>
-          <div style="display:flex;gap:8px;margin-bottom:12px;max-width:420px;">
-            <input id="couponSearch" placeholder="회원 아이디 또는 이름으로 조회" style="flex:1;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;" />
-            <button class="btn btn-small btn-primary" id="couponSearchBtn" type="button">검색</button>
-          </div>
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead><tr><th>회원</th><th>금액</th><th>상태</th><th>유효기간</th><th>사용주문</th><th>관리</th></tr></thead>
-              <tbody id="couponRows"><tr><td colspan="6" class="empty">회원 아이디/이름으로 검색하세요.</td></tr></tbody>
-            </table>
-          </div>
-        </div>
       </section>
 
       <!-- ===== 결제관리 ===== -->
@@ -353,6 +331,58 @@
         </div>
       </section>
 
+      <!-- ===== 게시판 (커뮤니티 글 관리) ===== -->
+      <section class="admin-page" id="page-boards">
+        <h2 class="admin-page-title">게시판 관리</h2>
+        <div class="dash-panel">
+          <h3>커뮤니티 게시판
+            <select id="boardFilter" style="margin-left:12px;padding:5px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;font-family:inherit;background:#fbfcfe;">
+              <option value="">전체</option>
+              <option value="review">후기게시판</option>
+              <option value="grade">등급업</option>
+              <option value="biz">사업자</option>
+              <option value="contact">1:1문의</option>
+            </select>
+            <button type="button" id="boardRefresh" class="btn btn-small" style="margin-left:8px;">새로고침</button>
+          </h3>
+          <p class="form-note" style="text-align:left;margin:0 0 12px;">커뮤니티(후기·등급업·사업자·1:1문의) 글을 검토·답변·삭제해요. ‘보기’를 누르면 내용·연락처가 펼쳐지고, 승인하면 공개 게시판에 노출됩니다.</p>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>유형</th><th>제목</th><th>작성자</th><th>공개</th><th>상태</th><th>작성일</th><th>관리</th></tr></thead>
+              <tbody id="boardRows"><tr><td colspan="7" class="empty">불러오는 중…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 프로모션 ▸ 쿠폰 ===== -->
+      <section class="admin-page" id="page-coupons">
+        <h2 class="admin-page-title">배송비 쿠폰</h2>
+        <p class="form-note" style="text-align:left;margin:0 0 16px;">회원에게 배송비 할인쿠폰을 발급하고, 정산 때 사용 처리해요. (신규가입 환영쿠폰도 여기서 관리)</p>
+        <div class="dash-panel">
+          <h3>🎁 쿠폰 발급·관리 <span style="font-size:13px;font-weight:400;color:var(--muted);">(회원에게 배송비 할인쿠폰 발급 / 정산 시 사용 처리)</span></h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;padding:12px;background:#FAF6F2;border-radius:10px;">
+            <b style="font-size:13px;">쿠폰 발급</b>
+            <input id="cpIssueUser" placeholder="회원 아이디(정확히)" style="height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;" />
+            <input id="cpIssueAmt" type="number" placeholder="금액₩" value="3000" style="width:110px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;" />
+            <input id="cpIssueDays" type="number" placeholder="유효일" value="30" style="width:90px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;" />
+            <input id="cpIssueReason" placeholder="사유(예: 이벤트)" style="width:150px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;" />
+            <button class="btn btn-small btn-primary" id="cpIssueBtn" type="button">발급</button>
+            <span class="save-ok" id="cpIssueMsg"></span>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;max-width:420px;">
+            <input id="couponSearch" placeholder="회원 아이디 또는 이름으로 조회" style="flex:1;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;" />
+            <button class="btn btn-small btn-primary" id="couponSearchBtn" type="button">검색</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>회원</th><th>금액</th><th>상태</th><th>유효기간</th><th>사용주문</th><th>관리</th></tr></thead>
+              <tbody id="couponRows"><tr><td colspan="6" class="empty">회원 아이디/이름으로 검색하세요.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- ===== 정산·통계 ===== -->
       <section class="admin-page" id="page-settle">
         <h2 class="admin-page-title">정산·통계</h2>
@@ -440,10 +470,11 @@
         </div>
 
         <div class="dash-panel" data-setgroup="home" style="margin-bottom:24px;">
-          <h3>상단 띠배너 문구</h3>
-          <p class="form-note" style="text-align:left;margin:0 0 12px;">모든 페이지 맨 위 띠에 표시됩니다. 비워두면 최신 공지가 자동으로 표시돼요. (예: 14시 전 입고분 당일 출고 / 설 연휴 배송 안내 / 이벤트)</p>
-          <input id="setTopbar" placeholder="예: 14시 전 입고분 당일 출고 / 이벤트 안내" style="width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fbfcfe;" />
-          <div class="set-actions" style="margin-top:12px;"><button class="btn btn-primary" id="saveTopbar">띠배너 저장</button><span class="save-ok" id="topbarSaved"></span></div>
+          <h3>상단 띠배너 문구 <span style="font-size:13px;font-weight:400;color:var(--muted);">(여러 개 넣으면 홈에서 자동으로 돌아가요)</span></h3>
+          <p class="form-note" style="text-align:left;margin:0 0 12px;">모든 페이지 맨 위 띠에 표시됩니다. 문구를 여러 개 넣으면 5초마다 한 줄씩 바뀝니다. 전부 비우면 기본 안내가 표시돼요.</p>
+          <div id="topbarList" style="display:grid;gap:8px;"></div>
+          <div class="set-actions" style="margin-top:10px;"><button class="btn btn-small" id="topbarAdd" type="button">＋ 문구 추가</button></div>
+          <div class="set-actions" style="margin-top:8px;"><button class="btn btn-primary" id="saveTopbar">띠배너 저장</button><span class="save-ok" id="topbarSaved"></span></div>
         </div>
 
         <!-- 메인 배너 관리는 좌측 '배너관리' 메뉴로 이동했어요 -->
@@ -512,16 +543,7 @@
           </div>
         </div>
 
-        <div class="dash-panel" data-setgroup="content" style="margin-top:24px;">
-          <h3>이용후기 관리</h3>
-          <p class="form-note" style="text-align:left;margin:0 0 16px;">메인 페이지 하단 후기 섹션에 표시됩니다. 작성자명은 가운데를 *로 가려 등록하세요. (예: 양*향)</p>
-          <div id="reviewRows"></div>
-          <div class="set-actions">
-            <button class="btn btn-small" id="addReview">+ 후기 추가</button>
-            <button class="btn btn-primary" id="saveReviews">후기 저장</button>
-            <span class="save-ok" id="reviewSaved"></span>
-          </div>
-        </div>
+        <!-- (옛 '이용후기 관리' 수동 편집기 제거 — 후기는 '공지·문의·후기' 화면에서 손님 실제 후기를 승인/거절합니다) -->
 
         <div class="dash-panel" data-setgroup="content" style="margin-top:24px;">
           <h3>FAQ (자주 묻는 질문) 관리</h3>
@@ -542,12 +564,26 @@
           <h3>메인 배너 관리 <span style="font-size:13px;font-weight:400;color:var(--muted);">(홈 첫화면 큰 이미지)</span></h3>
           <p class="form-note" style="text-align:left;margin:0 0 16px;">권장 2480×800px · png/jpeg/webp · 5MB 이하. 비워두면 홈에 기본 자리표시가 보여요. 여러 장 올리면 홈에서 자동으로 넘어가요.</p>
           <div class="set-grid">
-            <label class="full">이미지 파일<input type="file" id="bnFile" accept="image/png,image/jpeg,image/webp" /></label>
-            <label class="full">클릭 시 이동 (선택)<input id="bnLink" placeholder="예: order.html (비우면 구매대행 신청으로)" /></label>
-            <label class="full">설명 (선택)<input id="bnAlt" placeholder="배너 설명 (이미지 깨질 때·접근성용)" /></label>
+            <label class="full">이미지 파일 <span style="color:var(--muted);font-weight:400;font-size:12px;">(여러 장 한꺼번에 선택 → 아래에서 한 장씩 링크 달고 X로 빼기)</span><input type="file" id="bnFile" accept="image/png,image/jpeg,image/webp" multiple /></label>
           </div>
-          <div class="set-actions"><button class="btn btn-small btn-primary" id="bnAdd" type="button">배너 추가</button><span class="save-ok" id="bnMsg"></span></div>
+          <div id="bnPending" style="display:grid;gap:10px;margin-top:6px;"></div>
+          <div class="set-actions"><button class="btn btn-primary" id="bnAdd" type="button">＋ 선택한 이미지 올려서 저장</button><span class="save-ok" id="bnMsg"></span></div>
+          <div style="border-top:1px solid var(--line);margin:20px 0 14px;"></div>
+          <h4 style="margin:0 0 4px;font-size:14px;color:var(--navy);">등록된 배너 <span style="font-weight:400;color:var(--muted);font-size:12px;">(번호 순서대로 홈에서 돌아가요 · 링크 고치면 아래 ‘변경사항 저장’)</span></h4>
           <div id="bannerList" style="margin-top:12px;"></div>
+        </div>
+
+        <div class="dash-panel">
+          <h3>이벤트 서브배너 관리 <span style="font-size:13px;font-weight:400;color:var(--muted);">(홈 중간 작은 배너 2칸)</span></h3>
+          <p class="form-note" style="text-align:left;margin:0 0 16px;">권장 1000×500px(2:1) · png/jpeg/webp · 5MB 이하. 보통 2장 넣어요(홈에서 좌우로 나란히 표시). 비워두면 기본 자리표시가 보여요.</p>
+          <div class="set-grid">
+            <label class="full">이미지 파일 <span style="color:var(--muted);font-weight:400;font-size:12px;">(여러 장 한꺼번에 선택 → 아래에서 한 장씩 링크 달고 X로 빼기)</span><input type="file" id="evFile" accept="image/png,image/jpeg,image/webp" multiple /></label>
+          </div>
+          <div id="evPending" style="display:grid;gap:10px;margin-top:6px;"></div>
+          <div class="set-actions"><button class="btn btn-primary" id="evAdd" type="button">＋ 선택한 이미지 올려서 저장</button><span class="save-ok" id="evMsg"></span></div>
+          <div style="border-top:1px solid var(--line);margin:20px 0 14px;"></div>
+          <h4 style="margin:0 0 4px;font-size:14px;color:var(--navy);">등록된 서브배너 <span style="font-weight:400;color:var(--muted);font-size:12px;">(링크 고치면 아래 ‘변경사항 저장’)</span></h4>
+          <div id="evList" style="margin-top:12px;"></div>
         </div>
       </section>
 
@@ -960,8 +996,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=23"></script>
-  <script src="admin.js?v=46"></script>
+  <script src="supabase.js?v=26"></script>
+  <script src="guide-content.js?v=1"></script>
+  <script src="admin.js?v=54"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

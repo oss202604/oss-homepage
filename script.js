@@ -47,7 +47,7 @@ if (menuToggle && mainMenu) {
   if (!document.body.classList.contains("admin-body") && !document.querySelector(".osshead")) {
     [".utility-bar", ".site-header", ".main-nav"].forEach(function (s) { var e = document.querySelector(s); if (e) e.remove(); });
     var path = (location.pathname.split("/").pop() || "index.html"); if (path === "") path = "index.html";
-    var nav = [["index.html", "홈"], ["order.html", "구매대행 신청"], ["delivery.html", "배송대행 신청"], ["notice.html", "공지사항"], ["guide.html", "이용가이드"], ["order-lookup.html", "주문조회"]];
+    var nav = [["index.html", "홈"], ["order.html", "구매대행 신청"], ["delivery.html", "배송대행 신청"], ["notice.html", "공지사항"], ["community.html", "커뮤니티"], ["guide.html", "이용가이드"], ["order-lookup.html", "주문조회"]];
     var navHtml = nav.map(function (n) { return '<a href="' + n[0] + '"' + (n[0] === path ? ' class="on"' : "") + ">" + n[1] + "</a>"; }).join("");
     var sIco = '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>';
     var uIco = '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 20c0-3.6 3.4-5.6 7-5.6s7 2 7 5.6"></path></svg>';
@@ -71,7 +71,8 @@ if (menuToggle && mainMenu) {
       "order.html": [["order.html", "구매대행 신청"], ["guide.html#guide-purchase", "구매대행 신청방법"], ["order-lookup.html", "주문조회"]],
       "delivery.html": [["delivery.html", "배송대행 신청"], ["guide.html#guide-delivery", "배송대행 신청방법"], ["guide.html#guide-center", "배송센터(배대지) 주소"]],
       "guide.html": [["guide.html", "이용안내"], ["faq.html", "자주 묻는 질문"], ["guide.html#guide-customs", "통관·관세 안내"], ["guide.html#guide-money", "예치금(머니충전)"]],
-      "notice.html": [["notice.html", "공지사항"], ["faq.html", "자주 묻는 질문"], ["contact.html", "1:1 문의"]]
+      "notice.html": [["notice.html", "공지사항"], ["faq.html", "자주 묻는 질문"]],
+      "community.html": [["community.html#review", "후기 게시판"], ["community.html#grade", "타사이트 등급업"], ["community.html#biz", "사업자 게시판"], ["community.html#contact", "1:1 문의"]]
     };
     [].slice.call(navEl.querySelectorAll("a")).forEach(function (a) {
       var key = (a.getAttribute("href") || "").split("#")[0];
@@ -86,6 +87,26 @@ if (menuToggle && mainMenu) {
       sub.innerHTML = items.map(function (it) { return '<a href="' + it[0] + '">' + it[1] + "</a>"; }).join("");
       item.appendChild(sub);
     });
+  }
+  // 모바일 햄버거 메뉴 (bonri식) — 전 페이지 공통
+  var headIn = document.querySelector(".osshead-in");
+  if (headIn && !headIn.querySelector(".osshead-burger")) {
+    var curPath = (location.pathname.split("/").pop() || "index.html") || "index.html";
+    var DNAV = [["index.html", "홈"], ["order.html", "구매대행 신청"], ["delivery.html", "배송대행 신청"], ["notice.html", "공지사항"], ["community.html", "커뮤니티"], ["guide.html", "이용가이드"], ["order-lookup.html", "주문조회"]];
+    var burger = document.createElement("button");
+    burger.type = "button"; burger.className = "osshead-burger"; burger.setAttribute("aria-label", "메뉴 열기");
+    burger.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+    headIn.insertBefore(burger, headIn.firstChild);
+    var drBack = document.createElement("div"); drBack.className = "osshead-drawer-back";
+    var drawer = document.createElement("div"); drawer.className = "osshead-drawer";
+    var dnavHtml = DNAV.map(function (n) { return '<a href="' + n[0] + '"' + (n[0] === curPath ? ' class="on"' : "") + ">" + n[1] + "</a>"; }).join("");
+    drawer.innerHTML = '<div class="dr-sec">메뉴</div>' + dnavHtml + '<div class="dr-sec">내 계정</div><a href="login.html">로그인</a><a href="signup.html">회원가입</a><a href="mypage.html">마이페이지</a>';
+    document.body.appendChild(drBack); document.body.appendChild(drawer);
+    var _openDr = function () { drawer.classList.add("open"); drBack.classList.add("open"); };
+    var _closeDr = function () { drawer.classList.remove("open"); drBack.classList.remove("open"); };
+    burger.addEventListener("click", function (e) { e.stopPropagation(); drawer.classList.contains("open") ? _closeDr() : _openDr(); });
+    drBack.addEventListener("click", _closeDr);
+    drawer.addEventListener("click", function (e) { if (e.target.tagName === "A") _closeDr(); });
   }
 })();
 
@@ -124,7 +145,8 @@ if (menuToggle && mainMenu) {
           '<a href="delivery.html">배송대행 신청</a>' +
           '<a href="order-lookup.html">주문조회</a>' +
           '<a href="faq.html">자주 묻는 질문(FAQ)</a>' +
-          '<a href="contact.html">1:1 문의</a>' +
+          '<a href="community.html#contact">1:1 문의</a>' +
+          '<a href="community.html">커뮤니티</a>' +
         '</div>' +
       '</div>' +
       '<div class="footer-bottom"><div class="container">' +
@@ -166,7 +188,7 @@ if (menuToggle && mainMenu) {
     ["refund.html", "취소·환불정책"],
     ["notice.html", "공지사항"],
     ["faq.html", "FAQ"],
-    ["contact.html", "1:1 문의"],
+    ["community.html#contact", "1:1 문의"],
   ];
   const bar = document.createElement("nav");
   bar.className = "footer-sitemap";
@@ -211,18 +233,18 @@ if (menuToggle && mainMenu) {
 (function renderCsSidebar() {
   const el = document.querySelector(".cs-sidebar");
   if (!el) return;
+  if (el.dataset.cs === "community") return; // 커뮤니티는 자체 사이드바(게시판 탭) 유지
   const active = el.dataset.cs || "";
   const items = [
     ["notice", "notice.html", "공지사항"],
-    ["contact", "contact.html", "1:1 문의"],
     ["faq", "faq.html", "자주 묻는 질문"],
-    ["review", "index.html#reviews", "이용후기"],
+    ["community", "community.html", "커뮤니티"],
   ];
   el.innerHTML = '<p class="cs-sidebar-title">고객센터</p>' +
     items.map(([k, h, l]) => `<a href="${h}" class="${k === active ? "active" : ""}">${l}</a>`).join("") +
     '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.6;">' +
     '<p style="margin:0 0 9px;"><b style="color:var(--text);">상담시간</b><br>평일 10:00 ~ 22:00 <small>(일본시간)</small></p>' +
-    '<p style="margin:0;"><b style="color:var(--text);">카카오톡</b><br>@OSS <small>(등록 예정)</small></p></div>';
+    '<p style="margin:0;"><b style="color:var(--text);">카카오톡</b><br><a href="http://pf.kakao.com/_srxlxfX/chat" target="_blank" rel="noopener" style="color:var(--orange);font-weight:700;">@ossohayo</a></p></div>';
 })();
 
 // ===== "전체 서비스" 드롭다운 (모든 페이지 공통) =====
@@ -602,7 +624,9 @@ if (form && modal) {
   });
 
   document.getElementById("closeModal").addEventListener("click", () => { modal.hidden = true; });
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.hidden = true; });
+  let _mdn = false;
+  modal.addEventListener("mousedown", (e) => { _mdn = (e.target === modal); });
+  modal.addEventListener("click", (e) => { if (e.target === modal && _mdn) modal.hidden = true; });
 }
 
 // ===== 예상비용 계산기 (메인 #fee) =====
@@ -718,34 +742,39 @@ if (form && modal) {
   const esc = (s) => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   function render(list) {
     grid.innerHTML = list.map((r) => `<div class="review-card">
-      <div class="review-stars">${"★".repeat(Math.max(1, Math.min(5, Number(r.rating) || 5)))}</div>
+      ${r.image ? `<img class="review-photo" src="${esc(r.image)}" alt="후기 사진" loading="lazy" />` : `<div class="review-noimg">💬</div>`}
       <p class="review-text">${esc(r.text)}</p>
-      ${r.image ? `<img class="review-photo" src="${esc(r.image)}" alt="후기 사진" loading="lazy" />` : ""}
-      <p class="review-author">${esc(r.author || "고객님")}</p>
+      <p class="review-meta"><span class="rv-name">${esc(r.author || "고객님")}</span><span class="rv-date">${esc(r.date || "")}</span></p>
     </div>`).join("");
+    setupReviewAuto(list.length);
+  }
+  // 후기 가로 자동 슬라이드 (옆으로 흐르듯 계속 + 손으로 만지면 잠깐 멈춤)
+  var _rvTimer = null;
+  function setupReviewAuto(n) {
+    if (_rvTimer) { clearInterval(_rvTimer); _rvTimer = null; }
+    if (!n || n < 2) return;
+    function step() {
+      if (grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 4) grid.scrollTo({ left: 0, behavior: "smooth" });
+      else grid.scrollBy({ left: Math.round(grid.clientWidth * 0.85), behavior: "smooth" });
+    }
+    function start() { stop2(); _rvTimer = setInterval(step, 3500); }
+    function stop2() { if (_rvTimer) { clearInterval(_rvTimer); _rvTimer = null; } }
+    grid.addEventListener("mouseenter", stop2);
+    grid.addEventListener("mouseleave", start);
+    grid.addEventListener("touchstart", stop2, { passive: true });
+    start();
   }
   function empty() { grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#A99B91;padding:18px 0;">아직 등록된 후기가 없어요. 첫 후기를 남겨주세요! 😊</p>'; }
   grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#A99B91;">후기를 불러오는 중...</p>';
-  // 승인된 실제 후기 → 없으면 관리자 설정(reviews) → 없으면 빈 상태 (가짜 후기 표시 안 함)
-  function loadFromSetting() {
-    if (window.OSS && window.OSS.getSetting) window.OSS.getSetting("reviews").then((r) => { if (Array.isArray(r) && r.length) render(r); else empty(); }).catch(empty);
-    else empty();
-  }
+  // 승인된 실제 후기만 표시 (없으면 빈 상태). 가짜·수동 후기는 표시하지 않음.
+  function fmtRvDate(iso){ if(!iso) return ""; var d=(window.OSS && OSS.kstDate)?OSS.kstDate(iso):String(iso).slice(0,10); var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d); return m?(m[1].slice(2)+"."+m[2]+"."+m[3]):d; }
   if (window.OSS && window.OSS.fetchApprovedReviews) {
     var mask = (window.OSS && window.OSS.maskName) ? window.OSS.maskName : function (n) { return n || "고객"; };
     window.OSS.fetchApprovedReviews(12).then((rows) => {
-      if (Array.isArray(rows) && rows.length) render(rows.map((r) => ({ author: mask(r.author_name), rating: r.rating, text: r.body, image: r.image_url })));
-      else loadFromSetting();
-    }).catch(loadFromSetting);
-  } else { loadFromSetting(); }
-  // 후기 작성 CTA (회원만 — 마이페이지에서 작성, 비로그인 시 로그인으로 안내)
-  if (grid.parentNode && !document.getElementById("reviewWriteCta")) {
-    const cta = document.createElement("div");
-    cta.id = "reviewWriteCta";
-    cta.style.cssText = "text-align:center;margin-top:20px;";
-    cta.innerHTML = '<a href="mypage.html#reviews" class="btn btn-primary">✍️ 구매후기 작성하기</a>';
-    grid.parentNode.appendChild(cta);
-  }
+      if (Array.isArray(rows) && rows.length) render(rows.map((r) => ({ author: mask(r.author_name), text: r.body, image: r.image_url, date: fmtRvDate(r.approved_at || r.created_at) })));
+      else empty();
+    }).catch(empty);
+  } else { empty(); }
 })();
 
 // ===== 신청서 자동 임시저장 (구매/배송) =====
@@ -836,10 +865,11 @@ document.addEventListener("change", async (e) => {
   function show() { var c = pal[i % pal.length]; bar.style.background = c.b; bar.style.color = c.f; if (el) { el.style.color = c.f; el.textContent = msgs[i % msgs.length]; } }
   show();
   setInterval(function () { i++; show(); }, 5500);
-  // 관리자 설정(설정 → 띠배너 문구) 우선 적용. 여러 줄 입력 시 줄마다 순환.
+  // 관리자 설정(설정 → 띠배너 문구) 우선 적용. 배열(여러 개) 또는 줄바꿈 문자열 모두 지원 → 문구마다 순환.
   if (window.OSS && window.OSS.getSetting) window.OSS.getSetting("topbar").then(function (v) {
-    var t = (typeof v === "string" ? v : (v && v.text)) || "";
-    var lines = t.split(/\n+/).map(function (s) { return s.trim(); }).filter(Boolean);
+    var lines;
+    if (Array.isArray(v)) { lines = v.map(function (s) { return String(s).trim(); }).filter(Boolean); }
+    else { var t = (typeof v === "string" ? v : (v && v.text)) || ""; lines = t.split(/\n+/).map(function (s) { return s.trim(); }).filter(Boolean); }
     if (lines.length) { msgs = lines; i = 0; show(); }
   }).catch(function () {});
 })();
@@ -860,7 +890,9 @@ document.addEventListener("change", async (e) => {
   });
 
   document.getElementById("feeModalClose").addEventListener("click", close);
-  modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+  let _fdn = false;
+  modal.addEventListener("mousedown", (e) => { _fdn = (e.target === modal); });
+  modal.addEventListener("click", (e) => { if (e.target === modal && _fdn) close(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) close(); });
 
   // 다른 페이지에서 index.html#fee 로 들어온 경우 자동으로 열기

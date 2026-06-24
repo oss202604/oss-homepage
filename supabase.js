@@ -8,7 +8,29 @@ const SUPABASE_KEY = "sb_publishable_FyDtXrTDGbxtaLhqTS19Qw_VsnIE0xv";
 
 // supabase-js v2 (CDN) 로드 후 클라이언트 생성
 // 각 HTML에서 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 를 먼저 불러옵니다.
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+});
+
+// 로그인 토큰(기본 1시간)이 작업 중 만료돼 저장이 막히는 것 방지:
+// 주기적으로 + 탭 복귀 시 세션을 갱신해 둔다. (관리자 탭을 오래 열어두고 작업해도 안전)
+(function keepSessionAlive() {
+  if (!(sb && sb.auth)) return;
+  async function refresh() {
+    try {
+      const { data } = await sb.auth.getSession();   // 만료 임박이면 내부적으로 갱신
+      if (data && data.session) await sb.auth.refreshSession();
+    } catch (e) { /* 비로그인/네트워크 등은 조용히 무시 */ }
+  }
+  try { setInterval(refresh, 4 * 60 * 1000); } catch (e) {}   // 4분마다 (만료 1시간 전에 충분히 갱신)
+  try {
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "visible") refresh();   // 다른 탭 갔다 돌아오면 즉시 갱신
+      });
+    }
+  } catch (e) {}
+})();
 
 // ---- 신청서 저장 (구매대행/배송대행 공용) ----
 async function submitApplication(payload) {
@@ -138,6 +160,10 @@ async function createNotice(title, body, pinned) {
   const { error } = await sb.from("notices").insert([{ title, body, pinned: !!pinned }]);
   if (error) throw error;
 }
+async function updateNotice(id, title, body, pinned) {
+  const { error } = await sb.from("notices").update({ title, body, pinned: !!pinned }).eq("id", id);
+  if (error) throw error;
+}
 async function deleteNotice(id) {
   const { error } = await sb.from("notices").delete().eq("id", id);
   if (error) throw error;
@@ -149,9 +175,17 @@ async function getSetting(key) {
   if (error) throw error;
   return data ? data.value : null;
 }
+// 저장 실패가 '토큰 만료(RLS/JWT)' 때문이면 알아듣기 쉬운 메시지로 바꿔줌
+function rlsFriendly(error) {
+  const m = (error && error.message) || "";
+  if (/row-level security|jwt|not authorized|permission denied|invalid claim|token is expired/i.test(m)) {
+    return new Error("로그인이 만료됐어요. 화면을 새로고침(F5)한 뒤 다시 로그인하고 저장해 주세요.");
+  }
+  return error;
+}
 async function saveSetting(key, value) {
   const { error } = await sb.from("settings").upsert({ key, value, updated_at: new Date().toISOString() });
-  if (error) throw error;
+  if (error) throw rlsFriendly(error);
 }
 
 // ---- 이용안내 페이지 ----
@@ -167,7 +201,7 @@ async function fetchPages() {
 }
 async function savePage(slug, title, body) {
   const { error } = await sb.from("pages").upsert({ slug, title, body, updated_at: new Date().toISOString() });
-  if (error) throw error;
+  if (error) throw rlsFriendly(error);
 }
 
 // ---- 관리자 인증 ----
@@ -581,8 +615,28 @@ async function payByCard(opts) {
   }
 }
 
+// ---- 시간 표시: 전 사이트 한국(서울) 시간 기준 ----
+// DB는 UTC로 저장되므로 화면에는 항상 KST(+9)로 변환해 뿌린다.
+function kstDateTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return String(iso).replace("T", " ").slice(0, 16);
+  try { return new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(d); }
+  catch (e) { return String(iso).replace("T", " ").slice(0, 16); }
+}
+function kstDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return String(iso).slice(0, 10);
+  try { return new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(d); }
+  catch (e) { return String(iso).slice(0, 10); }
+}
+
 window.OSS = {
   sb,
+  // ⏰ 시간(KST)
+  kstDate,
+  kstDateTime,
   // 💳 PG
   OSS_PG,
   isPgEnabled,
@@ -606,6 +660,7 @@ window.OSS = {
   deleteInquiry,
   fetchNotices,
   createNotice,
+  updateNotice,
   deleteNotice,
   getSetting,
   saveSetting,
@@ -660,4 +715,71 @@ window.OSS = {
   updateAddress,
   deleteAddress,
   setDefaultAddress,
+  // 커뮤니티 게시판
+  fetchBoardPosts,
+  fetchMyBoardPosts,
+  submitBoardPost,
+  updateBoardPost,
+  deleteBoardPost,
+  replyBoardPost,
+  listBoardPosts,
+  setBoardPostStatus,
+  uploadBoardImage,
 };
+
+// ---- 커뮤니티 게시판 (board_posts) ----
+// board: 'review' | 'grade' | 'contact'
+async function fetchBoardPosts(board, limit) {
+  const { data, error } = await sb.from("board_posts")
+    .select("id,board,title,content,photos,visibility,status,author_display,order_no,admin_reply,replied_at,created_at")
+    .eq("board", board).eq("status", "approved").eq("visibility", "public")
+    .order("created_at", { ascending: false }).limit(limit || 30);
+  if (error) throw error;
+  return data || [];
+}
+async function fetchMyBoardPosts(board) {
+  const { data, error } = await sb.from("board_posts")
+    .select("*").eq("board", board).order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+async function submitBoardPost(payload) {
+  const { data: sess } = await sb.auth.getSession();
+  const uid = sess && sess.session && sess.session.user && sess.session.user.id;
+  if (!uid) throw new Error("로그인이 필요합니다.");
+  const { error } = await sb.from("board_posts").insert([Object.assign({ user_id: uid }, payload)]);
+  if (error) throw error;
+  return true;
+}
+async function updateBoardPost(id, fields) {
+  const { error } = await sb.from("board_posts").update(Object.assign({}, fields, { updated_at: new Date().toISOString() })).eq("id", id);
+  if (error) throw error;
+}
+async function deleteBoardPost(id) {
+  const { error } = await sb.from("board_posts").update({ status: "deleted", updated_at: new Date().toISOString() }).eq("id", id);
+  if (error) throw error;
+}
+// 관리자 전용
+async function listBoardPosts(board) {
+  let q = sb.from("board_posts").select("*").order("created_at", { ascending: false });
+  if (board) q = q.eq("board", board);
+  const { data, error } = await q.not("status", "eq", "deleted");
+  if (error) throw error;
+  return data || [];
+}
+async function replyBoardPost(id, reply) {
+  const { error } = await sb.from("board_posts").update({ admin_reply: reply, replied_at: new Date().toISOString(), updated_at: new Date().toISOString(), status: "approved" }).eq("id", id);
+  if (error) throw error;
+}
+async function setBoardPostStatus(id, status) {
+  const { error } = await sb.from("board_posts").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
+  if (error) throw error;
+}
+async function uploadBoardImage(file) {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const path = "board/" + Date.now() + "-" + Math.random().toString(36).slice(2, 7) + "." + ext;
+  const { error } = await sb.storage.from("product-images").upload(path, file, { cacheControl: "3600", upsert: false });
+  if (error) throw error;
+  const { data } = sb.storage.from("product-images").getPublicUrl(path);
+  return data.publicUrl;
+}
