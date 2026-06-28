@@ -38,9 +38,9 @@
     .oh-mascot{position:absolute;right:24px;bottom:16px;width:170px;height:auto;}
     .oh-hero-side{display:grid;grid-template-rows:1fr 1fr;gap:16px;}
     .oh-hero-side .oh-ph{border-radius:18px;}
-    .oh-hero-full{display:block;margin-top:24px;height:400px;border-radius:24px;position:relative;overflow:hidden;text-decoration:none;}
+    .oh-hero-full{display:block;margin-top:24px;height:460px;border-radius:24px;position:relative;overflow:hidden;text-decoration:none;}
     .oh-hero-full img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-    .oh-hero-carousel{position:relative;margin-top:24px;height:400px;border-radius:24px;overflow:hidden;}
+    .oh-hero-carousel{position:relative;margin-top:24px;height:460px;border-radius:24px;overflow:hidden;}
     .oh-hero-carousel .oh-slides{display:flex;height:100%;transition:transform .55s cubic-bezier(.4,0,.2,1);}
     .oh-hero-carousel .oh-slide{min-width:100%;height:100%;position:relative;}
     .oh-hero-carousel .oh-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
@@ -51,20 +51,15 @@
     .oh-dot{width:9px;height:9px;border-radius:50%;border:none;background:rgba(255,255,255,.55);cursor:pointer;padding:0;transition:width .2s,background .2s;}
     .oh-dot.on{background:#fff;width:22px;border-radius:5px;}
     .oh-evt-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-    .oh-evt{display:block;height:300px;border-radius:20px;position:relative;overflow:hidden;text-decoration:none;}
+    .oh-evt{display:block;height:280px;border-radius:20px;position:relative;overflow:hidden;text-decoration:none;}
     .oh-evt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
     @media(max-width:760px){
-      /* 모바일: 화면 꽉 차게(가장자리까지) + 배너 원본비율 그대로(잘림 없음) + 손가락 슬라이드 */
-      .oh-hero-full{height:auto;}
-      .oh-hero-full img{position:static;width:100%;height:auto;display:block;}
-      .oh-hero-carousel{height:auto;margin:0 -16px;width:auto;border-radius:0;}
-      .oh-hero-carousel .oh-slides{align-items:flex-start;}
-      .oh-hero-carousel .oh-slide{height:auto;}
-      .oh-hero-carousel .oh-slide img{position:static;width:100%;height:auto;display:block;}
+      /* 모바일: 폰용 이미지 + 화면 꽉 차게(가장자리까지) + 메인(4:3)이 서브(2:1)보다 크게 */
+      .oh-hero-full{aspect-ratio:4/3;height:auto;}
+      .oh-hero-carousel{aspect-ratio:4/3;height:auto;margin:0 -16px;width:auto;border-radius:0;}
       .oh-arrow{width:34px;height:34px;font-size:20px;}
       .oh-evt-grid{grid-template-columns:1fr;}
-      .oh-evt{height:auto;}
-      .oh-evt img{position:static;width:100%;height:auto;display:block;}
+      .oh-evt{aspect-ratio:2/1;height:auto;}
     }
     .oh-quicks{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:34px 0;}
     .oh-quick{display:flex;flex-direction:column;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:24px 12px;text-decoration:none;box-shadow:0 8px 30px rgba(40,26,16,.07);transition:transform .12s;}
@@ -153,18 +148,19 @@
       <div class="oh-dots" id="heroDots"></div>
     </div>
     <script>
-      /* 첫 페인트 전에 캐시된 배너(첫 장 base64)를 즉시 렌더 → 웹·폰 모두 깜빡임 제거 */
+      /* 첫 페인트 전에 캐시 배너 즉시 렌더(PC=url / 폰=urlMobile, 첫 장 base64) → 웹·폰 깜빡임 제거 */
       (function(){
         try{
           var b=JSON.parse(localStorage.getItem('oss_banners_v1')||'null');
           if(!(b&&b.length)) return;
           var h='';
           for(var i=0;i<b.length;i++){
-            var d=b[i]&&b[i].data, u=b[i]&&b[i].url;
-            var s=(d&&/^data:image\//.test(d))?d:(/^https?:\/\//i.test(u||'')?u:'');
-            if(!s) continue;
-            var lk=(b[i]&&b[i].link)||'order.html'; if(!/^(https?:\/\/|[a-z0-9_\-]+\.html)/i.test(lk)) lk='order.html';
-            h+='<a class="oh-slide" href="'+lk.replace(/"/g,'&quot;')+'"><img src="'+s.replace(/"/g,'&quot;')+'" alt="배너" onerror="this.remove()"></a>';
+            var it=b[i]||{};
+            var pc=(it.data&&/^data:image\//.test(it.data))?it.data:(/^https?:\/\//i.test(it.url||'')?it.url:'');
+            if(!pc) continue;
+            var mo=(it.dataMobile&&/^data:image\//.test(it.dataMobile))?it.dataMobile:(/^https?:\/\//i.test(it.urlMobile||'')?it.urlMobile:pc);
+            var lk=(it.link||'order.html'); if(!/^(https?:\/\/|[a-z0-9_\-]+\.html)/i.test(lk)) lk='order.html';
+            h+='<a class="oh-slide" href="'+lk.replace(/"/g,'&quot;')+'"><picture><source media="(max-width:760px)" srcset="'+mo.replace(/"/g,'&quot;')+'"><img src="'+pc.replace(/"/g,'&quot;')+'" alt="배너" onerror="this.remove()"></picture></a>';
           }
           if(h){ var el=document.getElementById('heroSlides'); if(el) el.innerHTML=h; }
         }catch(e){}
@@ -187,18 +183,19 @@
         <a class="oh-ph oh-evt" href="delivery.html"><b>이벤트 서브배너 2</b><span>1000 × 500 px · 관리자 ▸ 배너관리</span><img src="img/event-2.png" alt="이벤트 배너 2" onerror="this.remove()"></a>
       </div>
       <script>
-        /* 이벤트 서브배너도 첫 페인트 전에 캐시(첫 장 base64) 즉시 렌더 → 웹·폰 깜빡임 제거 */
+        /* 이벤트 서브배너도 첫 페인트 전에 즉시 렌더(PC=url / 폰=urlMobile, 첫 장 base64) → 웹·폰 깜빡임 제거 */
         (function(){
           try{
             var b=JSON.parse(localStorage.getItem('oss_evt_banners_v1')||'null');
             if(!(b&&b.length)) return;
             var h='';
             for(var i=0;i<b.length;i++){
-              var d=b[i]&&b[i].data, u=b[i]&&b[i].url;
-              var s=(d&&/^data:image\//.test(d))?d:(/^https?:\/\//i.test(u||'')?u:'');
-              if(!s) continue;
-              var lk=(b[i]&&b[i].link)||'order.html'; if(!/^(https?:\/\/|[a-z0-9_\-]+\.html)/i.test(lk)) lk='order.html';
-              h+='<a class="oh-evt" href="'+lk.replace(/"/g,'&quot;')+'"><img src="'+s.replace(/"/g,'&quot;')+'" alt="이벤트 배너" onerror="this.remove()"></a>';
+              var it=b[i]||{};
+              var pc=(it.data&&/^data:image\//.test(it.data))?it.data:(/^https?:\/\//i.test(it.url||'')?it.url:'');
+              if(!pc) continue;
+              var mo=(it.dataMobile&&/^data:image\//.test(it.dataMobile))?it.dataMobile:(/^https?:\/\//i.test(it.urlMobile||'')?it.urlMobile:pc);
+              var lk=(it.link||'order.html'); if(!/^(https?:\/\/|[a-z0-9_\-]+\.html)/i.test(lk)) lk='order.html';
+              h+='<a class="oh-evt" href="'+lk.replace(/"/g,'&quot;')+'"><picture><source media="(max-width:760px)" srcset="'+mo.replace(/"/g,'&quot;')+'"><img src="'+pc.replace(/"/g,'&quot;')+'" alt="이벤트 배너" onerror="this.remove()"></picture></a>';
             }
             if(h){ var el=document.getElementById('evtGrid'); if(el) el.innerHTML=h; }
           }catch(e){}
@@ -363,25 +360,36 @@
     }
     function escLocalB(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function safeUrlLocalB(u){ u=String(u==null?'':u).trim(); if(/^https?:\/\//i.test(u)) return u.replace(/["'<>]/g,encodeURIComponent); if(/^[a-z0-9_\-]+\.html(\?|#|$)/i.test(u)) return u.replace(/["'<>]/g,encodeURIComponent); return ''; }
-    // 배너 이미지를 폰에 통째(base64)로 저장 → 다음 방문 땐 네트워크 없이 즉시 표시(깜빡임 0). 관리자 변경도 그대로 유지.
+    function isMobileVB(){ try{ return window.matchMedia('(max-width:760px)').matches; }catch(e){ return (document.documentElement.clientWidth||999)<=760; } }
+    // 배너 이미지를 폰에 통째(base64)로 저장 → 다음 방문 땐 네트워크 없이 즉시 표시(깜빡임 0). 이 기기에서 실제 보이는 이미지(PC=url / 폰=urlMobile)만 저장.
     function cacheBannersB64(key, list){
       try{
         if(!(Array.isArray(list)&&list.length)){ localStorage.setItem(key, JSON.stringify(list||[])); return; }
-        var out=list.map(function(b){ return {url:b.url, link:b.link, alt:b.alt}; });
-        function save(){ try{ localStorage.setItem(key, JSON.stringify(out)); }catch(e){ out.forEach(function(o){ delete o.data; }); try{ localStorage.setItem(key, JSON.stringify(out)); }catch(e2){} } }
-        // 로딩 시 보이는 '첫 배너'만 base64로 저장 → 깜빡임 제거 + localStorage 용량 보호. 나머지는 주소(브라우저 캐시) 사용.
-        var first=out[0], u=first&&first.url;
-        if(!/^https?:\/\//i.test(String(u||''))){ save(); return; }
-        fetch(u).then(function(r){ return r.blob(); }).then(function(blob){
-          if(!blob || blob.size>1300000){ save(); return; }   // 1.3MB↑ 큰 사진은 생략(용량 보호)
-          var fr=new FileReader(); fr.onload=function(){ first.data=fr.result; save(); }; fr.onerror=save; fr.readAsDataURL(blob);
+        var out=list.map(function(b){ return {url:b.url, urlMobile:b.urlMobile, link:b.link, alt:b.alt}; });
+        function save(){ try{ localStorage.setItem(key, JSON.stringify(out)); }catch(e){ out.forEach(function(o){ delete o.data; delete o.dataMobile; }); try{ localStorage.setItem(key, JSON.stringify(out)); }catch(e2){} } }
+        var mo=isMobileVB(), first=out[0];
+        var target = mo ? (first.urlMobile||first.url) : first.url;   // 보이는 첫 배너만 캐시(용량 보호)
+        var field = mo ? 'dataMobile' : 'data';
+        if(!/^https?:\/\//i.test(String(target||''))){ save(); return; }
+        fetch(target).then(function(r){ return r.blob(); }).then(function(blob){
+          if(!blob || blob.size>1300000){ save(); return; }
+          var fr=new FileReader(); fr.onload=function(){ first[field]=fr.result; save(); }; fr.onerror=save; fr.readAsDataURL(blob);
         }).catch(save);
       }catch(e){ try{ localStorage.setItem(key, JSON.stringify(list||[])); }catch(e2){} }
     }
-    function bannerSrc(b){ return (b && b.data && /^data:image\//.test(b.data)) ? b.data : safeUrlLocalB(b && b.url); }
+    function bnPc(b){ return (b && b.data && /^data:image\//.test(b.data)) ? b.data : safeUrlLocalB(b && b.url); }
+    function bnMo(b){ var m=(b && b.dataMobile && /^data:image\//.test(b.dataMobile)) ? b.dataMobile : safeUrlLocalB(b && b.urlMobile); return m || bnPc(b); }
+    // 배너 1장 → <picture> (폰=폰용 이미지, PC=PC용). 폰용 없으면 PC용으로 대체.
+    function bannerPicture(b, cls){
+      var pc=bnPc(b); if(!pc) return '';
+      var mo=bnMo(b);
+      var href=safeUrlLocalB(b.link)||'order.html';
+      var alt=escLocalB(b.alt||'배너');
+      return '<a class="'+cls+'" href="'+href+'"><picture><source media="(max-width:760px)" srcset="'+mo+'"><img src="'+pc+'" alt="'+alt+'" onerror="this.remove()"></picture></a>';
+    }
     // 관리자가 올린 메인 배너 — 캐시(base64)로 즉시 렌더 후 네트워크로 갱신
     (function initHero(){
-      function buildHtml(banners){ if(!(Array.isArray(banners)&&banners.length)) return ''; return banners.map(function(b){ var src=bannerSrc(b); if(!src) return ''; var href=safeUrlLocalB(b.link)||'order.html'; var alt=escLocalB(b.alt||'배너'); return '<a class="oh-slide" href="'+href+'"><img src="'+src+'" alt="'+alt+'" onerror="this.remove()"></a>'; }).join(''); }
+      function buildHtml(banners){ if(!(Array.isArray(banners)&&banners.length)) return ''; return banners.map(function(b){ return bannerPicture(b,'oh-slide'); }).join(''); }
       var slides=document.getElementById('heroSlides'); var started=false;
       // 1) 캐시 즉시 렌더 (첫 페인트 전 → 자리표시·이미지 깜빡임 제거)
       try { var c=buildHtml(JSON.parse(localStorage.getItem('oss_banners_v1')||'null')); if(c){ slides.innerHTML=c; heroCarousel(); started=true; } } catch(e){}
@@ -397,7 +405,7 @@
     })();
     // 이벤트 서브배너 — 동일하게 base64 캐시
     (function initEvtBanners(){
-      function buildHtml(list){ if(!(Array.isArray(list)&&list.length)) return ''; return list.map(function(b){ var src=bannerSrc(b); if(!src) return ''; var href=safeUrlLocalB(b.link)||'order.html'; var alt=escLocalB(b.alt||'이벤트 배너'); return '<a class="oh-evt" href="'+href+'"><img src="'+src+'" alt="'+alt+'" onerror="this.remove()"></a>'; }).join(''); }
+      function buildHtml(list){ if(!(Array.isArray(list)&&list.length)) return ''; return list.map(function(b){ return bannerPicture(b,'oh-evt'); }).join(''); }
       var grid=document.getElementById('evtGrid'); if(!grid) return;
       var started=false;
       try { var c=buildHtml(JSON.parse(localStorage.getItem('oss_evt_banners_v1')||'null')); if(c){ grid.innerHTML=c; started=true; } } catch(e){}

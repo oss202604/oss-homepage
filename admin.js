@@ -1889,15 +1889,24 @@ function renderBanners() {
     return;
   }
   box.innerHTML = BANNERS.map((b, i) =>
-    '<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:8px;background:#fff;margin-bottom:8px;">'
+    '<div style="display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:8px;background:#fff;margin-bottom:8px;">'
     + '<span style="font-weight:700;color:var(--navy);width:18px;text-align:center;flex-shrink:0;">' + (i + 1) + '</span>'
-    + '<img src="' + safeUrl(b.url) + '" alt="" onerror="this.style.display=\'none\'" style="width:96px;height:46px;object-fit:cover;border-radius:4px;border:1px solid var(--line);flex-shrink:0;">'
-    + '<input class="bn-elink" data-i="' + i + '" value="' + esc(b.link || "").replace(/"/g, "&quot;") + '" placeholder="클릭 시 이동(선택) 예: order.html — 비우면 구매대행 신청으로" style="flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:4px;font-family:inherit;font-size:13px;">'
-    + '<button class="btn btn-small bn-edel" data-i="' + i + '" type="button" style="color:var(--red);flex-shrink:0;">✕ 삭제</button>'
+    + '<img src="' + safeUrl(b.url) + '" alt="" title="PC용" onerror="this.style.display=\'none\'" style="width:90px;height:46px;object-fit:cover;border-radius:4px;border:1px solid var(--line);flex-shrink:0;">'
+    + (b.urlMobile ? '<img src="' + safeUrl(b.urlMobile) + '" alt="" title="폰용" onerror="this.style.display=\'none\'" style="width:34px;height:46px;object-fit:cover;border-radius:4px;border:1.5px solid var(--orange);flex-shrink:0;">' : '<span style="font-size:11px;color:var(--muted);flex-shrink:0;white-space:nowrap;">폰용 없음</span>')
+    + '<input class="bn-elink" data-i="' + i + '" value="' + esc(b.link || "").replace(/"/g, "&quot;") + '" placeholder="클릭 시 이동(선택) 예: order.html" style="flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:4px;font-family:inherit;font-size:13px;">'
+    + '<label class="btn btn-small" style="flex-shrink:0;cursor:pointer;white-space:nowrap;">📱' + (b.urlMobile ? '변경' : '폰용 추가') + '<input type="file" class="bn-mobfile" data-i="' + i + '" accept="image/png,image/jpeg,image/webp" style="display:none;"></label>'
+    + '<button class="btn btn-small bn-edel" data-i="' + i + '" type="button" style="color:var(--red);flex-shrink:0;">✕</button>'
     + '</div>'
   ).join("")
     + '<div class="set-actions"><button class="btn btn-primary" id="bnSaveEdits" type="button">변경사항 저장</button><span class="save-ok" id="bnEditMsg"></span></div>';
   box.querySelectorAll(".bn-elink").forEach((inp) => inp.addEventListener("input", () => { BANNERS[Number(inp.dataset.i)].link = inp.value; }));
+  box.querySelectorAll(".bn-mobfile").forEach((inp) => inp.addEventListener("change", async () => {
+    const i = Number(inp.dataset.i), f = inp.files && inp.files[0]; if (!f) return;
+    if (!/^image\/(png|jpeg|webp)$/.test(f.type)) { alert("png·jpeg·webp만 가능해요"); return; }
+    if (f.size > 5 * 1024 * 1024) { alert("5MB를 넘어요"); return; }
+    try { const url = await window.OSS.uploadBannerImage(f); BANNERS[i].urlMobile = url; await saveBanners(); }
+    catch (e) { alert("폰용 이미지 업로드 실패: " + (e.message || e)); }
+  }));
   box.querySelectorAll(".bn-edel").forEach((btn) => btn.addEventListener("click", async () => {
     if (!confirm("이 배너를 뺄까요? (홈에서 사라져요)")) return;
     BANNERS.splice(Number(btn.dataset.i), 1);
@@ -1976,15 +1985,24 @@ function renderEventBanners() {
     return;
   }
   box.innerHTML = EVENT_BANNERS.map((b, i) =>
-    '<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:8px;background:#fff;margin-bottom:8px;">'
+    '<div style="display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:8px;background:#fff;margin-bottom:8px;">'
     + '<span style="font-weight:700;color:var(--navy);width:18px;text-align:center;flex-shrink:0;">' + (i + 1) + '</span>'
-    + '<img src="' + safeUrl(b.url) + '" alt="" onerror="this.style.display=\'none\'" style="width:96px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--line);flex-shrink:0;">'
+    + '<img src="' + safeUrl(b.url) + '" alt="" title="PC용" onerror="this.style.display=\'none\'" style="width:90px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--line);flex-shrink:0;">'
+    + (b.urlMobile ? '<img src="' + safeUrl(b.urlMobile) + '" alt="" title="폰용" onerror="this.style.display=\'none\'" style="width:34px;height:48px;object-fit:cover;border-radius:4px;border:1.5px solid var(--orange);flex-shrink:0;">' : '<span style="font-size:11px;color:var(--muted);flex-shrink:0;white-space:nowrap;">폰용 없음</span>')
     + '<input class="ev-elink" data-i="' + i + '" value="' + esc(b.link || "").replace(/"/g, "&quot;") + '" placeholder="클릭 시 이동(선택) 예: order.html" style="flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:4px;font-family:inherit;font-size:13px;">'
-    + '<button class="btn btn-small ev-edel" data-i="' + i + '" type="button" style="color:var(--red);flex-shrink:0;">✕ 삭제</button>'
+    + '<label class="btn btn-small" style="flex-shrink:0;cursor:pointer;white-space:nowrap;">📱' + (b.urlMobile ? '변경' : '폰용 추가') + '<input type="file" class="ev-mobfile" data-i="' + i + '" accept="image/png,image/jpeg,image/webp" style="display:none;"></label>'
+    + '<button class="btn btn-small ev-edel" data-i="' + i + '" type="button" style="color:var(--red);flex-shrink:0;">✕</button>'
     + '</div>'
   ).join("")
     + '<div class="set-actions"><button class="btn btn-primary" id="evSaveEdits" type="button">변경사항 저장</button><span class="save-ok" id="evEditMsg"></span></div>';
   box.querySelectorAll(".ev-elink").forEach((inp) => inp.addEventListener("input", () => { EVENT_BANNERS[Number(inp.dataset.i)].link = inp.value; }));
+  box.querySelectorAll(".ev-mobfile").forEach((inp) => inp.addEventListener("change", async () => {
+    const i = Number(inp.dataset.i), f = inp.files && inp.files[0]; if (!f) return;
+    if (!/^image\/(png|jpeg|webp)$/.test(f.type)) { alert("png·jpeg·webp만 가능해요"); return; }
+    if (f.size > 5 * 1024 * 1024) { alert("5MB를 넘어요"); return; }
+    try { const url = await window.OSS.uploadBannerImage(f); EVENT_BANNERS[i].urlMobile = url; await window.OSS.saveSetting("event_banners", EVENT_BANNERS); renderEventBanners(); }
+    catch (e) { alert("폰용 이미지 업로드 실패: " + (e.message || e)); }
+  }));
   box.querySelectorAll(".ev-edel").forEach((btn) => btn.addEventListener("click", async () => {
     if (!confirm("이 서브배너를 뺄까요?")) return;
     EVENT_BANNERS.splice(Number(btn.dataset.i), 1);
