@@ -96,6 +96,7 @@
             <button data-page="settle">정산 요약</button>
             <button data-page="vatrep">부가세 신고자료</button>
             <button data-page="salesrep">매출 리포트</button>
+            <button data-page="chanrep">채널별 리포트</button>
             <button data-page="cntrep">가입·건수 리포트</button>
           </div>
         </li>
@@ -758,6 +759,26 @@
         </div>
       </section>
 
+      <!-- ===== 정산통계 > 채널별 리포트 ===== -->
+      <section class="admin-page" id="page-chanrep">
+        <h2 class="admin-page-title">채널별 리포트 <span style="font-size:14px;font-weight:400;color:var(--muted);">(유입 채널별 매출)</span></h2>
+        <p class="form-note" style="text-align:left;margin:0 0 14px;">주문이 어느 채널(인스타·카카오·홈페이지 등)에서 들어왔는지 기간별로 집계해요. 취소·반품/교환 제외. 어디에 마케팅할지 판단에 활용하세요.</p>
+        <div class="dash-panel">
+          <div class="set-actions" style="margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+            <input type="date" id="chanFrom" style="height:38px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;">
+            <span style="color:var(--muted);">~</span>
+            <input type="date" id="chanTo" style="height:38px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;">
+            <button class="btn btn-small btn-primary" id="chanRun" type="button">조회</button>
+            <button class="btn btn-small" id="chanCsvBtn" type="button">엑셀(CSV) 저장</button>
+          </div>
+          <p id="chanSummary" style="margin:0 0 12px;font-size:14px;"></p>
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>채널</th><th>건수</th><th>상품합계¥</th><th>환산₩</th><th>배송비₩</th><th>추정수수료₩</th><th>총매출₩</th></tr></thead>
+            <tbody id="chanRows"><tr><td colspan="7" class="empty">조회를 누르면 표시돼요.</td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
       <!-- ===== 정산통계 > 부가세 신고자료 ===== -->
       <section class="admin-page" id="page-vatrep">
         <h2 class="admin-page-title">부가세 신고자료 <span style="font-size:14px;font-weight:400;color:var(--muted);">(월별 수수료매출·부가세 추정)</span></h2>
@@ -1016,7 +1037,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=26"></script>
   <script src="guide-content.js?v=1"></script>
-  <script src="admin.js?v=59"></script>
+  <script src="admin.js?v=60"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

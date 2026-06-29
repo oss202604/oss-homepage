@@ -538,6 +538,7 @@ document.querySelectorAll(".admin-nav button").forEach((btn) => {
     if (page === "pointlog") renderLedgerLog("points", "pointLogRows", false);
     if (page === "refund") renderLedgerLog("deposit", "refundRows", true);
     if (page === "salesrep") renderSalesReport();
+    if (page === "chanrep") renderChanReport();
     if (page === "vatrep") renderVatReport();
     if (page === "cntrep") renderCountReport();
     if (page === "paymethods") loadPayMethods();
@@ -830,6 +831,41 @@ function salesReportCsv() {
   const t = salesCalc(x.base); body.push(["합계", t.cnt, t.goodsYen, t.goodsWon, t.ship, t.comm, t.gross]);
   downloadCsv("매출리포트_" + x.from + "_" + x.to + ".csv", [head].concat(body));
 }
+// ----- 채널별 리포트 (유입 채널별 매출) -----
+const CHAN_LABEL = { web: "홈페이지", insta: "인스타", kakao: "카카오", threads: "스레드", sns: "SNS기타", manual: "직접입력" };
+function chanBase() { const rg = repRange("chan"); return { from: rg[0], to: rg[1], base: ordersInRange(rg[0], rg[1]).filter((o) => !isExcStatus(o.status)) }; }
+function chanGroups(base) { const g = {}; base.forEach((o) => { const c = (o.raw.channel || "").trim() || "(없음)"; (g[c] = g[c] || []).push(o); }); return g; }
+function renderChanReport() {
+  repDefaults("chan");
+  const x = chanBase(); const tb = document.getElementById("chanRows");
+  if (!tb || !x.from || !x.to) return;
+  const groups = chanGroups(x.base);
+  const keys = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
+  let html = "", tot = salesCalc([]);
+  keys.forEach((k) => {
+    const c = salesCalc(groups[k]);
+    ["cnt", "goodsYen", "goodsWon", "ship", "comm", "gross"].forEach((m) => { tot[m] += c[m]; });
+    html += '<tr><td><b>' + esc(CHAN_LABEL[k] || k) + '</b></td><td>' + c.cnt + '건</td><td>¥' + c.goodsYen.toLocaleString() + '</td><td>₩' + c.goodsWon.toLocaleString() + '</td><td>₩' + c.ship.toLocaleString() + '</td><td>₩' + c.comm.toLocaleString() + '</td><td><b>₩' + c.gross.toLocaleString() + '</b></td></tr>';
+  });
+  if (!keys.length) html = '<tr><td colspan="7" class="empty">해당 기간 주문이 없어요.</td></tr>';
+  else html += '<tr style="background:#FAF6F2;font-weight:700;"><td>합계</td><td>' + tot.cnt + '건</td><td>¥' + tot.goodsYen.toLocaleString() + '</td><td>₩' + tot.goodsWon.toLocaleString() + '</td><td>₩' + tot.ship.toLocaleString() + '</td><td>₩' + tot.comm.toLocaleString() + '</td><td>₩' + tot.gross.toLocaleString() + '</td></tr>';
+  tb.innerHTML = html;
+  const sm = document.getElementById("chanSummary");
+  if (sm) sm.innerHTML = '<b>' + x.from + ' ~ ' + x.to + '</b> · 채널 ' + keys.length + '개 · 총 ' + tot.cnt + '건 · 총매출 <b style="color:var(--orange);">₩' + tot.gross.toLocaleString() + '</b>';
+}
+function chanReportCsv() {
+  renderChanReport(); const x = chanBase(); if (!x.from || !x.to) return;
+  const groups = chanGroups(x.base);
+  const keys = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
+  const head = ["채널", "건수", "상품합계(엔)", "환산(원)", "배송비(원)", "추정수수료(원)", "총매출(원)"];
+  const body = keys.map((k) => { const c = salesCalc(groups[k]); return [CHAN_LABEL[k] || k, c.cnt, c.goodsYen, c.goodsWon, c.ship, c.comm, c.gross]; });
+  const t = salesCalc(x.base); body.push(["합계", t.cnt, t.goodsYen, t.goodsWon, t.ship, t.comm, t.gross]);
+  downloadCsv("채널별리포트_" + x.from + "_" + x.to + ".csv", [head].concat(body));
+}
+(function bindChanReport() {
+  const run = document.getElementById("chanRun"); if (run) run.addEventListener("click", renderChanReport);
+  const csv = document.getElementById("chanCsvBtn"); if (csv) csv.addEventListener("click", chanReportCsv);
+})();
 function vatByMonth() {
   const rg = repRange("vat"); const from = rg[0], to = rg[1];
   const base = ordersInRange(from, to).filter((o) => !isExcStatus(o.status));
