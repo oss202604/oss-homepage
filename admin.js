@@ -1144,12 +1144,16 @@ function matchSearch(o) {
   return [o.no, o.customer, o.name, r.applicant_phone, r.receiver_name, r.receiver_phone, r.tracking_no]
     .some((v) => (v || "").toString().toLowerCase().includes(q));
 }
-const ORD_ADV = { type: "", from: "", to: "" };  // 주문 표 상세필터(유형·기간) — 미설정 시 통과
+const ORD_ADV = { type: "", from: "", to: "", channel: "", amtMin: "", amtMax: "" };  // 주문 표 상세필터 — 미설정 시 통과
 function advPass(o) {
   if (ORD_ADV.type && o.type !== ORD_ADV.type) return false;
   const d = o.created_local || o.created || "";
   if (ORD_ADV.from && d < ORD_ADV.from) return false;
   if (ORD_ADV.to && d > ORD_ADV.to) return false;
+  if (ORD_ADV.channel && (o.raw.channel || "") !== ORD_ADV.channel) return false;
+  const amt = Number(o.amount) || 0;
+  if (ORD_ADV.amtMin !== "" && amt < Number(ORD_ADV.amtMin)) return false;
+  if (ORD_ADV.amtMax !== "" && amt > Number(ORD_ADV.amtMax)) return false;
   return true;
 }
 const FLAG_DOT = { red: "🔴", orange: "🟠", green: "🟢", blue: "🔵" };
@@ -1848,17 +1852,28 @@ function settleCsv() {
 })();
 
 // ===== 주문 표 보기 (칸반 대안) =====
-function renderOrderTable() {
+let ORDER_PAGE = 1; const ORDER_PER = 30;
+function renderOrderTable(keepPage) {
+  if (!keepPage) ORDER_PAGE = 1;
   const tb = document.getElementById("orderTableRows");
   if (!tb) return;
-  const list = ORDERS.filter((o) => !o.deleted && matchSearch(o) && advPass(o) && (!STATUS_FILTER || o.status === STATUS_FILTER)).slice().sort((a, b) => {
-    let av, bv;
-    if (SORT.key === "amount") { av = Number(a.amount) || 0; bv = Number(b.amount) || 0; }
+  const all = ORDERS.filter((o) => !o.deleted && matchSearch(o) && advPass(o) && (!STATUS_FILTER || o.status === STATUS_FILTER)).slice().sort((a, b) => {
+    const k = SORT.key; let av, bv;
+    if (k === "amount") { av = Number(a.amount) || 0; bv = Number(b.amount) || 0; }
+    else if (k === "no") { av = a.no || ""; bv = b.no || ""; }
+    else if (k === "type") { av = a.type || ""; bv = b.type || ""; }
+    else if (k === "customer") { av = a.customer || ""; bv = b.customer || ""; }
+    else if (k === "status") { av = a.status || ""; bv = b.status || ""; }
     else { av = a.created || ""; bv = b.created || ""; }
     if (av < bv) return -1 * SORT.dir;
     if (av > bv) return 1 * SORT.dir;
     return 0;
   });
+  const total = all.length;
+  const pages = Math.max(1, Math.ceil(total / ORDER_PER));
+  if (ORDER_PAGE > pages) ORDER_PAGE = pages;
+  const start = (ORDER_PAGE - 1) * ORDER_PER;
+  const list = all.slice(start, start + ORDER_PER);
   tb.innerHTML = list.length
     ? list.map((o) => `<tr data-id="${o.id}" style="cursor:pointer;"><td>${esc(o.no)}</td><td>${o.type === "purchase" ? "구매" : "배송"}</td><td>${esc(o.customer)}</td><td>${thumbHtml(o)}${esc(o.name)}</td><td><span class="status-badge ${badgeClass(o.status)}">${labelOf(o.status)}</span></td><td>¥${(o.amount || 0).toLocaleString()}</td><td>${o.created}</td><td>${esc(o.raw.tracking_no || "-")}</td></tr>`).join("")
     : '<tr><td colspan="8" class="empty">주문이 없습니다.</td></tr>';
@@ -1867,6 +1882,18 @@ function renderOrderTable() {
     const ind = th.querySelector(".sort-ind");
     if (ind) ind.textContent = (th.dataset.sort === SORT.key) ? (SORT.dir === -1 ? "▼" : "▲") : "";
   });
+  const pg = document.getElementById("orderPager");
+  if (pg) {
+    if (total <= ORDER_PER) { pg.innerHTML = total ? '<span class="pg-info">총 ' + total + '건</span>' : ''; }
+    else {
+      pg.innerHTML = '<button class="btn btn-small" id="pgPrev"' + (ORDER_PAGE <= 1 ? ' disabled' : '') + '>‹ 이전</button>'
+        + '<span class="pg-info">' + ORDER_PAGE + ' / ' + pages + ' 페이지 · 총 ' + total + '건</span>'
+        + '<button class="btn btn-small" id="pgNext"' + (ORDER_PAGE >= pages ? ' disabled' : '') + '>다음 ›</button>';
+      const pv = document.getElementById("pgPrev"), nx = document.getElementById("pgNext");
+      if (pv) pv.addEventListener("click", () => { if (ORDER_PAGE > 1) { ORDER_PAGE--; renderOrderTable(true); } });
+      if (nx) nx.addEventListener("click", () => { if (ORDER_PAGE < pages) { ORDER_PAGE++; renderOrderTable(true); } });
+    }
+  }
 }
 (function bindOrderView() {
   document.querySelectorAll(".view-toggle").forEach((b) => b.addEventListener("click", () => {
@@ -1898,12 +1925,15 @@ function renderOrderTable() {
     if (SORT.key === k) SORT.dir *= -1; else { SORT.key = k; SORT.dir = -1; }
     renderOrderTable();
   }));
-  const advType = document.getElementById("ordAdvType"), advFrom = document.getElementById("ordAdvFrom"), advTo = document.getElementById("ordAdvTo"), advClr = document.getElementById("ordAdvClear");
-  function advApply() { if (advType) ORD_ADV.type = advType.value; if (advFrom) ORD_ADV.from = advFrom.value; if (advTo) ORD_ADV.to = advTo.value; VIEW = "table"; const kw = document.getElementById("kanbanWrap"), tw = document.getElementById("orderTableWrap"); if (kw) kw.hidden = true; if (tw) tw.hidden = false; document.querySelectorAll(".view-toggle").forEach((x) => x.classList.toggle("active", x.dataset.view === "table")); renderOrderTable(); }
+  const advType = document.getElementById("ordAdvType"), advFrom = document.getElementById("ordAdvFrom"), advTo = document.getElementById("ordAdvTo"), advClr = document.getElementById("ordAdvClear"), advChan = document.getElementById("ordAdvChannel"), advMin = document.getElementById("ordAdvMin"), advMax = document.getElementById("ordAdvMax");
+  function advApply() { if (advType) ORD_ADV.type = advType.value; if (advFrom) ORD_ADV.from = advFrom.value; if (advTo) ORD_ADV.to = advTo.value; if (advChan) ORD_ADV.channel = advChan.value; if (advMin) ORD_ADV.amtMin = advMin.value; if (advMax) ORD_ADV.amtMax = advMax.value; VIEW = "table"; const kw = document.getElementById("kanbanWrap"), tw = document.getElementById("orderTableWrap"); if (kw) kw.hidden = true; if (tw) tw.hidden = false; document.querySelectorAll(".view-toggle").forEach((x) => x.classList.toggle("active", x.dataset.view === "table")); renderOrderTable(); }
   if (advType) advType.addEventListener("change", advApply);
   if (advFrom) advFrom.addEventListener("change", advApply);
   if (advTo) advTo.addEventListener("change", advApply);
-  if (advClr) advClr.addEventListener("click", () => { ORD_ADV.type = ""; ORD_ADV.from = ""; ORD_ADV.to = ""; if (advType) advType.value = ""; if (advFrom) advFrom.value = ""; if (advTo) advTo.value = ""; renderOrderTable(); });
+  if (advChan) advChan.addEventListener("change", advApply);
+  if (advMin) advMin.addEventListener("input", advApply);
+  if (advMax) advMax.addEventListener("input", advApply);
+  if (advClr) advClr.addEventListener("click", () => { ORD_ADV.type = ""; ORD_ADV.from = ""; ORD_ADV.to = ""; ORD_ADV.channel = ""; ORD_ADV.amtMin = ""; ORD_ADV.amtMax = ""; if (advType) advType.value = ""; if (advFrom) advFrom.value = ""; if (advTo) advTo.value = ""; if (advChan) advChan.value = ""; if (advMin) advMin.value = ""; if (advMax) advMax.value = ""; renderOrderTable(); });
   const csv = document.getElementById("orderCsvBtn");
   if (csv) csv.addEventListener("click", () => {
     const list = ORDERS.filter((o) => !o.deleted && matchSearch(o) && advPass(o) && (!STATUS_FILTER || o.status === STATUS_FILTER));

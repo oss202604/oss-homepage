@@ -195,6 +195,8 @@ body.admin-body { background: #eef1f6; --ac-line: #ffd8c6; --ac-ring: rgba(255,1
 .view-toggle.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 .sort-ind { font-size: 10px; color: var(--muted); }
 #orderTable th[data-sort] { cursor: pointer; user-select: none; }
+.order-pager { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
+.order-pager .pg-info { font-size: 13px; color: var(--muted); font-weight: 600; }
 .bn-item { display: flex; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 8px; margin-bottom: 8px; }
 .bn-item img { width: 120px; height: 42px; object-fit: cover; border-radius: 6px; flex: none; background: #f0f3f8; }
 .bn-item .bn-meta { flex: 1; min-width: 0; font-size: 13px; word-break: break-word; }
