@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>OSS 관리자 · 모바일</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <style>
+    :root{ --or:#ff6b2c; --or-d:#e85410; --navy:#1a1d23; --muted:#8a8079; --line:#ece5df; --bg:#f4f1ee; --red:#e0392b; --ok:#16a34a; }
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    body{font-family:"Noto Sans KR",-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:#191510;line-height:1.5;font-size:15px;}
+    button,input,select,textarea{font-family:inherit;}
+    /* 로그인 */
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+    .login-card{background:#fff;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.1);padding:30px 24px;width:100%;max-width:360px;}
+    .login-card h1{font-size:22px;font-weight:900;color:var(--navy);text-align:center;}
+    .login-card h1 small{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-top:4px;}
+    .login-card label{display:block;font-size:13px;font-weight:700;color:#444;margin:16px 0 5px;}
+    .login-card input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:11px;font-size:16px;background:#fbfaf8;}
+    .login-card input:focus{outline:none;border-color:var(--or);background:#fff;}
+    .login-card button{width:100%;margin-top:22px;padding:15px;border:none;border-radius:12px;background:var(--or);color:#fff;font-size:16px;font-weight:800;cursor:pointer;}
+    .login-card button:disabled{opacity:.6;}
+    .login-err{color:var(--red);font-size:13px;text-align:center;margin-top:12px;min-height:18px;}
+    .login-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6;}
+    /* 상단바 */
+    .topbar{position:sticky;top:0;z-index:30;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));}
+    .topbar b{font-size:17px;font-weight:900;}
+    .topbar b small{font-size:11px;font-weight:500;opacity:.7;margin-left:5px;}
+    .topbar .tb-btns{display:flex;gap:6px;}
+    .topbar button{background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:9px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;}
+    /* 탭 */
+    .tabs{position:sticky;top:49px;z-index:29;display:flex;background:#fff;border-bottom:1px solid var(--line);}
+    .tabs button{flex:1;background:none;border:none;padding:14px 0;font-size:15px;font-weight:700;color:var(--muted);cursor:pointer;position:relative;}
+    .tabs button.on{color:var(--or);}
+    .tabs button.on::after{content:"";position:absolute;left:20%;right:20%;bottom:0;height:3px;background:var(--or);border-radius:3px;}
+    .tabs .cnt{display:inline-block;min-width:18px;padding:0 5px;height:18px;line-height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:800;margin-left:4px;vertical-align:middle;}
+    .tabs .cnt.zero{display:none;}
+    /* 본문 */
+    main{padding:12px 12px 40px;}
+    .chips{display:flex;gap:7px;overflow-x:auto;padding:4px 2px 12px;scrollbar-width:none;}
+    .chips::-webkit-scrollbar{display:none;}
+    .chip{flex:none;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13.5px;font-weight:700;color:#555;cursor:pointer;white-space:nowrap;}
+    .chip.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+    .chip .c{opacity:.6;font-weight:600;margin-left:3px;}
+    .search{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:11px;font-size:15px;background:#fff;margin-bottom:12px;}
+    .search:focus{outline:none;border-color:var(--or);}
+    /* 주문 카드 */
+    .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+    .card-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:8px;}
+    .badge{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;}
+    .b-purchase{background:#fff3ec;color:var(--or-d);}
+    .b-delivery{background:#e3f6ec;color:#16a34a;}
+    .b-chan{background:#eef1f6;color:#5a6472;}
+    .card-no{font-size:13px;font-weight:800;color:var(--or-d);}
+    .card-date{margin-left:auto;font-size:12px;color:var(--muted);}
+    .card-cust{font-size:16px;font-weight:800;color:var(--navy);}
+    .card-item{font-size:13.5px;color:#5c5048;margin-top:2px;word-break:break-all;}
+    .card-amt{font-size:14px;font-weight:800;color:var(--navy);margin-top:6px;}
+    .st-row{display:flex;align-items:center;gap:8px;margin-top:11px;}
+    .st-badge{font-size:12px;font-weight:800;padding:5px 11px;border-radius:999px;flex:none;}
+    .g-구매{background:#fff4d6;color:#9a7400;} .g-입고{background:#fff3ec;color:var(--or-d);} .g-출고{background:#d7f5e3;color:#16a34a;} .g-예외{background:#ffe1e6;color:var(--red);}
+    .st-sel{flex:1;padding:9px 10px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fbfaf8;font-weight:600;}
+    .card-more{margin-top:11px;padding-top:11px;border-top:1px dashed var(--line);font-size:13.5px;color:#444;line-height:1.8;display:none;}
+    .card-more.open{display:block;}
+    .card-more b{color:var(--navy);}
+    .more-toggle{margin-top:10px;background:none;border:none;color:var(--or);font-size:13px;font-weight:700;cursor:pointer;padding:0;}
+    /* 후기 카드 */
+    .rv{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;}
+    .rv-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+    .rv-name{font-weight:800;color:var(--navy);}
+    .rv-stat{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;margin-left:auto;}
+    .rv-stat.wait{background:#fff3e0;color:#c77a12;} .rv-stat.ok{background:#e6f8f0;color:#16a34a;} .rv-stat.no{background:#fbecec;color:var(--red);}
+    .rv-body{font-size:14px;color:#333;margin:4px 0;word-break:break-word;}
+    .rv-photo{max-width:120px;max-height:120px;border-radius:9px;border:1px solid var(--line);object-fit:cover;margin:4px 0;display:block;}
+    .rv-meta{font-size:12px;color:var(--muted);}
+    .rv-acts{display:flex;gap:8px;margin-top:11px;}
+    .rv-acts button{flex:1;padding:11px;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;}
+    .btn-ok{background:var(--or);color:#fff;} .btn-no{background:#fff0f1;color:var(--red);border:1px solid #f6c2c8 !important;}
+    .empty{text-align:center;color:var(--muted);padding:50px 20px;font-size:14px;}
+    .loading{text-align:center;color:var(--muted);padding:40px;font-size:14px;}
+    .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:rgba(20,16,12,.92);color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:700;z-index:100;opacity:0;transition:opacity .2s;pointer-events:none;}
+    .toast.show{opacity:1;}
+  </style>
+</head>
+<body>
+  <!-- 로그인 -->
+  <div class="login-wrap" id="loginView">
+    <div class="login-card">
+      <h1>OSS 관리자 <small>모바일 콕핏</small></h1>
+      <label>이메일</label>
+      <input id="lEmail" type="email" inputmode="email" autocomplete="username" placeholder="관리자 이메일" />
+      <label>비밀번호</label>
+      <input id="lPw" type="password" autocomplete="current-password" placeholder="비밀번호" />
+      <button id="lBtn" type="button">로그인</button>
+      <div class="login-err" id="lErr"></div>
+      <p class="login-hint">관리자(마스터) 계정으로 로그인하세요.<br>폰 홈화면에 추가하면 앱처럼 쓸 수 있어요.</p>
+    </div>
+  </div>
+
+  <!-- 앱 -->
+  <div id="appView" hidden>
+    <div class="topbar">
+      <b>OSS 관리자 <small>모바일</small></b>
+      <div class="tb-btns">
+        <button id="reloadBtn" type="button">↻ 새로고침</button>
+        <button id="logoutBtn" type="button">로그아웃</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button id="tabBtnOrders" class="on" type="button">주문 <span class="cnt zero" id="newCnt">0</span></button>
+      <button id="tabBtnReviews" type="button">후기 <span class="cnt zero" id="rvCnt">0</span></button>
+    </div>
+    <main>
+      <section id="tabOrders">
+        <input class="search" id="ordSearch" type="search" placeholder="🔍 주문번호·고객명 검색" />
+        <div class="chips" id="ordChips"></div>
+        <div id="orderList"><div class="loading">불러오는 중…</div></div>
+      </section>
+      <section id="tabReviews" hidden>
+        <div class="chips" id="rvChips"></div>
+        <div id="reviewList"><div class="loading">불러오는 중…</div></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=26"></script>
+  <script>
+  (function(){
+    "use strict";
+    var $ = function(s){ return document.querySelector(s); };
+    var loginView=$("#loginView"), appView=$("#appView");
+    function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+    function toast(msg){ var t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.remove("show"); },1800); }
+
+    // 상태 정의 (admin.js와 동일)
+    var NORMAL=["신규접수","결제대기","구매결제완료","구매중","구매완료","창고도착","입고완료","일부입고","포장/측정","배송비결제대기","배송비결제완료","발송대기","배송중","배송완료"];
+    var EXCEPTION=["보류","취소","반품/교환","사고/폐기"];
+    var ALL=NORMAL.concat(EXCEPTION);
+    var GROUP={};
+    ["신규접수","결제대기","구매결제완료","구매중","구매완료"].forEach(function(s){GROUP[s]="구매";});
+    ["창고도착","입고완료","일부입고","포장/측정"].forEach(function(s){GROUP[s]="입고";});
+    ["배송비결제대기","배송비결제완료","발송대기","배송중","배송완료"].forEach(function(s){GROUP[s]="출고";});
+    EXCEPTION.forEach(function(s){GROUP[s]="예외";});
+    function groupOf(s){ return GROUP[s]||"구매"; }
+
+    var ORDERS=[], REVIEWS=[], ORD_FILTER="전체", RV_FILTER="대기";
+
+    // ---------- 로그인 ----------
+    function showApp(){ loginView.hidden=true; appView.hidden=false; loadAll(); }
+    function showLogin(msg){ appView.hidden=true; loginView.hidden=false; if(msg) $("#lErr").textContent=msg; }
+    async function checkSession(){
+      try{ var s = await window.OSS.adminGetSession(); if(s) { showApp(); return; } }catch(e){}
+      showLogin("");
+    }
+    $("#lBtn").addEventListener("click", async function(){
+      var em=$("#lEmail").value.trim(), pw=$("#lPw").value;
+      var btn=$("#lBtn"), err=$("#lErr"); err.textContent="";
+      if(!em||!pw){ err.textContent="이메일·비밀번호를 입력하세요."; return; }
+      btn.disabled=true; btn.textContent="로그인 중…";
+      try{
+        await window.OSS.adminSignIn(em, pw);
+        $("#lPw").value="";
+        showApp();
+      }catch(e){ err.textContent="로그인 실패: "+(e.message||e); }
+      btn.disabled=false; btn.textContent="로그인";
+    });
+    $("#lPw").addEventListener("keydown", function(e){ if(e.key==="Enter") $("#lBtn").click(); });
+    $("#logoutBtn").addEventListener("click", async function(){
+      if(!confirm("로그아웃 할까요?")) return;
+      try{ await window.OSS.adminSignOut(); }catch(e){}
+      showLogin("");
+    });
+    $("#reloadBtn").addEventListener("click", function(){ loadAll(); toast("새로고침"); });
+
+    // ---------- 탭 ----------
+    $("#tabBtnOrders").addEventListener("click", function(){ switchTab("orders"); });
+    $("#tabBtnReviews").addEventListener("click", function(){ switchTab("reviews"); });
+    function switchTab(t){
+      $("#tabBtnOrders").classList.toggle("on", t==="orders");
+      $("#tabBtnReviews").classList.toggle("on", t==="reviews");
+      $("#tabOrders").hidden = t!=="orders";
+      $("#tabReviews").hidden = t!=="reviews";
+    }
+
+    // ---------- 데이터 로드 ----------
+    async function loadAll(){ loadOrders(); loadReviews(); }
+    async function loadOrders(){
+      var box=$("#orderList"); box.innerHTML='<div class="loading">불러오는 중…</div>';
+      try{
+        var rows = await window.OSS.fetchApplications();
+        ORDERS = (rows||[]).filter(function(r){ return !r.deleted_at; })
+          .sort(function(a,b){ return String(b.created_at||"").localeCompare(String(a.created_at||"")); });
+        renderChips(); renderOrders();
+        var newN = ORDERS.filter(function(o){ return (o.status||"신규접수")==="신규접수"; }).length;
+        var nc=$("#newCnt"); nc.textContent=newN; nc.classList.toggle("zero", newN===0);
+      }catch(e){
+        box.innerHTML='<div class="empty">주문을 불러오지 못했어요.<br>'+esc(e.message||e)+'<br><br>관리자(마스터) 계정인지 확인해 주세요.</div>';
+      }
+    }
+    async function loadReviews(){
+      var box=$("#reviewList"); box.innerHTML='<div class="loading">불러오는 중…</div>';
+      try{
+        REVIEWS = (await window.OSS.listReviews())||[];
+        renderRvChips(); renderReviews();
+        var waitN = REVIEWS.filter(function(r){ return (r.status||"pending")==="pending"; }).length;
+        var rc=$("#rvCnt"); rc.textContent=waitN; rc.classList.toggle("zero", waitN===0);
+      }catch(e){
+        box.innerHTML='<div class="empty">후기를 불러오지 못했어요.<br>'+esc(e.message||e)+'</div>';
+      }
+    }
+
+    // ---------- 주문 렌더 ----------
+    var FILTERS=[
+      {key:"전체",  test:function(){return true;}},
+      {key:"신규",  test:function(o){return o.status==="신규접수";}},
+      {key:"진행중",test:function(o){return NORMAL.indexOf(o.status)>0 && o.status!=="배송완료";}},
+      {key:"완료",  test:function(o){return o.status==="배송완료";}},
+      {key:"예외",  test:function(o){return EXCEPTION.indexOf(o.status)>=0;}}
+    ];
+    function renderChips(){
+      $("#ordChips").innerHTML = FILTERS.map(function(f){
+        var n=ORDERS.filter(f.test).length;
+        return '<button class="chip'+(ORD_FILTER===f.key?' on':'')+'" data-f="'+f.key+'">'+f.key+'<span class="c">'+n+'</span></button>';
+      }).join("");
+      $("#ordChips").querySelectorAll(".chip").forEach(function(c){ c.addEventListener("click",function(){ ORD_FILTER=c.dataset.f; renderChips(); renderOrders(); }); });
+    }
+    function prodSummary(row){
+      var p = Array.isArray(row.products)?row.products:[];
+      if(!p.length) return "(상품 정보 없음)";
+      var first=p[0]||{}; var nm=first.name||"상품";
+      return p.length>1 ? (nm+" 외 "+(p.length-1)+"건") : nm;
+    }
+    function statusOptions(cur){
+      function opt(s){ return '<option value="'+esc(s)+'"'+(s===cur?" selected":"")+">"+esc(s)+"</option>"; }
+      return '<optgroup label="정상 단계">'+NORMAL.map(opt).join("")+'</optgroup>'
+           + '<optgroup label="예외">'+EXCEPTION.map(opt).join("")+'</optgroup>';
+    }
+    function renderOrders(){
+      var box=$("#orderList");
+      var kw=($("#ordSearch").value||"").trim().toLowerCase();
+      var f=FILTERS.filter(function(x){return x.key===ORD_FILTER;})[0]||FILTERS[0];
+      var list=ORDERS.filter(f.test).filter(function(o){
+        if(!kw) return true;
+        return String(o.order_no||"").toLowerCase().indexOf(kw)>=0 || String(o.applicant_name||"").toLowerCase().indexOf(kw)>=0;
+      });
+      if(!list.length){ box.innerHTML='<div class="empty">해당 주문이 없어요.</div>'; return; }
+      box.innerHTML = list.map(function(o){
+        var st=o.status||"신규접수", g=groupOf(st);
+        var typeB = o.type==="delivery" ? '<span class="badge b-delivery">배송대행</span>' : '<span class="badge b-purchase">구매대행</span>';
+        var chan = o.channel ? '<span class="badge b-chan">'+esc(o.channel)+'</span>' : "";
+        var amt = o.subtotal ? '<div class="card-amt">상품가 ¥'+Number(o.subtotal).toLocaleString()+'</div>' : "";
+        var date = window.OSS.kstDate ? window.OSS.kstDate(o.created_at) : String(o.created_at||"").slice(0,10);
+        var more = '<div class="card-more" id="more-'+o.id+'">'
+          + '<div><b>받는분</b> '+esc(o.receiver_name||"-")+' / '+esc(o.receiver_phone||"-")+'</div>'
+          + '<div><b>주소</b> ['+esc(o.zipcode||"-")+'] '+esc(o.address||"-")+'</div>'
+          + '<div><b>통관부호</b> '+esc(o.customs_code||"-")+'</div>'
+          + (o.tracking_no?'<div><b>송장</b> '+esc(o.tracking_no)+'</div>':"")
+          + (o.courier_memo?'<div><b>요청</b> '+esc(o.courier_memo)+'</div>':"")
+          + '</div>';
+        return '<div class="card">'
+          + '<div class="card-top">'+typeB+chan+'<span class="card-no">'+esc(o.order_no||("#"+o.id))+'</span><span class="card-date">'+esc(date)+'</span></div>'
+          + '<div class="card-cust">'+esc(o.applicant_name||"-")+'</div>'
+          + '<div class="card-item">'+esc(prodSummary(o))+'</div>'
+          + amt
+          + '<div class="st-row"><span class="st-badge g-'+g+'">'+esc(st)+'</span>'
+          + '<select class="st-sel" data-id="'+o.id+'" data-prev="'+esc(st)+'">'+statusOptions(st)+'</select></div>'
+          + '<button class="more-toggle" data-more="'+o.id+'">상세 보기 ▾</button>'
+          + more
+          + '</div>';
+      }).join("");
+      box.querySelectorAll(".st-sel").forEach(function(sel){ sel.addEventListener("change", onStatusChange); });
+      box.querySelectorAll(".more-toggle").forEach(function(b){ b.addEventListener("click", function(){
+        var m=document.getElementById("more-"+b.dataset.more); if(!m) return;
+        var open=m.classList.toggle("open"); b.textContent= open ? "상세 닫기 ▴" : "상세 보기 ▾";
+      }); });
+    }
+    async function onStatusChange(e){
+      var sel=e.target, id=sel.dataset.id, prev=sel.dataset.prev, next=sel.value;
+      if(next===prev) return;
+      sel.disabled=true;
+      try{
+        await window.OSS.updateApplicationStatus(id, next);
+        var o=ORDERS.filter(function(x){return String(x.id)===String(id);})[0]; if(o) o.status=next;
+        toast("상태 변경: "+next);
+        renderChips();
+        var badge=sel.parentElement.querySelector(".st-badge");
+        if(badge){ badge.textContent=next; badge.className="st-badge g-"+groupOf(next); }
+        sel.dataset.prev=next;
+        var newN=ORDERS.filter(function(x){return (x.status||"신규접수")==="신규접수";}).length;
+        var nc=$("#newCnt"); nc.textContent=newN; nc.classList.toggle("zero", newN===0);
+      }catch(err){
+        sel.value=prev; toast("변경 실패");
+        alert("상태 변경 실패: "+(err.message||err));
+      }
+      sel.disabled=false;
+    }
+
+    // ---------- 후기 렌더 ----------
+    var RV_FILTERS=[{key:"대기",s:"pending"},{key:"게시중",s:"approved"},{key:"숨김",s:"rejected"},{key:"전체",s:""}];
+    function renderRvChips(){
+      $("#rvChips").innerHTML = RV_FILTERS.map(function(f){
+        var n = f.s ? REVIEWS.filter(function(r){return (r.status||"pending")===f.s;}).length : REVIEWS.length;
+        return '<button class="chip'+(RV_FILTER===f.key?' on':'')+'" data-f="'+f.key+'">'+f.key+'<span class="c">'+n+'</span></button>';
+      }).join("");
+      $("#rvChips").querySelectorAll(".chip").forEach(function(c){ c.addEventListener("click",function(){ RV_FILTER=c.dataset.f; renderRvChips(); renderReviews(); }); });
+    }
+    function renderReviews(){
+      var box=$("#reviewList");
+      var f=RV_FILTERS.filter(function(x){return x.key===RV_FILTER;})[0]||RV_FILTERS[0];
+      var list=REVIEWS.filter(function(r){ return f.s ? (r.status||"pending")===f.s : true; });
+      if(!list.length){ box.innerHTML='<div class="empty">해당 후기가 없어요.</div>'; return; }
+      var mask = window.OSS.maskName || function(n){return n||"고객";};
+      box.innerHTML = list.map(function(r){
+        var st=r.status||"pending";
+        var stCls = st==="approved"?"ok":(st==="rejected"?"no":"wait");
+        var stTxt = st==="approved"?"게시중":(st==="rejected"?"숨김":"승인대기");
+        var date = window.OSS.kstDate ? window.OSS.kstDate(r.created_at) : String(r.created_at||"").slice(0,10);
+        var stars = "★".repeat(Math.max(1,Math.min(5,Number(r.rating)||5)));
+        var acts="";
+        if(st==="approved") acts='<button class="btn-no" data-no="'+r.id+'">거절(숨김)</button>';
+        else if(st==="rejected") acts='<button class="btn-ok" data-ok="'+r.id+'">승인</button>';
+        else acts='<button class="btn-ok" data-ok="'+r.id+'">승인</button><button class="btn-no" data-no="'+r.id+'">거절</button>';
+        return '<div class="rv">'
+          + '<div class="rv-top"><span class="rv-name">'+esc(mask(r.author_name))+'</span><span style="color:#f1a23a;font-size:13px;">'+stars+'</span><span class="rv-stat '+stCls+'">'+stTxt+'</span></div>'
+          + '<div class="rv-body">'+esc(r.body||"")+'</div>'
+          + (r.image_url?'<a href="'+esc(r.image_url)+'" target="_blank" rel="noopener"><img class="rv-photo" src="'+esc(r.image_url)+'" alt="후기사진"></a>':"")
+          + '<div class="rv-meta">'+esc(r.order_no||"")+' · '+esc(date)+'</div>'
+          + '<div class="rv-acts">'+acts+'</div>'
+          + '</div>';
+      }).join("");
+      box.querySelectorAll("[data-ok]").forEach(function(b){ b.addEventListener("click",function(){ setRv(b.dataset.ok,"approved"); }); });
+      box.querySelectorAll("[data-no]").forEach(function(b){ b.addEventListener("click",function(){ setRv(b.dataset.no,"rejected"); }); });
+    }
+    async function setRv(id, status){
+      try{
+        await window.OSS.setReviewStatus(id, status);
+        var r=REVIEWS.filter(function(x){return String(x.id)===String(id);})[0]; if(r) r.status=status;
+        toast(status==="approved"?"승인됨 (홈에 노출)":"거절됨 (숨김)");
+        renderRvChips(); renderReviews();
+        var waitN=REVIEWS.filter(function(x){return (x.status||"pending")==="pending";}).length;
+        var rc=$("#rvCnt"); rc.textContent=waitN; rc.classList.toggle("zero", waitN===0);
+      }catch(e){ alert("처리 실패: "+(e.message||e)); }
+    }
+
+    $("#ordSearch").addEventListener("input", function(){ renderOrders(); });
+
+    // 시작
+    if(window.OSS && window.OSS.adminGetSession){ checkSession(); }
+    else { showLogin("초기화 오류 — 새로고침 해주세요."); }
+  })();
+  </script>
+</body>
+</html>
