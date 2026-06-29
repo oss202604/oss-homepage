@@ -65,6 +65,22 @@
     .card-more.open{display:block;}
     .card-more b{color:var(--navy);}
     .more-toggle{margin-top:10px;background:none;border:none;color:var(--or);font-size:13px;font-weight:700;cursor:pointer;padding:0;}
+    .more-line{margin:3px 0;}
+    .more-sec{font-size:13px;font-weight:800;color:var(--or-d);margin:15px 0 8px;}
+    .prod-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+    .prod-list li{background:#faf7f4;border:1px solid var(--line);border-radius:10px;padding:10px 11px;}
+    .prod-nm{font-size:14px;font-weight:700;color:var(--navy);word-break:break-all;}
+    .prod-nm .po{font-weight:500;color:var(--muted);font-size:12.5px;}
+    .prod-meta{font-size:12.5px;color:#666;margin:2px 0 8px;}
+    .prod-buy{display:inline-block;background:var(--or);color:#fff;font-size:13.5px;font-weight:800;padding:9px 16px;border-radius:9px;text-decoration:none;}
+    .prod-nolink{font-size:12.5px;color:var(--muted);}
+    .buy-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+    .buy-grid label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:#555;min-width:0;}
+    .buy-grid label:nth-child(1),.buy-grid label:nth-child(4),.buy-grid label:nth-child(5){grid-column:1 / -1;}
+    .buy-grid input{width:100%;min-width:0;padding:11px;border:1px solid var(--line);border-radius:9px;font-size:16px;background:#fbfaf8;}
+    .buy-grid input:focus{outline:none;border-color:var(--or);background:#fff;}
+    .buy-save{width:100%;margin-top:12px;padding:13px;border:none;border-radius:11px;background:var(--navy);color:#fff;font-size:15px;font-weight:800;cursor:pointer;}
+    .buy-save:active{opacity:.85;}
     /* 후기 카드 */
     .rv{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;}
     .rv-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
@@ -123,6 +139,10 @@
       </section>
     </main>
   </div>
+
+  <datalist id="payopts">
+    <option value="메루카리카드"></option><option value="라쿠텐카드"></option><option value="페이페이"></option><option value="현금"></option><option value="아멕스"></option>
+  </datalist>
 
   <div class="toast" id="toast"></div>
 
@@ -234,6 +254,32 @@
       var first=p[0]||{}; var nm=first.name||"상품";
       return p.length>1 ? (nm+" 외 "+(p.length-1)+"건") : nm;
     }
+    // 상품 목록(클릭해 구매처로) — 상세보기용
+    function prodListHtml(o){
+      var p=Array.isArray(o.products)?o.products:[];
+      if(!p.length) return '<div class="more-line">상품 정보가 없어요.</div>';
+      return '<ul class="prod-list">'+p.map(function(it){
+        var nm=esc(it.name||"상품"); var opt=it.option?' <span class="po">('+esc(it.option)+')</span>':'';
+        var qty=it.qty||1; var price=(it.price!=null&&it.price!=='')?(' · 단가 ¥'+Number(it.price).toLocaleString()):'';
+        var url=String(it.url||'').trim();
+        var link=/^https?:\/\//i.test(url)?'<a class="prod-buy" href="'+esc(url)+'" target="_blank" rel="noopener">🛒 구매하러 가기</a>':'<span class="prod-nolink">상품 링크 없음</span>';
+        return '<li><div class="prod-nm">'+nm+opt+'</div><div class="prod-meta">수량 ×'+qty+price+'</div>'+link+'</li>';
+      }).join('')+'</ul>';
+    }
+    // 구매(사입) 기록 입력 폼 — 상세보기용 (PC 관리자와 같은 컬럼에 저장)
+    function buyFormHtml(o){
+      var v=function(x){return esc(x==null?'':x);};
+      var pdVal=/^\d{4}-\d{2}-\d{2}$/.test(o.pay_date||'')?o.pay_date:'';
+      return '<div class="more-sec">💳 구매(사입) 기록 <span style="font-weight:500;color:var(--muted);font-size:11.5px;">구매 후 입력하세요</span></div>'
+        +'<div class="buy-grid">'
+        +'<label>사입처<input class="bf" data-id="'+o.id+'" value="'+v(o.buy_from)+'" placeholder="예: 라쿠텐 / 메루카리 / 점포명"></label>'
+        +'<label>사입가 ¥<input class="by" data-id="'+o.id+'" type="number" inputmode="numeric" value="'+(o.buy_yen!=null?o.buy_yen:'')+'" placeholder="실제 구매가"></label>'
+        +'<label>결제일<input class="pd" data-id="'+o.id+'" type="date" value="'+pdVal+'"></label>'
+        +'<label>결제수단<input class="pc" data-id="'+o.id+'" list="payopts" value="'+v(o.pay_card)+'" placeholder="카드/현금 선택·입력"></label>'
+        +'<label>현지오더번호<input class="lo" data-id="'+o.id+'" value="'+v(o.local_order_no)+'" placeholder="일본 주문번호(선택)"></label>'
+        +'</div>'
+        +'<button class="buy-save" data-id="'+o.id+'" type="button">💾 구매 기록 저장</button>';
+    }
     function statusOptions(cur){
       function opt(s){ return '<option value="'+esc(s)+'"'+(s===cur?" selected":"")+">"+esc(s)+"</option>"; }
       return '<optgroup label="정상 단계">'+NORMAL.map(opt).join("")+'</optgroup>'
@@ -255,11 +301,15 @@
         var amt = o.subtotal ? '<div class="card-amt">상품가 ¥'+Number(o.subtotal).toLocaleString()+'</div>' : "";
         var date = window.OSS.kstDate ? window.OSS.kstDate(o.created_at) : String(o.created_at||"").slice(0,10);
         var more = '<div class="card-more" id="more-'+o.id+'">'
-          + '<div><b>받는분</b> '+esc(o.receiver_name||"-")+' / '+esc(o.receiver_phone||"-")+'</div>'
-          + '<div><b>주소</b> ['+esc(o.zipcode||"-")+'] '+esc(o.address||"-")+'</div>'
-          + '<div><b>통관부호</b> '+esc(o.customs_code||"-")+'</div>'
-          + (o.tracking_no?'<div><b>송장</b> '+esc(o.tracking_no)+'</div>':"")
-          + (o.courier_memo?'<div><b>요청</b> '+esc(o.courier_memo)+'</div>':"")
+          + '<div class="more-sec">📦 상품 — 탭하면 구매처로 이동</div>'
+          + prodListHtml(o)
+          + '<div class="more-sec">🚚 받는분</div>'
+          + '<div class="more-line"><b>'+esc(o.receiver_name||"-")+'</b> · '+esc(o.receiver_phone||"-")+'</div>'
+          + '<div class="more-line">['+esc(o.zipcode||"-")+'] '+esc(o.address||"-")+'</div>'
+          + '<div class="more-line"><b>통관부호</b> '+esc(o.customs_code||"-")+'</div>'
+          + (o.courier_memo?'<div class="more-line"><b>요청</b> '+esc(o.courier_memo)+'</div>':"")
+          + (o.tracking_no?'<div class="more-line"><b>송장</b> '+esc(o.tracking_no)+'</div>':"")
+          + buyFormHtml(o)
           + '</div>';
         return '<div class="card">'
           + '<div class="card-top">'+typeB+chan+'<span class="card-no">'+esc(o.order_no||("#"+o.id))+'</span><span class="card-date">'+esc(date)+'</span></div>'
@@ -277,6 +327,19 @@
         var m=document.getElementById("more-"+b.dataset.more); if(!m) return;
         var open=m.classList.toggle("open"); b.textContent= open ? "상세 닫기 ▴" : "상세 보기 ▾";
       }); });
+      box.querySelectorAll(".buy-save").forEach(function(b){ b.addEventListener("click", function(){ saveBuy(b.dataset.id); }); });
+    }
+    async function saveBuy(id){
+      function gv(cls){ var el=document.querySelector('.'+cls+'[data-id="'+id+'"]'); return el?el.value:''; }
+      var byRaw=gv('by');
+      var fields={ buy_from:gv('bf').trim(), buy_yen:(byRaw!==''?Number(byRaw):null), pay_card:gv('pc').trim(), pay_date:gv('pd'), local_order_no:gv('lo').trim() };
+      var btn=document.querySelector('.buy-save[data-id="'+id+'"]'); if(btn){ btn.disabled=true; btn.textContent='저장 중…'; }
+      try{
+        await window.OSS.updateApplication(id, fields);
+        var o=ORDERS.filter(function(x){return String(x.id)===String(id);})[0]; if(o){ for(var k in fields) o[k]=fields[k]; }
+        toast('구매 기록 저장됨 ✓');
+      }catch(e){ alert('저장 실패: '+(e.message||e)); }
+      if(btn){ btn.disabled=false; btn.textContent='💾 구매 기록 저장'; }
     }
     async function onStatusChange(e){
       var sel=e.target, id=sel.dataset.id, prev=sel.dataset.prev, next=sel.value;
