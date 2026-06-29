@@ -311,6 +311,14 @@
     .ohpop-skip{display:inline-flex;align-items:center;gap:6px;margin-top:13px;font-size:12px;color:#a99b91;cursor:pointer;}
     .ohpop-skip input{width:auto;}
   </style>
+  <div class="ohpop" id="eventPop" hidden>
+    <div class="ohpop-dim" id="evPopDim"></div>
+    <div class="ohpop-card" style="padding:0;overflow:hidden;">
+      <button class="ohpop-x" id="evPopX" type="button" aria-label="닫기">×</button>
+      <a id="evPopLink" href="javascript:void(0)"><img id="evPopImg" src="" alt="이벤트" style="display:block;width:100%;height:auto;" /></a>
+      <label class="ohpop-skip" style="justify-content:center;padding:11px;"><input type="checkbox" id="evPopSkip" /> 오늘 그만보기</label>
+    </div>
+  </div>
   <div class="ohpop" id="couponPop" hidden>
     <div class="ohpop-dim" id="popDim"></div>
     <div class="ohpop-card">
@@ -325,16 +333,40 @@
   </div>
   <script>
     (function(){
-      var pop=document.getElementById('couponPop'); if(!pop) return;
-      try{ if(localStorage.getItem('oss_couponPop_off')==='1') return; }catch(e){}
-      try{ if(sessionStorage.getItem('oss_couponPop_seen')==='1') return; }catch(e){}
-      function show(){ pop.hidden=false; try{sessionStorage.setItem('oss_couponPop_seen','1');}catch(e){} }
-      function hide(){ pop.hidden=true; var sk=document.getElementById('popSkip'); if(sk&&sk.checked){try{localStorage.setItem('oss_couponPop_off','1');}catch(e){}} }
-      function later(){ setTimeout(show, 800); }
-      if(window.OSS && OSS.getMyProfile){ OSS.getMyProfile().then(function(p){ if(!p) later(); }).catch(later); }
-      else later();
-      document.getElementById('popX').addEventListener('click', hide);
-      document.getElementById('popDim').addEventListener('click', hide);
+      function _su(u){ u=String(u==null?'':u).trim(); return (/^https?:\/\//i.test(u)||/^[a-z0-9_\-]+\.html(\?|#|$)/i.test(u))?u:''; }
+      // 쿠폰 팝업(기본)
+      function showCoupon(){
+        var pop=document.getElementById('couponPop'); if(!pop) return;
+        try{ if(localStorage.getItem('oss_couponPop_off')==='1') return; }catch(e){}
+        try{ if(sessionStorage.getItem('oss_couponPop_seen')==='1') return; }catch(e){}
+        function show(){ pop.hidden=false; try{sessionStorage.setItem('oss_couponPop_seen','1');}catch(e){} }
+        function hide(){ pop.hidden=true; var sk=document.getElementById('popSkip'); if(sk&&sk.checked){try{localStorage.setItem('oss_couponPop_off','1');}catch(e){}} }
+        function later(){ setTimeout(show, 800); }
+        if(window.OSS && OSS.getMyProfile){ OSS.getMyProfile().then(function(p){ if(!p) later(); }).catch(later); } else later();
+        var x=document.getElementById('popX'), dim=document.getElementById('popDim');
+        if(x) x.addEventListener('click', hide); if(dim) dim.addEventListener('click', hide);
+      }
+      // 이벤트 팝업(관리자 설정) — 켜져 있으면 우선 표시, 닫으면 쿠폰팝업 생략
+      function offKey(){ var d; try{ d=new Date().toISOString().slice(0,10); }catch(e){ d=''; } return 'oss_evpop_off_'+d; }
+      function showEvent(cfg){
+        var pop=document.getElementById('eventPop'); if(!pop) return false;
+        var u=_su(cfg.url); if(!u) return false;
+        try{ if(localStorage.getItem(offKey())==='1') return false; }catch(e){}
+        try{ if(sessionStorage.getItem('oss_evpop_seen')==='1') return false; }catch(e){}
+        var img=document.getElementById('evPopImg'), lk=document.getElementById('evPopLink');
+        img.src=u; var href=_su(cfg.link); lk.href=href||'javascript:void(0)';
+        pop.hidden=false; try{sessionStorage.setItem('oss_evpop_seen','1');}catch(e){}
+        function hide(){ pop.hidden=true; var sk=document.getElementById('evPopSkip'); if(sk&&sk.checked){try{localStorage.setItem(offKey(),'1');}catch(e){}} }
+        document.getElementById('evPopX').addEventListener('click', hide);
+        document.getElementById('evPopDim').addEventListener('click', hide);
+        return true;
+      }
+      if(window.OSS && OSS.getSetting){
+        OSS.getSetting('event_popup').then(function(cfg){
+          if(cfg && cfg.enabled && cfg.url && showEvent(cfg)) return;
+          showCoupon();
+        }).catch(showCoupon);
+      } else { showCoupon(); }
     }());
     // 히어로 캐러셀 (자동 넘김 5초 + 좌우 화살표 + 점, 호버 시 정지)
     function heroCarousel(){

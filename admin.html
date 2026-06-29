@@ -585,6 +585,18 @@
           <h4 style="margin:0 0 4px;font-size:14px;color:var(--navy);">등록된 서브배너 <span style="font-weight:400;color:var(--muted);font-size:12px;">(링크 고치면 아래 ‘변경사항 저장’)</span></h4>
           <div id="evList" style="margin-top:12px;"></div>
         </div>
+
+        <div class="dash-panel">
+          <h3>이벤트 팝업 <span style="font-size:13px;font-weight:400;color:var(--muted);">(홈 첫 방문 시 가운데 뜨는 팝업)</span></h3>
+          <p class="form-note" style="text-align:left;margin:0 0 16px;">권장 600×600~800px(정사각/세로형) · png/jpeg/webp · 5MB 이하. 이미지를 누르면 설정한 링크로 이동해요. 손님은 '오늘 그만보기'로 닫을 수 있어요.</p>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;margin-bottom:14px;cursor:pointer;"><input type="checkbox" id="popEnabled" style="width:auto;"> 팝업 켜기 <span style="font-weight:400;color:var(--muted);font-size:12px;">(체크 해제하면 홈에서 안 보여요)</span></label>
+          <div class="set-grid">
+            <label class="full">이미지 파일 <input type="file" id="popFile" accept="image/png,image/jpeg,image/webp" /></label>
+            <label class="full">클릭 시 이동 링크 <input id="popLink" placeholder="예: order.html · notice.html · https://..." /></label>
+          </div>
+          <div id="popPreview" style="margin-top:12px;"></div>
+          <div class="set-actions"><button class="btn btn-primary" id="popSave" type="button">이벤트 팝업 저장</button><span class="save-ok" id="popMsg"></span></div>
+        </div>
       </section>
 
       <!-- ===== 주문관리 > 확인·사고·폐기 ===== -->
@@ -1000,7 +1012,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=26"></script>
   <script src="guide-content.js?v=1"></script>
-  <script src="admin.js?v=57"></script>
+  <script src="admin.js?v=58"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>

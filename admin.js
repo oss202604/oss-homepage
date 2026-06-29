@@ -2053,6 +2053,49 @@ async function loadEventBanners() {
   catch (e) { EVENT_BANNERS = []; }
   renderEventBanners();
 }
+// ----- 이벤트 팝업 (settings.event_popup = {url, link, enabled}) -----
+let EVENT_POPUP = { url: "", link: "", enabled: false };
+let POP_PENDING_FILE = null;
+function renderPopPreview() {
+  const box = document.getElementById("popPreview"); if (!box) return;
+  const src = POP_PENDING_FILE ? URL.createObjectURL(POP_PENDING_FILE) : safeUrl(EVENT_POPUP.url);
+  box.innerHTML = src
+    ? '<img src="' + src + '" alt="팝업 미리보기" style="max-width:240px;max-height:300px;border-radius:10px;border:1px solid var(--line);" />'
+    : '<span class="form-note">아직 이미지가 없어요.</span>';
+}
+async function loadEventPopup() {
+  try { const p = await window.OSS.getSetting("event_popup"); EVENT_POPUP = (p && typeof p === "object") ? p : { url: "", link: "", enabled: false }; }
+  catch (e) { EVENT_POPUP = { url: "", link: "", enabled: false }; }
+  POP_PENDING_FILE = null;
+  const en = document.getElementById("popEnabled"); if (en) en.checked = !!EVENT_POPUP.enabled;
+  const lk = document.getElementById("popLink"); if (lk) lk.value = EVENT_POPUP.link || "";
+  renderPopPreview();
+}
+(function bindEventPopup() {
+  const saveBtn = document.getElementById("popSave"); if (!saveBtn) return;
+  const fileEl = document.getElementById("popFile");
+  if (fileEl) fileEl.addEventListener("change", () => {
+    const f = fileEl.files && fileEl.files[0]; if (!f) return;
+    if (!/^image\/(png|jpeg|webp)$/.test(f.type)) { alert("png·jpeg·webp만 가능해요"); fileEl.value = ""; return; }
+    if (f.size > 5 * 1024 * 1024) { alert("5MB를 넘어요"); fileEl.value = ""; return; }
+    POP_PENDING_FILE = f; renderPopPreview();
+  });
+  saveBtn.addEventListener("click", async () => {
+    const msg = document.getElementById("popMsg");
+    try {
+      if (msg) msg.textContent = "저장 중…";
+      let url = EVENT_POPUP.url || "";
+      if (POP_PENDING_FILE) url = await window.OSS.uploadBannerImage(POP_PENDING_FILE);
+      const link = (document.getElementById("popLink").value || "").trim();
+      const enabled = !!document.getElementById("popEnabled").checked;
+      if (enabled && !url) { if (msg) msg.textContent = "팝업을 켜려면 이미지를 먼저 올려주세요."; return; }
+      EVENT_POPUP = { url: url, link: link, enabled: enabled };
+      await window.OSS.saveSetting("event_popup", EVENT_POPUP);
+      POP_PENDING_FILE = null; renderPopPreview();
+      if (msg) { msg.textContent = "✓ 저장됨"; setTimeout(() => (msg.textContent = ""), 2500); }
+    } catch (e) { if (msg) msg.textContent = "저장 실패: " + (e.message || e); }
+  });
+})();
 let EV_PENDING = [];
 function renderEvPending() {
   const box = document.getElementById("evPending"); if (!box) return;
@@ -2545,3 +2588,4 @@ loadBoardPosts();
 loadTopbar();
 loadBanners();
 loadEventBanners();
+loadEventPopup();
