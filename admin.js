@@ -1315,7 +1315,7 @@ function openModal(id) {
     const opt = Array.isArray(p.options) && p.options.length
       ? " / " + p.options.map((x) => esc(x.option) + (x.qty > 1 ? " x" + x.qty : "")).join(", ")
       : (p.memo ? " / " + esc(p.memo) : "");
-    return `${i + 1}) ${esc(p.name) || "-"} ${p.category ? "[" + esc(p.category) + "]" : ""} ¥${p.price || 0} × ${p.qty || 0}${opt}` +
+    return `<label class="arr-lbl"><input type="checkbox" class="arr-chk" data-pi="${i}"${p.arrived ? " checked" : ""}> 입고</label> ${i + 1}) ${esc(p.name) || "-"} ${p.category ? "[" + esc(p.category) + "]" : ""} ¥${p.price || 0} × ${p.qty || 0}${opt}` +
       (p.orderNo ? ` / 오더:${esc(p.orderNo)}` : "") +
       (u ? `<br><a href="${u}" target="_blank" style="color:var(--blue);font-size:12px;">상품링크 ↗</a>` : "") +
       (img ? `<br><a href="${img}" target="_blank"><img src="${img}" alt="상품사진" style="max-width:120px;max-height:120px;border-radius:8px;border:1px solid var(--line);margin-top:6px;" /></a>` : "");
@@ -1332,7 +1332,7 @@ function openModal(id) {
           <th>통관부호</th><td>${esc(r.customs_code) || "-"}</td>
           <th>배송방법</th><td>${esc(r.ship_method) || "-"}</td></tr>
       <tr><th>주소</th><td colspan="5">[${esc(r.zipcode) || "-"}] ${esc(r.address) || "-"}</td></tr>
-      <tr><th>상품</th><td colspan="5">${prodHtml || "-"}</td></tr>
+      <tr><th>상품${products.length > 1 ? '<br><span class="arr-sum" id="modalArrSummary">입고 ' + products.filter((p) => p.arrived).length + '/' + products.length + '</span>' : ''}</th><td colspan="5">${prodHtml || "-"}</td></tr>
       <tr><th>합계</th><td colspan="5">¥${(r.subtotal || 0).toLocaleString()}</td></tr>
       <tr><th>요청사항</th><td colspan="5">${esc(r.memo) || "-"}</td></tr>
     </table></div>`;
@@ -1345,6 +1345,14 @@ function openModal(id) {
   function _syncCR(v) { if (_cr) _cr.style.display = (v === "취소") ? "" : "none"; }
   sel.onchange = function () { if (selTop) selTop.value = sel.value; _syncCR(sel.value); };
   if (selTop) selTop.onchange = function () { sel.value = selTop.value; _syncCR(selTop.value); };
+  // 상품별 입고 체크 → "입고 N/M" 요약 갱신
+  (function () {
+    const sumEl = document.getElementById("modalArrSummary");
+    const chks = document.querySelectorAll("#modalDetail .arr-chk");
+    chks.forEach((chk) => chk.addEventListener("change", function () {
+      if (sumEl) sumEl.textContent = "입고 " + document.querySelectorAll("#modalDetail .arr-chk:checked").length + "/" + chks.length;
+    }));
+  })();
   // 입고·무게·배송비
   document.getElementById("modalWeight").value = r.weight_kg != null ? r.weight_kg : "";
   document.getElementById("modalCenter").value = r.center_type === "sea" ? "sea" : "air";
@@ -1559,6 +1567,12 @@ document.getElementById("modalSave").addEventListener("click", async () => {
       rack_no: gv("modalRackNo"),
       customs_name: gv("modalCustomsName"),
     };
+    // 상품별 입고 체크 반영 (일부입고 추적)
+    {
+      const _prods = (Array.isArray(o.raw.products) ? o.raw.products.map((x) => Object.assign({}, x)) : []);
+      document.querySelectorAll("#modalDetail .arr-chk").forEach((chk) => { const pi = Number(chk.dataset.pi); if (_prods[pi]) _prods[pi].arrived = chk.checked; });
+      if (_prods.length) fields.products = _prods;
+    }
     // 취소 사유별 환불 (품절=예치금·적립금 환불 / 단순변심=환불불가)
     if (newStatus === "취소") {
       const _cr = document.getElementById("modalCancelReason");
