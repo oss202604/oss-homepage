@@ -1338,12 +1338,13 @@ function openModal(id) {
     </table></div>`;
   const sel = document.getElementById("modalStatus");
   sel.innerHTML = ALL_STATUS.map((s) => `<option value="${s.key}" ${s.key === o.status ? "selected" : ""}>${s.label}</option>`).join("");
+  const selTop = document.getElementById("modalStatusTop");
+  if (selTop) { selTop.innerHTML = sel.innerHTML; selTop.value = o.status; }
   const _cr = document.getElementById("modalCancelReason");
-  if (_cr) {
-    _cr.value = "";
-    _cr.style.display = (o.status === "취소") ? "" : "none";
-    sel.onchange = function () { _cr.style.display = (sel.value === "취소") ? "" : "none"; };
-  }
+  if (_cr) { _cr.value = ""; _cr.style.display = (o.status === "취소") ? "" : "none"; }
+  function _syncCR(v) { if (_cr) _cr.style.display = (v === "취소") ? "" : "none"; }
+  sel.onchange = function () { if (selTop) selTop.value = sel.value; _syncCR(sel.value); };
+  if (selTop) selTop.onchange = function () { sel.value = selTop.value; _syncCR(selTop.value); };
   // 입고·무게·배송비
   document.getElementById("modalWeight").value = r.weight_kg != null ? r.weight_kg : "";
   document.getElementById("modalCenter").value = r.center_type === "sea" ? "sea" : "air";
@@ -1391,13 +1392,30 @@ function openModal(id) {
     const el = document.getElementById(id); if (el) el.oninput = recomputeShipFinal;
   });
   recomputeShipFinal();
+  // 예치금으로 배송비 전액 사용 체크박스 (체크 → 배송비 금액만큼 자동 입력, 회원이면 잔액 한도)
+  const _depFull = document.getElementById("modalDepFull");
+  if (_depFull) {
+    _depFull.checked = false;
+    _depFull.onchange = function () {
+      const di = document.getElementById("modalDepositUsed");
+      if (_depFull.checked) {
+        const fee = _modalFeeNow().fee || 0;
+        if (!fee) { alert("먼저 실무게(kg)를 입력해 배송비를 계산해 주세요."); _depFull.checked = false; return; }
+        let dep = fee;
+        if (r.user_id) { dep = Math.min(fee, _modalMemberDeposit); if (fee > _modalMemberDeposit) alert("예치금 잔액(₩" + _modalMemberDeposit.toLocaleString() + ")이 배송비보다 적어 잔액만큼만 채웠어요."); }
+        if (di) di.value = dep;
+      } else { if (di) di.value = 0; }
+      recomputeShipFinal();
+    };
+  }
   // 연결된 회원 잔액 힌트 (예치금/적립금 자동차감 대상)
   const mbEl = document.getElementById("modalMemberBal");
+  _modalMemberDeposit = 0;
   if (mbEl) {
     mbEl.textContent = "";
     if (r.user_id && window.OSS.getMemberById) {
       window.OSS.getMemberById(r.user_id).then((m) => {
-        if (m) mbEl.innerHTML = "🔗 회원 <b>" + esc(m.name || m.username || "") + "</b> · 예치금 잔액 <b style='color:var(--blue);'>₩" + Number(m.deposit || 0).toLocaleString() + "</b> · 적립금 <b style='color:#1F9D6B;'>₩" + Number(m.points || 0).toLocaleString() + "</b> <span style='color:#aaa;'>(저장 시 사용액만큼 자동 차감)</span>";
+        if (m) { _modalMemberDeposit = Number(m.deposit || 0); mbEl.innerHTML = "🔗 회원 <b>" + esc(m.name || m.username || "") + "</b> · 예치금 잔액 <b style='color:var(--blue);'>₩" + Number(m.deposit || 0).toLocaleString() + "</b> · 적립금 <b style='color:#1F9D6B;'>₩" + Number(m.points || 0).toLocaleString() + "</b> <span style='color:#aaa;'>(저장 시 사용액만큼 자동 차감)</span>"; }
       }).catch(() => {});
     } else {
       mbEl.innerHTML = "<span style='color:#c77a12;'>※ 비회원 주문(회원계정 미연결) — 예치금/적립금 자동차감 안 됨</span>";
@@ -1454,6 +1472,7 @@ if (modalTrackBtn) modalTrackBtn.addEventListener("click", () => {
   window.open("https://search.naver.com/search.naver?query=" + encodeURIComponent("택배조회 " + no), "_blank");
 });
 
+let _modalMemberDeposit = 0; // 연결 회원 예치금 잔액(전액사용 체크박스 한도용)
 // 현재 모달의 배송비(등급할인 반영) 계산
 function _modalFeeNow() {
   const o = ORDERS.find((x) => x.id === modalOrderId);

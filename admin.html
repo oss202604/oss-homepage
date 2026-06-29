@@ -893,6 +893,8 @@
           <option value="green">🟢 정상</option>
           <option value="blue">🔵 보류·관찰</option>
         </select>
+        <span class="mf-label" style="margin-left:6px;">상태변경</span>
+        <select id="modalStatusTop"></select>
         <span class="mf-timeline" id="modalTimeline"></span>
       </div>
 
@@ -919,7 +921,7 @@
             <th>국제배송비</th><td style="white-space:nowrap;"><button class="btn btn-small" id="modalCalcFee" type="button">계산</button> <b id="modalFee">-</b></td>
           </tr>
           <tr>
-            <th>예치금 사용(₩)</th><td><input type="number" id="modalDepositUsed" min="0" step="100" placeholder="0" /></td>
+            <th>예치금 사용(₩)</th><td><input type="number" id="modalDepositUsed" min="0" step="100" placeholder="0" /><label style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:12px;color:#555;cursor:pointer;"><input type="checkbox" id="modalDepFull" style="width:auto;margin:0;" /> 예치금으로 배송비 전액 사용</label></td>
             <th>적립금 사용(₩)</th><td><input type="number" id="modalPointsUsed" min="0" step="100" placeholder="0" /></td>
             <th>배송비 결제수단</th><td><select id="modalShipPay"></select><input id="modalShipPayCustom" placeholder="직접 입력" style="display:none;margin-top:5px;" /></td>
           </tr>
@@ -998,7 +1000,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=26"></script>
   <script src="guide-content.js?v=1"></script>
-  <script src="admin.js?v=55"></script>
+  <script src="admin.js?v=56"></script>
   <script>lucide.createIcons();</script>
 </body>
 </html>
