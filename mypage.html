@@ -335,11 +335,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=26"></script>
-  <script src="script.js?v=47"></script>
+  <script src="script.js?v=48"></script>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script>
     (function () {
-      const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      const safeUrl = (u) => { u = String(u == null ? "" : u).trim(); return /^https:\/\//i.test(u) ? u.replace(/["'<>]/g, encodeURIComponent) : ""; };
       const fmtDate = (s) => { if (!s) return "-"; if (window.OSS && OSS.kstDate) return OSS.kstDate(s); try { return new Date(s).toLocaleDateString("ko-KR"); } catch (e) { return s; } };
 
       if (!(window.OSS && window.OSS.getMyProfile)) return;
@@ -544,7 +545,7 @@
             if (!box) return;
             box.innerHTML = rv.length ? rv.map((r) => {
               const st = r.status === "approved" ? '<span class="rv-badge ok">게시중</span>' : (r.status === "rejected" ? '<span class="rv-badge no">미게시</span>' : '<span class="rv-badge wait">승인대기</span>');
-              const photo = r.image_url ? `<img class="rv-photo" src="${esc(r.image_url)}" alt="후기사진" />` : "";
+              const photo = safeUrl(r.image_url) ? `<img class="rv-photo" src="${safeUrl(r.image_url)}" alt="후기사진" />` : "";
               const edited = r.updated_at ? ' · 수정됨' : '';
               return `<div class="rv-item"><div class="rv-top">${"★".repeat(r.rating || 5)} ${st}</div><p>${esc(r.body)}</p>${photo}<div class="rv-bot"><span class="rv-date">${fmtDate(r.created_at)}${edited}</span><button type="button" class="rv-edit" onclick="editMyReview('${r.id}')">수정</button></div></div>`;
             }).join("") : '<p class="empty">아직 작성한 후기가 없어요.</p>';

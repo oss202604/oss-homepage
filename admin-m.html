@@ -164,7 +164,8 @@
     "use strict";
     var $ = function(s){ return document.querySelector(s); };
     var loginView=$("#loginView"), appView=$("#appView");
-    function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+    function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+    function safeUrl(u){ u=String(u==null?"":u).trim(); return /^https:\/\//i.test(u)?u.replace(/["'<>]/g,encodeURIComponent):""; }
     function toast(msg){ var t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.remove("show"); },1800); }
 
     // 상태 정의 (admin.js와 동일)
@@ -423,7 +424,7 @@
         return '<div class="rv">'
           + '<div class="rv-top"><span class="rv-name">'+esc(mask(r.author_name))+'</span><span style="color:#f1a23a;font-size:13px;">'+stars+'</span><span class="rv-stat '+stCls+'">'+stTxt+'</span></div>'
           + '<div class="rv-body">'+esc(r.body||"")+'</div>'
-          + (r.image_url?'<a href="'+esc(r.image_url)+'" target="_blank" rel="noopener"><img class="rv-photo" src="'+esc(r.image_url)+'" alt="후기사진"></a>':"")
+          + (safeUrl(r.image_url)?'<a href="'+safeUrl(r.image_url)+'" target="_blank" rel="noopener"><img class="rv-photo" src="'+safeUrl(r.image_url)+'" alt="후기사진"></a>':"")
           + '<div class="rv-meta">'+esc(r.order_no||"")+' · '+esc(date)+'</div>'
           + '<div class="rv-acts">'+acts+'</div>'
           + '</div>';

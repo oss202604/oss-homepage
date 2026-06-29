@@ -62,7 +62,8 @@ let RATES = [];
 let FX_APPLIED = 1000; // 적용환율(100엔당 원). exchange_rate.applied. ¥→₩ 변환(perJpy = applied/100). 계산기와 동일
 
 // HTML 이스케이프(저장형 XSS 방지) + 안전 URL 가드 — 고객 입력을 관리자 화면에 렌더할 때 사용
-function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+function safeUrl(u) { u = String(u == null ? "" : u).trim(); return /^https:\/\//i.test(u) ? u.replace(/["'<>]/g, encodeURIComponent) : ""; }
 function safeUrl(u) { u = String(u == null ? "" : u).trim(); if (!/^https?:\/\//i.test(u)) return ""; return u.replace(/["'<>]/g, encodeURIComponent); }
 
 // CSV 한 칸 (한글/콤마/줄바꿈/따옴표 안전 + CSV Injection 가드: =,+,-,@ 로 시작하면 ' 프리픽스)
@@ -305,7 +306,7 @@ async function loadReviews() {
         : (r.status === "rejected")
           ? '<button class="btn btn-small btn-primary" data-rv-ok="' + r.id + '">승인</button>'
           : '<button class="btn btn-small btn-primary" data-rv-ok="' + r.id + '">승인</button> <button class="btn btn-small" data-rv-hide="' + r.id + '" style="color:var(--red);">거절</button>';
-      const photo = r.image_url ? '<br><a href="' + esc(r.image_url) + '" target="_blank" rel="noopener"><img src="' + esc(r.image_url) + '" alt="후기사진" style="max-width:120px;max-height:120px;border-radius:8px;border:1px solid #e5e5e5;margin-top:6px;object-fit:cover;" /></a>' : "";
+      const _ph = safeUrl(r.image_url); const photo = _ph ? '<br><a href="' + _ph + '" target="_blank" rel="noopener"><img src="' + _ph + '" alt="후기사진" style="max-width:120px;max-height:120px;border-radius:8px;border:1px solid #e5e5e5;margin-top:6px;object-fit:cover;" /></a>' : "";
       const editedTag = r.updated_at ? ' <span style="font-size:11px;color:#C77A12;">(수정됨)</span>' : "";
       return '<tr><td>' + esc(r.author_name || "회원") + '</td><td style="white-space:nowrap;color:#F1A23A;">' + "★".repeat(r.rating || 5) + '</td><td style="max-width:280px;white-space:normal;word-break:break-word;">' + esc(r.body || "") + editedTag + photo + '</td><td>' + esc(r.order_no || "-") + '</td><td>' + toKstD(r.created_at) + '</td><td>' + st + '</td><td style="white-space:nowrap;">' + btn + ' <button class="btn btn-small" data-rv-del="' + r.id + '" style="color:var(--red);">삭제</button></td></tr>';
     }).join("");
@@ -2609,7 +2610,7 @@ async function loadBoardPosts() {
       ${p.phone ? `<p style="margin:0 0 6px;"><b>연락처</b> ${esc(p.phone)}</p>` : ""}
       ${p.order_no ? `<p style="margin:0 0 6px;"><b>주문</b> ${esc(p.order_no)}</p>` : ""}
       <p style="white-space:pre-wrap;margin:0 0 10px;">${esc(p.content)}</p>
-      ${Array.isArray(p.photos) && p.photos.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">${p.photos.map((u) => `<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid var(--line);"></a>`).join("")}</div>` : ""}
+      ${Array.isArray(p.photos) && p.photos.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">${p.photos.map((u) => { var s = safeUrl(u); return s ? `<a href="${s}" target="_blank"><img src="${s}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid var(--line);"></a>` : ""; }).join("")}</div>` : ""}
       <textarea id="brep-${p.id}" rows="3" placeholder="답변 내용" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;">${esc(p.admin_reply)}</textarea>
       <div class="set-actions" style="margin-top:8px;">
         <button class="btn btn-primary btn-small" data-brep="${p.id}">답변 저장</button>

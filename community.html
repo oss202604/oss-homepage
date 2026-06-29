@@ -274,10 +274,11 @@
   <script>lucide.createIcons();</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js?v=26"></script>
-  <script src="script.js?v=47"></script>
+  <script src="script.js?v=48"></script>
   <script>
   (async function(){
-    function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+    function safeUrl(u){ u=String(u==null?"":u).trim(); return /^https:\/\//i.test(u) ? u.replace(/["'<>]/g,encodeURIComponent) : ""; }
     function maskName(n){ n=String(n||""); if(n.length<=1) return n+"*"; return n[0]+"*".repeat(n.length-1); }
     function kstD(s){ return (window.OSS&&OSS.kstDate)?OSS.kstDate(s):String(s||"").slice(0,10); }
     function relDate(s){ const d=new Date(s),now=new Date(),diff=now-d; if(diff<60000) return "방금"; if(diff<3600000) return Math.floor(diff/60000)+"분 전"; if(diff<86400000) return Math.floor(diff/3600000)+"시간 전"; return kstD(s); }
@@ -380,7 +381,7 @@
         else if(p.status==="pending"&&!isPriv) sb='<span class="cm-badge cm-badge-pend">검토중</span>';
         const vb = isPriv ? '<span class="cm-badge cm-badge-prv">비밀글</span>' : "";
         const photos = Array.isArray(p.photos)&&p.photos.length&&canSee
-          ? `<div class="cm-photos-thumb">${p.photos.slice(0,3).map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join("")}</div>` : "";
+          ? `<div class="cm-photos-thumb">${p.photos.slice(0,3).map(u=>{var s=safeUrl(u);return s?`<img src="${s}" alt="" loading="lazy">`:"";}).join("")}</div>` : "";
         const preview = canSee&&p.content ? `<div class="cm-preview">${esc((p.content||"").slice(0,80))}</div>` : "";
         return `<div class="cm-item" data-id="${p.id}">
           <div>
@@ -424,7 +425,7 @@
       else{                   bd.textContent="전체공개"; bd.className="cm-badge cm-badge-pub"; }
       const ph=document.getElementById("detailPhotos");
       ph.innerHTML=Array.isArray(p.photos)&&p.photos.length
-        ? p.photos.map(u=>`<img src="${esc(u)}" alt="" onclick="window.open('${esc(u)}','_blank')">`).join("") : "";
+        ? p.photos.map(u=>{var s=safeUrl(u);return s?`<a href="${s}" target="_blank" rel="noopener"><img src="${s}" alt=""></a>`:"";}).join("") : "";
       const rb=document.getElementById("detailReply");
       if(p.admin_reply){ rb.hidden=false; document.getElementById("detailReplyText").textContent=p.admin_reply; document.getElementById("detailReplyDate").textContent=kstD(p.replied_at); }
       else rb.hidden=true;

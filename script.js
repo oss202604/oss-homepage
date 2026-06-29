@@ -739,10 +739,11 @@ if (form && modal) {
 (function reviews() {
   const grid = document.getElementById("reviewGrid");
   if (!grid) return;
-  const esc = (s) => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const esc = (s) => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  const safeUrl = (u) => { u = String(u == null ? "" : u).trim(); return /^https:\/\//i.test(u) ? u.replace(/["'<>]/g, encodeURIComponent) : ""; };
   function render(list) {
     grid.innerHTML = list.map((r) => `<div class="review-card">
-      ${r.image ? `<img class="review-photo" src="${esc(r.image)}" alt="후기 사진" loading="lazy" />` : `<div class="review-noimg">💬</div>`}
+      ${safeUrl(r.image) ? `<img class="review-photo" src="${safeUrl(r.image)}" alt="후기 사진" loading="lazy" />` : `<div class="review-noimg">💬</div>`}
       <p class="review-text">${esc(r.text)}</p>
       <p class="review-meta"><span class="rv-name">${esc(r.author || "고객님")}</span><span class="rv-date">${esc(r.date || "")}</span></p>
     </div>`).join("");
