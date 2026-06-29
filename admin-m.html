@@ -58,6 +58,12 @@
     .card-cust{font-size:16px;font-weight:800;color:var(--navy);}
     .card-item{font-size:13.5px;color:#5c5048;margin-top:2px;word-break:break-all;}
     .card-amt{font-size:14px;font-weight:800;color:var(--navy);margin-top:6px;}
+    .card{border-left:4px solid var(--line);}
+    .card.grp-구매{border-left-color:#f0a020;} .card.grp-입고{border-left-color:#ff6b2c;} .card.grp-출고{border-left-color:#16a34a;} .card.grp-예외{border-left-color:#e0392b;}
+    .card.is-new{background:#fffdf3;border-left-color:#f5b800;}
+    .card-extra{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px;}
+    .card-extra .tag{font-size:12px;font-weight:800;border-radius:7px;padding:3px 9px;}
+    .card-extra .tag.buy{background:#fff3ec;color:var(--or-d);} .card-extra .tag.inv{background:#e3f6ec;color:#16a34a;}
     .st-row{display:flex;align-items:center;gap:8px;margin-top:11px;}
     .st-badge{font-size:12px;font-weight:800;padding:5px 11px;border-radius:999px;flex:none;}
     .g-구매{background:#fff4d6;color:#9a7400;} .g-입고{background:#fff3ec;color:var(--or-d);} .g-출고{background:#d7f5e3;color:#16a34a;} .g-예외{background:#ffe1e6;color:var(--red);}
@@ -300,6 +306,10 @@
         var typeB = o.type==="delivery" ? '<span class="badge b-delivery">배송대행</span>' : '<span class="badge b-purchase">구매대행</span>';
         var chan = o.channel ? '<span class="badge b-chan">'+esc(o.channel)+'</span>' : "";
         var amt = o.subtotal ? '<div class="card-amt">상품가 ¥'+Number(o.subtotal).toLocaleString()+'</div>' : "";
+        var extra="";
+        if(o.buy_yen!=null && o.buy_yen!=="") extra+='<span class="tag buy">사입 ¥'+Number(o.buy_yen).toLocaleString()+'</span>';
+        if(o.tracking_no) extra+='<span class="tag inv">📦 송장</span>';
+        extra = extra ? '<div class="card-extra">'+extra+'</div>' : "";
         var date = window.OSS.kstDate ? window.OSS.kstDate(o.created_at) : String(o.created_at||"").slice(0,10);
         var more = '<div class="card-more" id="more-'+o.id+'">'
           + '<div class="more-sec">📦 상품 — 탭하면 구매처로 이동</div>'
@@ -312,11 +322,11 @@
           + (o.tracking_no?'<div class="more-line"><b>송장</b> '+esc(o.tracking_no)+'</div>':"")
           + buyFormHtml(o)
           + '</div>';
-        return '<div class="card">'
+        return '<div class="card grp-'+g+(st==="신규접수"?" is-new":"")+'">'
           + '<div class="card-top">'+typeB+chan+'<span class="card-no">'+esc(o.order_no||("#"+o.id))+'</span></div>'
           + '<div class="card-cust-row"><span class="card-cust">'+esc(o.applicant_name||"-")+'</span><span class="card-date">'+esc(date)+'</span></div>'
           + '<div class="card-item">'+esc(prodSummary(o))+'</div>'
-          + amt
+          + amt + extra
           + '<div class="st-row"><span class="st-badge g-'+g+'">'+esc(st)+'</span>'
           + '<select class="st-sel" data-id="'+o.id+'" data-prev="'+esc(st)+'">'+statusOptions(st)+'</select></div>'
           + '<button class="more-toggle" data-more="'+o.id+'">상세 보기 ▾</button>'
