@@ -422,9 +422,15 @@
 
     function formatPrice(el){var d=el.value.replace(/[^0-9]/g,"");el.value=d?Number(d).toLocaleString():"";}
     function formatPhone(el){var d=el.value.replace(/[^0-9]/g,"").slice(0,11);var o=d;if(d.length>=8)o=d.slice(0,3)+"-"+d.slice(3,7)+"-"+d.slice(7);else if(d.length>=4)o=d.slice(0,3)+"-"+d.slice(3);el.value=o;}
-    var YEN_KRW=10; // 1엔=10원 (고정 환율)
-    function recompute(){var goods=0;productsBox.querySelectorAll(".oq-product").forEach(function(p){var price=numOnly(p.querySelector(".oq-price").value);var q=0;p.querySelectorAll(".oq-options .oq-optrow").forEach(function(r){q+=numOnly(r.querySelector(".oq-qty").value);});if(!q)q=1;goods+=price*q;});var fee=Math.round(goods*0.03);var fmt=function(n){return "¥"+Number(n||0).toLocaleString();};var g=document.getElementById("totGoods");if(g)g.textContent=fmt(goods);var f=document.getElementById("totFee");if(f)f.textContent=fmt(fee);var fin=goods+fee;var t=document.getElementById("totFinal");var k=document.getElementById("totFinalKrw");if(goods<=0){if(t)t.textContent="확인 후 안내";if(k)k.textContent="입금 시 안내";}else{if(t)t.textContent=fmt(fin);if(k)k.textContent="₩"+Number(fin*YEN_KRW).toLocaleString();}}
+    var YEN_KRW=10; // 1엔=원 (관리자 환율 적용 전 기본값)
+    var COMMISSION_PCT=3; // 구매대행 수수료 % (관리자 설정 적용 전 기본값)
+    function recompute(){var goods=0;productsBox.querySelectorAll(".oq-product").forEach(function(p){var price=numOnly(p.querySelector(".oq-price").value);var q=0;p.querySelectorAll(".oq-options .oq-optrow").forEach(function(r){q+=numOnly(r.querySelector(".oq-qty").value);});if(!q)q=1;goods+=price*q;});var fee=Math.round(goods*COMMISSION_PCT/100);var fmt=function(n){return "¥"+Number(n||0).toLocaleString();};var g=document.getElementById("totGoods");if(g)g.textContent=fmt(goods);var f=document.getElementById("totFee");if(f)f.textContent=fmt(fee);var fin=goods+fee;var t=document.getElementById("totFinal");var k=document.getElementById("totFinalKrw");if(goods<=0){if(t)t.textContent="확인 후 안내";if(k)k.textContent="입금 시 안내";}else{if(t)t.textContent=fmt(fin);if(k)k.textContent="₩"+Number(fin*YEN_KRW).toLocaleString();}}
     productsBox.addEventListener("input", function(e){var t=e.target;if(t.classList&&t.classList.contains("oq-price"))formatPrice(t);if(t.classList&&t.classList.contains("oq-qty"))t.value=t.value.replace(/[^0-9]/g,"");recompute();});
+    // 관리자 설정(환율·수수료)을 불러와 견적에 반영 (관리자 ▸ 환경설정에서 바꾸면 여기 자동 적용)
+    try{ if(window.OSS&&OSS.getSetting){
+      OSS.getSetting('exchange_rate').then(function(fx){ var a=Number(fx&&fx.applied); if(a>0){ YEN_KRW=a/100; recompute(); } }).catch(function(){});
+      OSS.getSetting('fee_policy').then(function(fp){ if(fp&&fp.commissionPct!=null&&!isNaN(Number(fp.commissionPct))){ COMMISSION_PCT=Number(fp.commissionPct); recompute(); } }).catch(function(){});
+    } }catch(e){}
 
     function addOption(prod, focus) {
       var row = optionTpl.cloneNode(true);
@@ -658,7 +664,7 @@
         $("#doneNo").textContent = orderNo;
         var _sa = document.getElementById("fSaveAddr");
         if (_sa && _sa.checked && OSS.saveAddress) { OSS.saveAddress({ receiver_name: name, receiver_phone: phone, zipcode: zip, address: addr, customs_code: customs }).then(function () {}, function () {}); }
-        var _finalYen = bp.subtotal + Math.round(bp.subtotal * 0.03);
+        var _finalYen = bp.subtotal + Math.round(bp.subtotal * COMMISSION_PCT / 100);
         var _dp = $("#donePay"); if (_dp) _dp.textContent = bp.subtotal > 0 ? "₩" + Number(_finalYen * YEN_KRW).toLocaleString() : "상품가 확인 후 안내드려요";
         $("#panelDone").style.display = "block";
         window.scrollTo({ top: 0, behavior: "smooth" });

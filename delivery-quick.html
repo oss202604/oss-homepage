@@ -466,10 +466,12 @@
 
     function formatPrice(el){var d=el.value.replace(/[^0-9]/g,"");el.value=d?Number(d).toLocaleString():"";}
     function formatPhone(el){var d=el.value.replace(/[^0-9]/g,"").slice(0,11);var o=d;if(d.length>=8)o=d.slice(0,3)+"-"+d.slice(3,7)+"-"+d.slice(7);else if(d.length>=4)o=d.slice(0,3)+"-"+d.slice(3);el.value=o;}
-    var YEN_KRW=10;
+    var YEN_KRW=10; // 1엔=원 (관리자 환율 적용 전 기본값)
     function numOnly(s){return Number(String(s||"").replace(/[^0-9.]/g,""))||0;}
     function recompute(){var goods=0;productsBox.querySelectorAll(".oq-product").forEach(function(p){var price=numOnly(p.querySelector(".oq-price").value);var q=numOnly(p.querySelector(".oq-qty").value)||1;goods+=price*q;});var t=$("#totFinal");if(t)t.textContent="¥"+Number(goods).toLocaleString();var k=$("#totFinalKrw");if(k)k.textContent="₩"+Number(goods*YEN_KRW).toLocaleString();}
     productsBox.addEventListener("input", function(e){var t=e.target;if(t.classList&&t.classList.contains("oq-price"))formatPrice(t);if(t.classList&&t.classList.contains("oq-qty"))t.value=t.value.replace(/[^0-9]/g,"");recompute();});
+    // 관리자 환율 설정을 불러와 원화 환산에 반영
+    try{ if(window.OSS&&OSS.getSetting){ OSS.getSetting('exchange_rate').then(function(fx){ var a=Number(fx&&fx.applied); if(a>0){ YEN_KRW=a/100; recompute(); } }).catch(function(){}); } }catch(e){}
 
     function wireProduct(prod) {
       prod.querySelector(".oq-translate").addEventListener("click", function () { translateName(prod, this); });
