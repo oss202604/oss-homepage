@@ -46,6 +46,9 @@
     .addr-card .acts button{font-size:12px;border:1px solid #E3D8CF;background:#fff;border-radius:8px;padding:5px 11px;cursor:pointer;font-family:inherit;color:#5C5048;}
     #info h3{margin:0 0 10px;}
     #info .btn-primary{box-shadow:none;}
+    /* 묶음 안에 여러 섹션이 쌓일 때 간격 */
+    .mypage-content .mypage-block{margin-bottom:30px;}
+    .mypage-content .mypage-block + .mypage-block{border-top:1px solid #F0E6DF;padding-top:26px;}
     /* 지금 할 일 배너 */
     .mp-todo{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px;}
     .mp-todo:empty{display:none;}
@@ -100,15 +103,10 @@
           <div class="mp-wallet-row"><span class="lab">예치금</span><span class="val" id="walDeposit">0<em>원</em></span></div>
         </div>
         <ul class="mypage-menu">
-          <li><a href="#dashboard" class="active">신청 현황</a></li>
-          <li><a href="#orders">구매대행 내역</a></li>
-          <li><a href="#shipping">배송대행 내역</a></li>
-          <li><a href="#deposit">예치금</a></li>
-          <li><a href="#points">적립금</a></li>
-          <li><a href="#coupons">쿠폰함</a></li>
-          <li><a href="#reviews">구매후기</a></li>
-          <li><a href="#savedAddrs">저장된 배송지</a></li>
-          <li><a href="#info">회원 정보</a></li>
+          <li><a href="#dashboard" data-blocks="dashboard,orders,shipping" class="active">내 주문</a></li>
+          <li><a href="#deposit" data-blocks="deposit,points,coupons">내 지갑</a></li>
+          <li><a href="#reviews" data-blocks="reviews">구매후기</a></li>
+          <li><a href="#savedAddrs" data-blocks="savedAddrs,info">내 정보</a></li>
           <li><a href="#" id="logoutBtn">로그아웃</a></li>
         </ul>
       </aside>
@@ -822,22 +820,21 @@
       }
     })();
 
-    // 마이페이지 사이드 메뉴 = 탭 전환 (클릭한 섹션만 표시)
+    // 마이페이지 사이드 메뉴 = 4묶음 탭 (묶음 클릭 → 그 안 섹션들 함께 표시)
     (function mypageTabs() {
       var blocks = document.querySelectorAll(".mypage-block");
-      var links = document.querySelectorAll(".mypage-menu a[href^='#']");
+      var links = document.querySelectorAll(".mypage-menu a[data-blocks]");
       if (!blocks.length || !links.length) return;
-      function show(id) {
-        if (!id || id === "#") return;
-        blocks.forEach(function (b) { b.style.display = ("#" + b.id === id) ? "block" : "none"; });
-        links.forEach(function (a) { a.classList.toggle("active", a.getAttribute("href") === id); });
+      function idsOf(a) { return (a.getAttribute("data-blocks") || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
+      function show(link) {
+        var ids = idsOf(link);
+        blocks.forEach(function (b) { b.style.display = ids.indexOf(b.id) >= 0 ? "block" : "none"; });
+        links.forEach(function (a) { a.classList.toggle("active", a === link); });
+        try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {}
       }
-      links.forEach(function (a) {
-        if (a.id === "logoutBtn") return;
-        a.addEventListener("click", function (e) { e.preventDefault(); show(a.getAttribute("href")); });
-      });
-      var initial = "#dashboard";
-      try { if (location.hash && document.querySelector(".mypage-block" + location.hash)) initial = location.hash; } catch (e) {}
+      links.forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); show(a); }); });
+      var initial = links[0];
+      try { var hid = (location.hash || "").replace("#", ""); if (hid) links.forEach(function (a) { if (idsOf(a).indexOf(hid) >= 0) initial = a; }); } catch (e) {}
       show(initial);
     })();
   </script>
