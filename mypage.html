@@ -249,9 +249,9 @@
           </div>
         </div>
 
-        <!-- 저장된 배송지 (최대 3개) -->
+        <!-- 저장된 배송지 (최대 5개) -->
         <div class="mypage-block" id="savedAddrs">
-          <h2 class="mypage-title">저장된 배송지<span style="font-size:13px;font-weight:400;color:#888;">(최대 3개)</span></h2>
+          <h2 class="mypage-title">저장된 배송지<span style="font-size:13px;font-weight:400;color:#888;">(최대 5개)</span></h2>
           <p class="form-note" style="text-align:left;margin:0 0 12px;">자주 쓰는 배송지를 저장해두면, 주문서 작성할 때 <b>"내 주소지 사용"</b>으로 한 번에 불러올 수 있어요.</p>
           <div id="addrList" class="addr-list"><p class="empty">불러오는 중...</p></div>
           <form class="order-form" id="addrForm" style="margin-top:14px;">
@@ -593,8 +593,8 @@
                 '<div class="acts">' + (a.is_default ? '' : '<button type="button" data-ad-def="' + a.id + '">기본으로</button>') + '<button type="button" data-ad-del="' + a.id + '">삭제</button></div></div>';
             }).join("") : '<p class="empty">저장된 배송지가 없어요. 아래에서 추가해 보세요.</p>';
             const btn = document.getElementById("addrSaveBtn");
-            const full = list.length >= 3;
-            if (btn) { btn.disabled = full; btn.textContent = full ? "최대 3개까지 저장했어요" : "배송지 저장"; }
+            const full = list.length >= 5;
+            if (btn) { btn.disabled = full; btn.textContent = full ? "최대 5개까지 저장했어요" : "배송지 저장"; }
             const adForm2 = document.getElementById("addrForm");
             if (adForm2) adForm2.querySelectorAll("input").forEach(function (i) { i.disabled = full; });
           } catch (e) { box.innerHTML = '<p class="empty">불러오기 실패</p>'; }
