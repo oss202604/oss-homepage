@@ -303,7 +303,16 @@ async function touchLogin() {
 }
 
 // 비밀번호 변경 (로그인 상태에서 본인)
-async function changePassword(newPassword) {
+async function changePassword(newPassword, currentPassword) {
+  // 현재 비밀번호 재확인 (세션이 탈취돼도 비밀번호를 못 바꾸게 — 계정 영구장악 방지)
+  if (currentPassword) {
+    const { data: s } = await sb.auth.getSession();
+    const email = s && s.session && s.session.user && s.session.user.email;
+    if (email) {
+      const { error: e1 } = await sb.auth.signInWithPassword({ email, password: currentPassword });
+      if (e1) throw new Error("현재 비밀번호가 일치하지 않아요.");
+    }
+  }
   const { error } = await sb.auth.updateUser({ password: newPassword });
   if (error) throw error;
 }

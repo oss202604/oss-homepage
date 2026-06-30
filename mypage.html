@@ -307,6 +307,9 @@
           <h3 style="font-size:15px;margin-bottom:10px;">비밀번호 변경</h3>
           <form class="order-form" id="pwForm">
             <div class="form-row">
+              <label>현재 비밀번호<input type="password" id="cpw" placeholder="현재 비밀번호" autocomplete="current-password" /></label>
+            </div>
+            <div class="form-row">
               <label>새 비밀번호<input type="password" id="npw1" placeholder="6자 이상" autocomplete="new-password" /></label>
               <label>새 비밀번호 확인<input type="password" id="npw2" placeholder="다시 입력" autocomplete="new-password" /></label>
             </div>
@@ -334,7 +337,7 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=27"></script>
+  <script src="supabase.js?v=28"></script>
   <script src="script.js?v=49"></script>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script>
@@ -666,15 +669,16 @@
         const pwf = document.getElementById("pwForm");
         if (pwf) pwf.addEventListener("submit", async (e) => {
           e.preventDefault();
-          const a = document.getElementById("npw1").value, b = document.getElementById("npw2").value;
+          const cur = document.getElementById("cpw").value, a = document.getElementById("npw1").value, b = document.getElementById("npw2").value;
           const m = document.getElementById("pwMsg");
-          if (a.length < 6) { m.style.color = "#c0392b"; m.textContent = "비밀번호는 6자 이상이어야 해요."; return; }
+          if (!cur) { m.style.color = "#c0392b"; m.textContent = "현재 비밀번호를 입력해 주세요."; return; }
+          if (a.length < 6) { m.style.color = "#c0392b"; m.textContent = "새 비밀번호는 6자 이상이어야 해요."; return; }
           if (a !== b) { m.style.color = "#c0392b"; m.textContent = "두 비밀번호가 일치하지 않아요."; return; }
           try {
-            await window.OSS.changePassword(a);
+            await window.OSS.changePassword(a, cur);
             m.style.color = "#1F9D6B"; m.textContent = "✓ 비밀번호가 변경됐어요.";
             pwf.reset();
-          } catch (err) { m.style.color = "#c0392b"; m.textContent = "변경 실패 — 다시 로그인 후 시도해 주세요."; }
+          } catch (err) { m.style.color = "#c0392b"; m.textContent = (err && err.message) || "변경 실패 — 다시 로그인 후 시도해 주세요."; }
         });
       }).catch(() => { location.href = "login.html?need=1"; });
 
