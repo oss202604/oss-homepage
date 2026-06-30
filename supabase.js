@@ -747,7 +747,7 @@ async function submitBoardPost(payload) {
   const { data: sess } = await sb.auth.getSession();
   const uid = sess && sess.session && sess.session.user && sess.session.user.id;
   if (!uid) throw new Error("로그인이 필요합니다.");
-  const { error } = await sb.from("board_posts").insert([Object.assign({ user_id: uid }, payload)]);
+  const { error } = await sb.from("board_posts").insert([Object.assign({}, payload, { user_id: uid })]);
   if (error) throw error;
   return true;
 }

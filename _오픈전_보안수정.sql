@@ -46,6 +46,25 @@ create policy product_images_banner_insert on storage.objects
   for insert to authenticated
   with check (bucket_id = 'product-images' and name like 'banner/%' and public.oss_is_staff());
 
+-- 📱 [데이터 무결성] 상태변경 시 단계별 날짜 자동기록 -----------
+-- 문제: 모바일 관리자에서 상태를 바꾸면 status_dates(단계별 날짜)가 안 남아
+--       PC 타임라인·정산통계가 깨짐.
+-- 수정: 어느 경로(PC·모바일·일괄·드래그)로 바꾸든 DB가 자동으로 기록(기존 날짜 보존).
+create or replace function public.oss_stamp_status_date()
+returns trigger language plpgsql security definer set search_path to 'public' as $$
+begin
+  if (TG_OP = 'UPDATE' and NEW.status is distinct from OLD.status) then
+    NEW.status_dates := coalesce(NEW.status_dates, '{}'::jsonb)
+      || (case when coalesce(NEW.status_dates, '{}'::jsonb) ? NEW.status
+                 then '{}'::jsonb
+                 else jsonb_build_object(NEW.status, now()) end);
+  end if;
+  return NEW;
+end $$;
+drop trigger if exists trg_stamp_status_date on public.applications;
+create trigger trg_stamp_status_date before update on public.applications
+  for each row execute function public.oss_stamp_status_date();
+
 -- ============================================================
 -- ※ 아래는 SQL이 아니라 '대시보드 설정' 또는 '정책 결정'이 필요한 항목 (참고)
 --
