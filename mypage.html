@@ -92,7 +92,7 @@
       <!-- 좌측 사이드 -->
       <aside class="mypage-side">
         <div class="mypage-profile">
-          <div class="mypage-avatar">👤</div>
+          <div class="mypage-avatar" id="myAvatar"></div>
           <p class="mypage-name" id="myName">게스트</p>
           <p class="mypage-email" id="myEmail">로그인이 필요합니다</p>
           <p class="mypage-grade" id="myGrade"></p>
@@ -378,7 +378,9 @@
         // 관리자도 마이페이지는 일반회원처럼 이용 — 관리자페이지는 헤더 '관리자' 버튼으로만 이동
 
         // 프로필 표시
-        document.getElementById("myName").textContent = (p.name || p.username || "회원") + "님";
+        var _nm = (p.name || p.username || "회원");
+        document.getElementById("myName").textContent = _nm + "님";
+        var _av = document.getElementById("myAvatar"); if (_av) _av.textContent = _nm.charAt(0).toUpperCase();
         document.getElementById("myEmail").textContent = p.email || p.username || "";
         var _g = document.getElementById("myGrade"); if (_g) _g.textContent = (p.grade ? p.grade + " 회원" : "일반 회원") + (p.mailbox_code ? " · 고객번호 " + p.mailbox_code : "");
         const addrCard = document.getElementById("addressCard");
@@ -424,12 +426,12 @@
           if (!sd || typeof sd !== "object") return "";
           var ord = [["구매결제완료", "결제확인"], ["구매중", "구매시작"], ["입고완료", "센터입고"], ["일부입고", "일부입고"], ["포장/측정", "검수·측정"], ["배송비결제완료", "배송비결제"], ["배송중", "배송시작"], ["배송완료", "수령완료"]];
           var parts = ord.filter(function (p) { return sd[p[0]]; }).map(function (p) { return p[1] + " <b>" + fmtDate(sd[p[0]]) + "</b>"; });
-          return parts.length ? '<div class="mp-tl-dates">📅 ' + parts.join(" · ") + "</div>" : "";
+          return parts.length ? '<div class="mp-tl-dates">' + parts.join(" · ") + "</div>" : "";
         }
         function tlHtml(o) {
           var st = o.status || "";
           if (["취소", "반품/교환", "보류", "사고/폐기"].indexOf(st) >= 0)
-            return '<div class="mp-tl-exc">⚠ 이 주문은 「' + esc(st) + '」 상태예요. 자세한 내용은 카카오톡(@ossohayo)으로 문의해 주세요.</div>' + tlDates(o.status_dates);
+            return '<div class="mp-tl-exc">이 주문은 「' + esc(st) + '」 상태예요. 자세한 내용은 카카오톡(@ossohayo)으로 문의해 주세요.</div>' + tlDates(o.status_dates);
           var cur = custStepIdx(st);
           var steps = CUST_STEPS.map(function (lbl, i) {
             var cls = i < cur ? "done" : (i === cur ? "done cur" : "");
