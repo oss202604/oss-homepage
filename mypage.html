@@ -46,6 +46,32 @@
     .addr-card .acts button{font-size:12px;border:1px solid #E3D8CF;background:#fff;border-radius:8px;padding:5px 11px;cursor:pointer;font-family:inherit;color:#5C5048;}
     #info h3{margin:0 0 10px;}
     #info .btn-primary{box-shadow:none;}
+    /* 지금 할 일 배너 */
+    .mp-todo{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px;}
+    .mp-todo:empty{display:none;}
+    .mp-todo a,.mp-todo .ok{display:flex;align-items:center;gap:10px;text-decoration:none;border-radius:12px;padding:12px 16px;font-size:13.5px;font-weight:700;border:1.5px solid;flex:1;min-width:230px;line-height:1.4;}
+    .mp-todo .pay{background:#FFF0F0;border-color:#F6C2C8;color:#C0392B;}
+    .mp-todo .ship{background:#FFF6EC;border-color:#F6C99B;color:#C24E18;}
+    .mp-todo b{font-size:20px;}
+    .mp-todo .arr{margin-left:auto;font-weight:900;font-size:18px;}
+    .mp-todo .ok{background:#F0FBF6;border-color:#9AD6BC;color:#1F9D6B;cursor:default;}
+    /* 주문 진행 타임라인 */
+    .mp-orow{cursor:pointer;}
+    .mp-orow:hover{background:#FFF8F4;}
+    .mp-orow .exp{color:#C24E18;font-size:11px;font-weight:700;white-space:nowrap;}
+    .mp-detail td{background:#FAF6F2;padding:14px 16px !important;}
+    .mp-tl{display:flex;align-items:flex-start;margin:2px 0 10px;}
+    .mp-tl .stp{flex:1;text-align:center;position:relative;font-size:11px;color:#B0A89F;}
+    .mp-tl .stp::before{content:"";position:absolute;top:8px;left:-50%;width:100%;height:2px;background:#E5DCD3;z-index:0;}
+    .mp-tl .stp:first-child::before{display:none;}
+    .mp-tl .stp .dot{width:17px;height:17px;border-radius:50%;background:#E5DCD3;margin:0 auto 5px;position:relative;z-index:1;}
+    .mp-tl .stp.done{color:#C24E18;font-weight:700;}
+    .mp-tl .stp.done .dot{background:#F46A2C;}
+    .mp-tl .stp.done::before{background:#F6C99B;}
+    .mp-tl .stp.cur .dot{box-shadow:0 0 0 4px #FCE3D3;}
+    .mp-tl-exc{color:#C0392B;font-weight:700;font-size:13px;padding:4px 0 8px;}
+    .mp-tl-dates{font-size:12px;color:#7a6f66;line-height:1.8;}
+    .mp-tl-dates b{color:#C24E18;}
   </style>
 </head>
 <body>
@@ -92,6 +118,7 @@
         <!-- 신청 현황 대시보드 -->
         <div class="mypage-block" id="dashboard">
           <h2 class="mypage-title">신청 현황</h2>
+          <div id="mpTodo" class="mp-todo"></div>
           <table class="mp-summary">
             <tbody>
               <tr><th>회원등급</th><td id="sumGrade">-</td><th>고객번호</th><td id="sumMailbox">-</td></tr>
@@ -384,6 +411,59 @@
         const purchases = orders.filter((o) => o.type !== "delivery");
         const deliveries = orders.filter((o) => o.type === "delivery");
 
+        // ── ① "지금 할 일" 배너 + ② 주문 진행 타임라인 ──
+        var CUST_STEPS = ["주문접수", "결제확인", "상품구매/발송", "센터입고·검수", "국제배송", "수령완료"];
+        function custStepIdx(st) {
+          if (["신규접수", "결제대기"].indexOf(st) >= 0) return 0;
+          if (["구매결제완료", "결제완료"].indexOf(st) >= 0) return 1;
+          if (["구매중", "구매완료"].indexOf(st) >= 0) return 2;
+          if (["창고도착", "입고완료", "일부입고", "포장/측정"].indexOf(st) >= 0) return 3;
+          if (["배송비결제대기", "배송비결제완료", "발송대기", "배송중"].indexOf(st) >= 0) return 4;
+          if (st === "배송완료") return 5;
+          return 0;
+        }
+        function tlDates(sd) {
+          if (!sd || typeof sd !== "object") return "";
+          var ord = [["구매결제완료", "결제확인"], ["구매중", "구매시작"], ["입고완료", "센터입고"], ["일부입고", "일부입고"], ["포장/측정", "검수·측정"], ["배송비결제완료", "배송비결제"], ["배송중", "배송시작"], ["배송완료", "수령완료"]];
+          var parts = ord.filter(function (p) { return sd[p[0]]; }).map(function (p) { return p[1] + " <b>" + fmtDate(sd[p[0]]) + "</b>"; });
+          return parts.length ? '<div class="mp-tl-dates">📅 ' + parts.join(" · ") + "</div>" : "";
+        }
+        function tlHtml(o) {
+          var st = o.status || "";
+          if (["취소", "반품/교환", "보류", "사고/폐기"].indexOf(st) >= 0)
+            return '<div class="mp-tl-exc">⚠ 이 주문은 「' + esc(st) + '」 상태예요. 자세한 내용은 카카오톡(@ossohayo)으로 문의해 주세요.</div>' + tlDates(o.status_dates);
+          var cur = custStepIdx(st);
+          var steps = CUST_STEPS.map(function (lbl, i) {
+            var cls = i < cur ? "done" : (i === cur ? "done cur" : "");
+            return '<div class="stp ' + cls + '"><div class="dot"></div>' + lbl + "</div>";
+          }).join("");
+          return '<div class="mp-tl">' + steps + "</div>" + tlDates(o.status_dates);
+        }
+        function attachTimeline(tbodyId, list) {
+          var tb = document.getElementById(tbodyId); if (!tb) return;
+          tb.querySelectorAll("tr.mp-orow").forEach(function (tr, i) {
+            tr.addEventListener("click", function (e) {
+              if (e.target.closest("a")) return;
+              var nxt = tr.nextElementSibling;
+              if (nxt && nxt.classList.contains("mp-detail")) { nxt.remove(); return; }
+              tb.querySelectorAll("tr.mp-detail").forEach(function (d) { d.remove(); });
+              var dr = document.createElement("tr"); dr.className = "mp-detail";
+              dr.innerHTML = '<td colspan="' + tr.children.length + '">' + tlHtml(list[i]) + "</td>";
+              tr.parentNode.insertBefore(dr, tr.nextSibling);
+            });
+          });
+        }
+        (function todoBanner() {
+          var el = document.getElementById("mpTodo"); if (!el) return;
+          var payN = orders.filter(function (o) { return o.status === "신규접수" || o.status === "결제대기"; }).length;
+          var shipN = orders.filter(function (o) { return o.status === "배송비결제대기"; }).length;
+          var h = "";
+          if (payN) h += '<a class="pay" href="#orders"><b>' + payN + '</b><span>입금(상품가) 대기<br>입금하면 구매가 시작돼요</span><span class="arr">›</span></a>';
+          if (shipN) h += '<a class="ship" href="#orders"><b>' + shipN + '</b><span>배송비 결제 대기<br>결제하면 한국으로 출고돼요</span><span class="arr">›</span></a>';
+          if (!h) h = '<div class="ok">✓ 지금 결제하실 건 없어요. 아래 주문을 누르면 진행상황이 보여요.</div>';
+          el.innerHTML = h;
+        })();
+
         // 신청현황 요약표 바인딩
         (function () {
           var sG = document.getElementById("sumGrade"); if (sG) sG.textContent = (p.grade ? p.grade + " 회원" : "일반 회원");
@@ -444,11 +524,11 @@
           oTb.innerHTML = purchases.map((o) => {
             const prods = Array.isArray(o.products) ? o.products : [];
             const title = prods.length ? esc(prods[0].name || "상품") + (prods.length > 1 ? ` 외 ${prods.length - 1}건` : "") : "-";
-            return `<tr data-status="${esc(o.status || "")}">
+            return `<tr class="mp-orow" data-status="${esc(o.status || "")}">
               <td>${esc(o.order_no || "-")}</td>
               <td>${title}</td>
               <td>¥${Number(o.subtotal || 0).toLocaleString()}</td>
-              <td>${esc(o.status || "-")}</td>
+              <td>${esc(o.status || "-")} <span class="exp">▾진행</span></td>
               <td>${fmtDate(o.created_at)}</td>
               <td><a class="btn btn-small" href="order-lookup.html?no=${encodeURIComponent(o.order_no || '')}">조회</a></td>
             </tr>`;
@@ -458,15 +538,17 @@
         if (deliveries.length) {
           dTb.innerHTML = deliveries.map((o) => {
             const prods = Array.isArray(o.products) ? o.products : [];
-            return `<tr data-status="${esc(o.status || "")}">
+            return `<tr class="mp-orow" data-status="${esc(o.status || "")}">
               <td>${esc(o.order_no || "-")}</td>
               <td>${esc((prods[0] && (prods[0].brand || prods[0].shipName)) || "-")}</td>
               <td>${esc((prods[0] && (prods[0].tracking_no || prods[0].url || prods[0].code)) || "-")}</td>
-              <td>${esc(o.status || "-")}</td>
+              <td>${esc(o.status || "-")} <span class="exp">▾진행</span></td>
               <td>${fmtDate(o.created_at)}</td>
             </tr>`;
           }).join("");
         }
+        attachTimeline("orderTbody", purchases);
+        attachTimeline("deliveryTbody", deliveries);
 
         // 쿠폰함 (사용가능 / 사용예정(예약) / 사용완료 — 사용이력 표시)
         try {
