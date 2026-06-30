@@ -65,6 +65,13 @@ drop trigger if exists trg_stamp_status_date on public.applications;
 create trigger trg_stamp_status_date before update on public.applications
   for each row execute function public.oss_stamp_status_date();
 
+-- 💳 [입금계좌 한 곳 관리] quick 주문폼이 이 값을 읽어 표시 -------
+-- 계좌가 바뀌면 '아래 num/holder만' 수정해 다시 Run → 전 폼에 자동 반영
+-- (지금은 현재 계좌와 동일 — 안 바꿔도 무방)
+insert into public.settings(key, value)
+values ('pay_account', '{"num":"농협 302-2154-8330-21","holder":"송상익"}'::jsonb)
+on conflict (key) do update set value = excluded.value;
+
 -- ============================================================
 -- ※ 아래는 SQL이 아니라 '대시보드 설정' 또는 '정책 결정'이 필요한 항목 (참고)
 --

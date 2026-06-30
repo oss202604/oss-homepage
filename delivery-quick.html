@@ -639,7 +639,12 @@
     $("#copyNoBtn").addEventListener("click", function () { copyText($("#doneNo").textContent, this); });
     var cc1 = $("#copyCenterBtn1"); if (cc1) cc1.addEventListener("click", function () { copyText("받는사람: OSS / 주문번호\n" + (CENTER_ADDR || "배대지 주소는 주문 후 안내"), this); });
     var cc2 = $("#copyCenterBtn2"); if (cc2) cc2.addEventListener("click", function () { copyText("받는사람: OSS / " + $("#doneNo").textContent + "\n" + (CENTER_ADDR || "배대지 주소는 카톡/문자로 안내"), this); });
-    var ca = $("#copyAcctBtn"); if (ca) ca.addEventListener("click", function () { copyText("농협 302-2154-8330-21 송상익", this); });
+    var ACCT_COPY = "농협 302-2154-8330-21 송상익";
+    if (window.OSS && OSS.getSetting) OSS.getSetting("pay_account").then(function (v) {
+      if (v && v.num) { var cl = function (s) { return String(s == null ? "" : s).replace(/[<>&]/g, ""); }; ACCT_COPY = cl(v.num) + " " + cl(v.holder || "");
+        var ae = document.querySelector(".pay-acct-num"); if (ae) ae.innerHTML = "<b>" + cl(v.num) + "</b><span>예금주 " + cl(v.holder || "") + "</span>"; }
+    }).catch(function () {});
+    var ca = $("#copyAcctBtn"); if (ca) ca.addEventListener("click", function () { copyText(ACCT_COPY, this); });
 
     // 내 주소지 (로그인 회원)
     if (window.OSS && OSS.getMyProfile) {

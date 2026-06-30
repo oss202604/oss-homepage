@@ -683,10 +683,20 @@
       else { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
     });
 
+    // 입금계좌: settings(pay_account)에서 읽어 표시·복사 (계좌 바꾸면 한 곳만 수정)
+    var ACCT_COPY = "농협 302-2154-8330-21 송상익";
+    if (window.OSS && OSS.getSetting) OSS.getSetting("pay_account").then(function (v) {
+      if (v && v.num) {
+        var cl = function (s) { return String(s == null ? "" : s).replace(/[<>&]/g, ""); };
+        ACCT_COPY = cl(v.num) + " " + cl(v.holder || "");
+        var ae = document.querySelector(".pay-acct-num");
+        if (ae) ae.innerHTML = "<b>" + cl(v.num) + "</b><span>예금주 " + cl(v.holder || "") + "</span>";
+      }
+    }).catch(function () {});
     // 계좌번호 복사
     var copyAcctBtn = $("#copyAcctBtn");
     if (copyAcctBtn) copyAcctBtn.addEventListener("click", function () {
-      var t = "농협 302-2154-8330-21 송상익";
+      var t = ACCT_COPY;
       var done = function () { copyAcctBtn.innerHTML = '<i data-lucide="check"></i> 복사됐어요!'; icons(); };
       if (navigator.clipboard) navigator.clipboard.writeText(t).then(done).catch(done);
       else { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
