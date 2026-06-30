@@ -463,13 +463,13 @@ if (form && modal) {
   const resultContent = document.getElementById("resultContent");
   const g = (n) => new FormData(form).get(n) || "-";
 
-  // 주문번호 발급: OSS-YYMMDD-XXXXX (사람이 읽기 쉽고 고유)
+  // 주문번호 발급: OSS-YYMMDD-XXXXXXXXX (추측·대입 방지로 난수 9자리)
   function genOrderNo() {
     const d = new Date();
     const yy = String(d.getFullYear()).slice(2);
     const mm = String(d.getMonth() + 1).padStart(2, "0");
     const dd = String(d.getDate()).padStart(2, "0");
-    const rnd = Math.random().toString(36).slice(2, 7).toUpperCase();
+    const rnd = (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0, 9).toUpperCase();
     return `OSS-${yy}${mm}${dd}-${rnd}`;
   }
 
@@ -924,6 +924,15 @@ document.addEventListener("change", async (e) => {
         adm.textContent = "관리자";
         icons.insertBefore(adm, icons.firstChild);
       }
+    }
+    // 모바일 드로어도 로그인상태 반영 (로그인/회원가입 제거 → 인사·로그아웃·관리자)
+    const dr = document.querySelector(".osshead-drawer");
+    if (dr && !dr.querySelector(".dr-logout")) {
+      dr.querySelectorAll('a[href="login.html"], a[href="signup.html"]').forEach((a) => a.remove());
+      const my = dr.querySelector('a[href="mypage.html"]');
+      if (my) my.insertAdjacentHTML("beforebegin", `<a href="mypage.html" class="oss-greet">${name}님</a>`);
+      dr.insertAdjacentHTML("beforeend", `<a href="#" class="dr-logout oss-logout">로그아웃</a>`);
+      if (staff) dr.insertAdjacentHTML("beforeend", `<a href="admin.html">관리자</a>`);
     }
   }).catch(() => {});
 })();
