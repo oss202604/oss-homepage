@@ -741,3 +741,8 @@ p { word-break: keep-all; }
 /* 앵커 이동 부드럽게 + 상단 가림 보정 */
 html { scroll-behavior: smooth; }
 .mypage-block { scroll-margin-top: 84px; }
+
+/* 텍스트·이미지 드래그(선택) 방지 — 글 적는 입력칸은 예외 */
+body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+input, textarea, [contenteditable] { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+img { -webkit-user-drag: none; user-drag: none; }

@@ -250,3 +250,6 @@ body.admin-body { background: #eef1f6; --ac-line: #ffd8c6; --ac-ring: rgba(255,1
 .admin-main .data-table thead th { background: #eef1f6; color: var(--navy); }
 .admin-main .data-table tbody tr:nth-child(even) td { background: #fafbfd; }
 .admin-main .data-table tbody tr:hover td { background: #eaf2ff; }
+
+/* 관리자는 주문번호·고객데이터 선택·복사가 필요 → 텍스트 선택 허용(styles.css 드래그방지 덮어씀) */
+body { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
